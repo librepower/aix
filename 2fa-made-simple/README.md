@@ -2,7 +2,7 @@
 
 Google Authenticator two-factor authentication for AIX/VIOS, with working QR codes and safer configuration.
 
-## Download
+## Packages
 
 | File | Description |
 |------|-------------|
@@ -12,6 +12,11 @@ Google Authenticator two-factor authentication for AIX/VIOS, with working QR cod
 ## Quick Start
 
 ```bash
+
+# Download packages
+wget https://github.com/librepower/aix/blob/main/2fa-made-simple/RPMS/google-authenticator-1.10-1.aix7.1.ppc.rpm
+wget https://github.com/librepower/aix/blob/main/2fa-made-simple/RPMS/libqrencode-4.1.1-4.aix7.3.sixe.aix7.3.ppc.rpm
+
 # Install packages
 rpm -ivh RPMS/libqrencode-4.1.1-4.aix7.3.sixe.aix7.3.ppc.rpm
 rpm -ivh RPMS/google-authenticator-1.10-1.aix7.1.ppc.rpm
