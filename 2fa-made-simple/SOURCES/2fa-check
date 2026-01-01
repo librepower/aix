@@ -1,0 +1,37 @@
+#!/bin/bash
+# 2fa-check - Optional 2FA activation prompt at login
+# SIXE - IBM Business Partner
+#
+# To enable, add to /etc/profile:
+#   [ -x /opt/freeware/bin/2fa-check ] && . /opt/freeware/bin/2fa-check
+
+[ "$(id -u)" = "0" ] && return 2>/dev/null
+[ -f "$HOME/.google_authenticator" ] && return 2>/dev/null
+case $- in *i*) ;; *) return 2>/dev/null ;; esac
+
+echo ""
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "║       TWO-FACTOR AUTHENTICATION (2FA) AVAILABLE            ║"
+echo "╚════════════════════════════════════════════════════════════╝"
+echo "  Your account does not have 2FA enabled."
+echo "  This adds an extra layer of security to your access."
+echo ""
+printf "  Enable now? (y/n): "
+read -r resp
+
+case "$resp" in
+    [yY])
+        if [ -x /opt/freeware/bin/google-authenticator ]; then
+            echo ""
+            /opt/freeware/bin/google-authenticator -t -d -w 17 -r 3 -R 30 -i "$(hostname -s)"
+        else
+            echo "Error: google-authenticator not found"
+        fi
+        ;;
+    *)
+        echo ""
+        echo "  You can enable it later by running:"
+        echo "    google-authenticator -t -i CompanyName"
+        echo ""
+        ;;
+esac
