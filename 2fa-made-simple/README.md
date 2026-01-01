@@ -10,15 +10,15 @@ Google Authenticator two-factor authentication for AIX/VIOS, with working QR cod
 cd /tmp
 
 # Required packages
-curl -L -o libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm \
-  https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
+curl -L -o libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
 
 curl -L -o google-authenticator-1.10-1.aix7.1.ppc.rpm \
   https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
 
 # Optional: Easy setup wizards (English & Spanish)
-curl -L -o google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm \
-  https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm
+curl -L -o google-authenticator-setup-1.0-2.librepower.aix7.3.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-setup-1.0-2.librepower.aix7.3.ppc.rpm
 
 # Verify downloads
 file *.rpm
@@ -68,9 +68,9 @@ startsrc -s xntpd
 # Enable at boot: edit /etc/rc.tcpip and uncomment the xntpd entry
 
 # 2. Install packages
-rpm -ivh libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
+rpm -ivh libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
 rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
-rpm -ivh google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm
+rpm -ivh google-authenticator-setup-1.0-2.librepower.aix7.3.ppc.rpm
 
 # 3. Configure PAM - add to /etc/pam.conf:
 # SSH 2FA for AIX made SIMPLE
@@ -121,8 +121,8 @@ IBM released google-authenticator for AIX but their [official guide](https://com
 2fa-made-simple/
 ├── RPMS/
 │   ├── google-authenticator-1.10-1.aix7.1.ppc.rpm       # IBM official
-│   ├── libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm          # QR library
-│   └── google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm
+│   ├── libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm          # QR library
+│   └── google-authenticator-setup-1.0-2.librepower.aix7.3.ppc.rpm
 ├── SPECS/
 │   └── libqrencode.spec
 ├── SOURCES/
