@@ -28,12 +28,12 @@ cd /tmp
 # Download
 curl -L -O https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
 curl -L -O https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
-curl -L -O https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-setup-1.0-4.librepower.aix7.3.ppc.rpm
+curl -L -O https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-setup-1.0-5.librepower.aix7.3.ppc.rpm
 
 # Install
 rpm -ivh libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
 rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
-rpm -ivh google-authenticator-setup-1.0-4.librepower.aix7.3.ppc.rpm
+rpm -ivh google-authenticator-setup-1.0-5.librepower.aix7.3.ppc.rpm
 
 # Configure 2FA
 google-authenticator-setup      # English
