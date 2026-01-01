@@ -10,47 +10,54 @@ Open source tools and packages for AIX/VIOS on IBM Power systems.
 
 Google Authenticator two-factor authentication for AIX/VIOS, done right.
 
-**Features:**
 - ✅ QR codes work (libqrencode included)
-- ✅ Bilingual setup wizards (English/Spanish)
+- ✅ Bilingual setup wizards (EN/ES)
 - ✅ NTP verification before setup
-- ✅ Secure defaults (TOTP, rate limiting)
-- ✅ Keeps STD_AUTH - sudo works normally
+- ✅ Secure defaults
 - ✅ Full rollback and emergency access instructions
 
 📁 **[Documentation & Downloads](2fa-made-simple/)**
 
-## Quick Start
+## Contribute
 
-```bash
-cd /tmp
+**We welcome contributions from the community!**
 
-# Download
-curl -L -O https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
-curl -L -O https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
-curl -L -O https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-setup-1.0-5.librepower.aix7.3.ppc.rpm
+Have you compiled open source software for AIX? Built something useful for Power Systems? Share it here.
 
-# Install
-rpm -ivh libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
-rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
-rpm -ivh google-authenticator-setup-1.0-5.librepower.aix7.3.ppc.rpm
+### What we're looking for
 
-# Configure 2FA
-google-authenticator-setup      # English
-google-authenticator-configura  # Español
-```
+- 📦 RPM packages compiled for AIX/VIOS
+- 🛠️ Tools and utilities for Power Systems
+- 📚 Documentation and guides
+- 🔧 Patches for AIX compatibility
 
-> ⚠️ **Important**: Use `curl -L` to follow GitHub redirects.
+### How to contribute
 
-## Contributing
+1. **Fork** this repository
+2. **Add** your package:
+   ```
+   your-package/
+   ├── RPMS/           # Compiled RPMs
+   ├── SPECS/          # Spec files (for reproducibility)
+   ├── SOURCES/        # Scripts, patches, configs
+   └── README.md       # Documentation
+   ```
+3. **Submit** a Pull Request
 
-Contributions welcome! Open an issue or submit a PR.
+### Guidelines
 
-## License
+- Include license information
+- Document tested AIX/VIOS versions
+- Provide build instructions when possible
+- English or Spanish documentation welcome
 
-- Documentation and scripts: Apache-2.0
-- libqrencode: LGPL-2.1
-- google-authenticator: Apache-2.0
+### Ideas welcome too
+
+No code yet? Open an [Issue](https://github.com/librepower/aix/issues) with your ideas, requests, or questions.
+
+---
+
+Let's build something great for Power Systems together.
 
 ---
 
