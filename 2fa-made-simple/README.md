@@ -30,7 +30,7 @@ file *.rpm
 
 Download from [Releases](https://github.com/librepower/aix/releases/tag/2fa-v1.0)
 
-## Easy Setup Wizards (NEW!)
+## Easy Setup Wizards
 
 After installing the packages, use our setup wizards:
 
@@ -50,7 +50,7 @@ Features:
 - ✅ Step-by-step guidance with colored output
 - ✅ Clear emergency access information (HMC console)
 
-## Quick Start (Manual)
+## Quick Start
 
 ```bash
 # 1. Configure NTP first (critical for TOTP!)
@@ -58,7 +58,6 @@ cat > /etc/ntp.conf << 'NTPEOF'
 driftfile /etc/ntp.drift
 server 0.pool.ntp.org iburst
 server 1.pool.ntp.org iburst
-server 2.pool.ntp.org iburst
 server time.google.com iburst
 restrict default limited kod nomodify notrap nopeer noquery
 restrict 127.0.0.1
@@ -66,13 +65,15 @@ NTPEOF
 
 ntpdate -u pool.ntp.org
 startsrc -s xntpd
+# Enable at boot: edit /etc/rc.tcpip and uncomment the xntpd entry
 
 # 2. Install packages
 rpm -ivh libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
 rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
-rpm -ivh google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm  # Optional
+rpm -ivh google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm
 
 # 3. Configure PAM - add to /etc/pam.conf:
+# SSH 2FA for AIX made SIMPLE
 sshd    auth       required   pam_aix
 sshd    auth       required   /usr/lib/security/pam_google_authenticator.so nullok no_increment_hotp
 sshd    account    required   pam_aix
@@ -80,17 +81,20 @@ sshd    password   required   pam_aix
 sshd    session    required   pam_aix
 
 # 4. Configure SSH - add to /etc/ssh/sshd_config:
+# SSH 2FA for AIX made SIMPLE
 UsePAM yes
 KbdInteractiveAuthentication yes
 
 # 5. Restart SSH
-stopsrc -s sshd && startsrc -s sshd
+stopsrc -s sshd
+startsrc -s sshd
+
+# NOTE: After this step, 2FA is ACTIVE. Users with ~/.google_authenticator
+# need password + code. Users without it only need password (nullok).
 
 # 6. Setup 2FA for a user
 google-authenticator-setup           # English wizard
 google-authenticator-configura       # Spanish wizard
-# OR manual:
-google-authenticator -t -d -f -w 17 -r 3 -R 30 -i "Company"
 ```
 
 ## Why This Package?

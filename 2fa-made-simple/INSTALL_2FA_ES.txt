@@ -75,8 +75,9 @@ ntpdate -u pool.ntp.org
 # Iniciar daemon NTP
 startsrc -s xntpd
 
-# Habilitar en el arranque
-mkitab "xntpd:2:once:/usr/sbin/ntpdate -s pool.ntp.org && /usr/sbin/startsrc -s xntpd"
+# Habilitar en el arranque: edita /etc/rc.tcpip y descomenta la entrada xntpd:
+# Start up Network Time Protocol (NTP) daemon
+# start /usr/sbin/xntpd "$src_running"
 
 # Verificar sincronización
 ntpq -p
@@ -90,8 +91,9 @@ rpm -ivh google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm
 
 PASO 2: CONFIGURAR PAM (como root)
 ----------------------------------
-Añade estas líneas a /etc/pam.conf (¡EL ORDEN EXACTO ES IMPORTANTE!):
+Añade al final de /etc/pam.conf:
 
+# SSH 2FA for AIX made SIMPLE
 sshd    auth       required   pam_aix
 sshd    auth       required   /usr/lib/security/pam_google_authenticator.so nullok no_increment_hotp
 sshd    account    required   pam_aix
@@ -103,13 +105,19 @@ Elimina "nullok" después para obligar 2FA a todos los usuarios.
 
 PASO 3: CONFIGURAR SSH (como root)
 ----------------------------------
-Edita /etc/ssh/sshd_config y añade/modifica:
+Añade a /etc/ssh/sshd_config:
 
+# SSH 2FA for AIX made SIMPLE
 UsePAM yes
 KbdInteractiveAuthentication yes
 
 Reinicia SSH:
-stopsrc -s sshd && startsrc -s sshd
+stopsrc -s sshd
+startsrc -s sshd
+
+NOTA: Después de este paso, 2FA está ACTIVO para SSH. Los usuarios con
+~/.google_authenticator necesitarán contraseña + código. Los usuarios
+sin él solo necesitarán contraseña (nullok).
 
 PASO 4: CONFIGURAR 2FA POR USUARIO
 ----------------------------------
@@ -172,7 +180,8 @@ Si algo sale mal:
    # sshd    auth       required   /usr/lib/security/pam_google_authenticator.so nullok
 
 2. Reinicia SSH:
-   stopsrc -s sshd && startsrc -s sshd
+   stopsrc -s sshd
+   startsrc -s sshd
 
 3. Eliminar 2FA de un usuario:
    rm /home/usuario/.google_authenticator
@@ -202,7 +211,7 @@ Problema: "sudo" no funciona después de configurar
 
 VERSIÓN
 -------
-Versión de documentación: 1.8 (Enero 2026)
+Versión de documentación: 1.9 (Enero 2026)
 
 ================================================================================
   SIXE - IBM Business Partner | https://sixe.eu

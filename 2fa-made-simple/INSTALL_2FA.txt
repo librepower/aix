@@ -75,8 +75,9 @@ ntpdate -u pool.ntp.org
 # Start NTP daemon
 startsrc -s xntpd
 
-# Enable at boot
-mkitab "xntpd:2:once:/usr/sbin/ntpdate -s pool.ntp.org && /usr/sbin/startsrc -s xntpd"
+# Enable at boot: edit /etc/rc.tcpip and uncomment the xntpd entry:
+# Start up Network Time Protocol (NTP) daemon
+# start /usr/sbin/xntpd "$src_running"
 
 # Verify synchronization
 ntpq -p
@@ -90,8 +91,9 @@ rpm -ivh google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm
 
 STEP 2: CONFIGURE PAM (as root)
 -------------------------------
-Add these lines to /etc/pam.conf (EXACT ORDER IS IMPORTANT):
+Add to the end of /etc/pam.conf:
 
+# SSH 2FA for AIX made SIMPLE
 sshd    auth       required   pam_aix
 sshd    auth       required   /usr/lib/security/pam_google_authenticator.so nullok no_increment_hotp
 sshd    account    required   pam_aix
@@ -103,13 +105,18 @@ Remove "nullok" later to enforce 2FA for all users.
 
 STEP 3: CONFIGURE SSH (as root)
 -------------------------------
-Edit /etc/ssh/sshd_config and add/modify:
+Add to /etc/ssh/sshd_config:
 
+# SSH 2FA for AIX made SIMPLE
 UsePAM yes
 KbdInteractiveAuthentication yes
 
 Restart SSH:
-stopsrc -s sshd && startsrc -s sshd
+stopsrc -s sshd
+startsrc -s sshd
+
+NOTE: After this step, 2FA is ACTIVE for SSH. Users with ~/.google_authenticator
+will need password + code. Users without it will only need password (nullok).
 
 STEP 4: CONFIGURE 2FA PER USER
 ------------------------------
@@ -172,7 +179,8 @@ If something goes wrong:
    # sshd    auth       required   /usr/lib/security/pam_google_authenticator.so nullok
 
 2. Restart SSH:
-   stopsrc -s sshd && startsrc -s sshd
+   stopsrc -s sshd
+   startsrc -s sshd
 
 3. Remove 2FA for a user:
    rm /home/username/.google_authenticator
@@ -202,7 +210,7 @@ Problem: "sudo" not working after setup
 
 VERSION
 -------
-Documentation version: 1.8 (January 2026)
+Documentation version: 1.9 (January 2026)
 
 ================================================================================
   SIXE - IBM Business Partner | https://sixe.eu
