@@ -1,8 +1,7 @@
 #!/opt/freeware/bin/bash
 #
 # google-authenticator-configura - Configuración fácil de 2FA para AIX
-# Parte de LibrePower (https://librepower.org)
-# SIXE - IBM Business Partner (https://sixe.eu)
+# LibrePower (https://librepower.org)
 #
 
 VERSION="1.0"
@@ -18,7 +17,7 @@ NC='\033[0m'
 banner() {
     echo ""
     echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║     CONFIGURACION 2FA - Google Authenticator para AIX       ║"
+    echo "║     CONFIGURACION 2FA - Google Authenticator para AIX        ║"
     echo "║                                                              ║"
     echo "║     LibrePower - https://librepower.org                      ║"
     echo "╚══════════════════════════════════════════════════════════════╝"
@@ -75,12 +74,17 @@ check_existing() {
 get_issuer() {
     echo -e "${BLUE}[3/4] Configuración...${NC}"
     
-    DEFAULT_ISSUER=$(hostname -s 2>/dev/null || echo "AIX-Server")
+    HOSTNAME=$(hostname -s 2>/dev/null || echo "AIX-Server")
+    USERNAME=$(whoami)
     
-    echo "Nombre del emisor (se muestra en la app):"
-    echo -n "  [Por defecto: $DEFAULT_ISSUER]: "
-    read -r ISSUER
-    ISSUER="${ISSUER:-$DEFAULT_ISSUER}"
+    echo "Nombre de tu organización (se muestra en la app):"
+    echo -n "  [Por defecto: LibrePower]: "
+    read -r ORG
+    ORG="${ORG:-LibrePower}"
+    
+    ISSUER="${ORG}: ${USERNAME}@${HOSTNAME}"
+    echo ""
+    echo "  En la app verás: $ISSUER"
     echo ""
 }
 
@@ -109,7 +113,7 @@ run_setup() {
 
 show_help() {
     echo "google-authenticator-configura v$VERSION"
-    echo "Configuración fácil de 2FA para AIX - LibrePower"
+    echo "Configuración fácil de 2FA para AIX"
     echo ""
     echo "Uso: google-authenticator-configura [opciones]"
     echo ""
@@ -117,17 +121,11 @@ show_help() {
     echo "  -h, --help     Muestra esta ayuda"
     echo "  -v, --version  Muestra la versión"
     echo ""
-    echo "Este script envuelve google-authenticator con:"
-    echo "  • Verificación de NTP antes de configurar"
-    echo "  • Valores seguros por defecto (TOTP, no reutilizar, rate limiting)"
-    echo "  • Guía paso a paso"
-    echo ""
     echo "Versión en inglés: google-authenticator-setup"
     echo ""
-    echo "https://librepower.org | https://sixe.eu"
+    echo "https://librepower.org"
 }
 
-# Parsear argumentos
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help|--ayuda)
@@ -146,21 +144,18 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Verificar si es root
 if [[ $(id -u) -eq 0 ]]; then
     echo -e "${YELLOW}⚠ Ejecutando como root. 2FA se configurará para root.${NC}"
     echo "Para usuarios normales, ejecuta como ese usuario."
     echo ""
 fi
 
-# Verificar binario google-authenticator
 if [[ ! -x "$GA_BIN" ]]; then
     echo -e "${RED}✗ Error: google-authenticator no encontrado en $GA_BIN${NC}"
     echo "Instala con: rpm -ivh google-authenticator-*.rpm"
     exit 1
 fi
 
-# Flujo principal
 banner
 check_ntp
 check_existing

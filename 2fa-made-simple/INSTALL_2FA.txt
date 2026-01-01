@@ -12,7 +12,7 @@ PACKAGE CONTENTS
 ----------------
 - google-authenticator-1.10-1.aix7.1.ppc.rpm     (Official IBM AIX Toolbox)
 - libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm        (QR code library)
-- google-authenticator-setup-1.0-3.librepower.aix7.3.ppc.rpm       (Easy setup wizards)
+- google-authenticator-setup-1.0-4.librepower.aix7.3.ppc.rpm       (Easy setup wizards)
 
 The setup wizards package includes:
   - google-authenticator-setup      (English wizard)
@@ -36,8 +36,8 @@ curl -L -o libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm \
 curl -L -o google-authenticator-1.10-1.aix7.1.ppc.rpm \
   https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
 
-curl -L -o google-authenticator-setup-1.0-3.librepower.aix7.3.ppc.rpm \
-  https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-setup-1.0-3.librepower.aix7.3.ppc.rpm
+curl -L -o google-authenticator-setup-1.0-4.librepower.aix7.3.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-setup-1.0-4.librepower.aix7.3.ppc.rpm
 
 # Verify downloads (must show "RPM v3.0", NOT "HTML")
 file *.rpm
@@ -87,7 +87,7 @@ STEP 1: INSTALL RPMs (as root)
 cd /tmp
 rpm -ivh libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
 rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
-rpm -ivh google-authenticator-setup-1.0-3.librepower.aix7.3.ppc.rpm
+rpm -ivh google-authenticator-setup-1.0-4.librepower.aix7.3.ppc.rpm
 
 STEP 2: CONFIGURE PAM (as root)
 -------------------------------
