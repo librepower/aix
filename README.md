@@ -2,7 +2,7 @@
 
 Open source tools and packages for AIX/VIOS on IBM Power systems.
 
-Part of the [LibrePower](https://librepower.org) initiative - extending the life of IBM Power hardware through open source.
+Part of the [LibrePower](https://librepower.org) initiative - extending the life of IBM Power hardware through open source. 🚀 Launching February 2026
 
 ## Available Packages
 
@@ -48,9 +48,9 @@ Contributions welcome! Open an issue or submit a PR.
 
 ## About LibrePower
 
-LibrePower promotes open source on IBM Power systems and extends the useful life of Power8/Power9 hardware through community-driven software.
+Power hardware offers exceptional longevity. LibrePower brings more and better open source to IBM Power - extending hardware lifespan while expanding what's possible.
 
-🌍 Sustainability through longevity - hardware that lasts 10-15 years is good for the planet.
+🌍 Longer life. Endless possibilities. Unmatched TCO. Minimal footprint.
 
 ---
 
