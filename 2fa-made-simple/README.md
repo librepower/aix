@@ -136,7 +136,7 @@ IBM released google-authenticator for AIX but their [official guide](https://com
 
 ## Requirements
 
-- AIX 7.1+ or VIOS 3.x
+- AIX 7.1+ or VIOS 3.x (currently tested on AIX 7.3 TL04 with the std dnf_toolbox installed)
 - NTP configured (critical for TOTP)
 - Root access
 
