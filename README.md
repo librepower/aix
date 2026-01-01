@@ -49,7 +49,7 @@ Have you compiled open source software for AIX? Built something useful for Power
 - Include license information
 - Document tested AIX/VIOS versions
 - Provide build instructions when possible
-- English or Spanish documentation welcome
+- Documentation in any language welcome. We maintain English and Spanish; other languages supported if volunteers step up
 
 ### Ideas welcome too
 
