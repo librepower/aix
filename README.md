@@ -26,14 +26,14 @@ Google Authenticator two-factor authentication for AIX/VIOS, done right.
 # Download RPMs using curl (requires -L for redirects)
 cd /tmp
 
-curl -L -o libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm \
-  https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
+curl -L -o libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
 
 curl -L -o google-authenticator-1.10-1.librepower.ppc.rpm \
   https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.librepower.aix7.3.aix7.3.ppc.rpm
 
 # Install
-rpm -ivh libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
+rpm -ivh libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
 rpm -ivh google-authenticator-1.10-1.librepower.ppc.rpm
 
 # Then follow INSTALL_2FA.txt for NTP, PAM and SSH configuration
