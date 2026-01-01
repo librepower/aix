@@ -9,7 +9,7 @@
 PACKAGE CONTENTS
 ----------------
 - google-authenticator-1.10-1.aix7.1.ppc.rpm  (Official IBM AIX Toolbox package)
-- libqrencode-4.1.1-3.aix7.3.sixe.ppc.rpm     (QR code library for console display)
+- libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm     (QR code library for console display)
 - 2fa-check                                    (Optional login prompt script)
 
 IMPORTANT NOTE
@@ -32,6 +32,26 @@ PREREQUISITES
    A difference of more than 30 seconds will cause authentication failures.
 
 
+DOWNLOAD RPMs
+-------------
+Download the RPMs directly from GitHub Releases using curl:
+
+cd /tmp
+
+curl -L -o libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
+
+curl -L -o google-authenticator-1.10-1.aix7.1.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
+
+Verify the downloads are valid RPM files:
+  file *.rpm
+  # Should show: RPM v3.0 bin...
+
+NOTE: The -L flag is required to follow GitHub redirects.
+      Do NOT download from /blob/ URLs - those return HTML pages, not binaries.
+
+
 STEP 0: CONFIGURE NTP (VERY IMPORTANT)
 --------------------------------------
 Check current time:
@@ -40,12 +60,18 @@ Check current time:
 
 If there's a significant difference (>30 sec), synchronize:
 
+# NTP Configuration
 cat > /etc/ntp.conf << 'NTPEOF'
+# NTP Configuration
 driftfile /etc/ntp.drift
+
+# Public NTP servers
 server 0.pool.ntp.org iburst
 server 1.pool.ntp.org iburst
 server 2.pool.ntp.org iburst
 server time.google.com iburst
+
+# Restrictions
 restrict default limited kod nomodify notrap nopeer noquery
 restrict 127.0.0.1
 NTPEOF
@@ -60,8 +86,8 @@ STEP 1: INSTALL RPMs (as root)
 # On VIOS, first enter root mode:
 oem_setup_env
 
-cd /path/to/rpms
-rpm -ivh libqrencode-4.1.1-3.aix7.3.sixe.aix7.3.ppc.rpm
+cd /tmp
+rpm -ivh libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
 rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
 
 NOTE: After this step, 2FA is NOT yet active. Current access is not affected.
@@ -193,5 +219,5 @@ SIXE - IBM Business Partner
 hugo.blanco@sixe.eu | https://sixe.eu
 
 ================================================================================
-  Version: 1.6 | December 2025
+  Version: 1.7 | January 2026
 ================================================================================

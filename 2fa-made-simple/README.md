@@ -2,40 +2,71 @@
 
 Google Authenticator two-factor authentication for AIX/VIOS, with working QR codes and safer configuration.
 
-## Packages
+## Download
 
-| File | Description |
-|------|-------------|
-| [RPMS/google-authenticator-1.10-1.aix7.1.ppc.rpm](RPMS/google-authenticator-1.10-1.aix7.1.ppc.rpm) | Official IBM package |
-| [RPMS/libqrencode-4.1.1-4.aix7.3.sixe.aix7.3.ppc.rpm](RPMS/libqrencode-4.1.1-4.aix7.3.sixe.aix7.3.ppc.rpm) | QR code library |
+### Option 1: curl (Recommended)
+
+```bash
+cd /tmp
+
+curl -L -o libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
+
+curl -L -o google-authenticator-1.10-1.aix7.1.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
+
+# Verify downloads
+file *.rpm
+# Should show: RPM v3.0 bin...
+```
+
+> ⚠️ **Important**: Use `-L` flag to follow redirects. Do NOT download from `/blob/` URLs.
+
+### Option 2: GitHub Releases Page
+
+Download from [Releases](https://github.com/librepower/aix/releases/tag/2fa-v1.0)
 
 ## Quick Start
 
 ```bash
+# 1. Configure NTP first (critical for TOTP!)
+cat > /etc/ntp.conf << 'NTPEOF'
+# NTP Configuration
+driftfile /etc/ntp.drift
 
-# Download packages
-wget https://github.com/librepower/aix/blob/main/2fa-made-simple/RPMS/google-authenticator-1.10-1.aix7.1.ppc.rpm
-wget https://github.com/librepower/aix/blob/main/2fa-made-simple/RPMS/libqrencode-4.1.1-4.aix7.3.sixe.aix7.3.ppc.rpm
+# Public NTP servers
+server 0.pool.ntp.org iburst
+server 1.pool.ntp.org iburst
+server 2.pool.ntp.org iburst
+server time.google.com iburst
 
-# Install packages
-rpm -ivh RPMS/libqrencode-4.1.1-4.aix7.3.sixe.aix7.3.ppc.rpm
-rpm -ivh RPMS/google-authenticator-1.10-1.aix7.1.ppc.rpm
+# Restrictions
+restrict default limited kod nomodify notrap nopeer noquery
+restrict 127.0.0.1
+NTPEOF
 
-# Configure PAM - add to /etc/pam.conf:
+ntpdate -u pool.ntp.org
+startsrc -s xntpd
+
+# 2. Install packages
+rpm -ivh libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
+rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
+
+# 3. Configure PAM - add to /etc/pam.conf:
 sshd    auth       required   pam_aix
 sshd    auth       required   /usr/lib/security/pam_google_authenticator.so nullok no_increment_hotp
 sshd    account    required   pam_aix
 sshd    password   required   pam_aix
 sshd    session    required   pam_aix
 
-# Configure SSH - add to /etc/ssh/sshd_config:
+# 4. Configure SSH - add to /etc/ssh/sshd_config:
 UsePAM yes
 KbdInteractiveAuthentication yes
 
-# Restart SSH
+# 5. Restart SSH
 stopsrc -s sshd && startsrc -s sshd
 
-# Setup 2FA for a user
+# 6. Setup 2FA for a user
 google-authenticator -t -i "YourCompany"
 ```
 

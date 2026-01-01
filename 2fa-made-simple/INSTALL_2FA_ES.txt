@@ -9,18 +9,18 @@
 CONTENIDO DEL PAQUETE
 ---------------------
 - google-authenticator-1.10-1.aix7.1.ppc.rpm  (Paquete oficial IBM AIX Toolbox)
-- libqrencode-4.1.1-3.aix7.3.sixe.ppc.rpm     (Librería QR para consola)
-- 2fa-check                                    (Script opcional de prompt en login)
+- libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm     (Librería QR para consola)
+- 2fa-check                                    (Script opcional de aviso en login)
 
 NOTA IMPORTANTE
 ---------------
 Los RPMs solo instalan los binarios. La configuración de PAM y SSH es MANUAL
-para evitar bloqueos accidentales. El 2FA NO se activa hasta completar los
+para evitar bloqueos accidentales. 2FA NO se activa hasta completar los
 pasos 2 y 3. Puedes instalar los RPMs de forma segura sin afectar el acceso
 actual al sistema.
 
 Acceso de emergencia: La consola serie (tty desde HMC) NO usa SSH, por lo que
-nunca pedirá 2FA. Siempre podrás recuperar el acceso desde la consola del HMC.
+nunca pedirá 2FA. Siempre podrás recuperar el acceso desde la consola HMC.
 
 
 PREREQUISITOS
@@ -32,6 +32,26 @@ PREREQUISITOS
    Una diferencia de más de 30 segundos causará fallos de autenticación.
 
 
+DESCARGAR RPMs
+--------------
+Descarga los RPMs directamente desde GitHub Releases usando curl:
+
+cd /tmp
+
+curl -L -o libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
+
+curl -L -o google-authenticator-1.10-1.aix7.1.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
+
+Verificar que las descargas son archivos RPM válidos:
+  file *.rpm
+  # Debe mostrar: RPM v3.0 bin...
+
+NOTA: El flag -L es necesario para seguir las redirecciones de GitHub.
+      NO descargues desde URLs /blob/ - esas devuelven páginas HTML, no binarios.
+
+
 PASO 0: CONFIGURAR NTP (MUY IMPORTANTE)
 ---------------------------------------
 Verificar hora actual:
@@ -40,12 +60,18 @@ Verificar hora actual:
 
 Si hay diferencia significativa (>30 seg), sincronizar:
 
+# Configuración NTP
 cat > /etc/ntp.conf << 'NTPEOF'
+# NTP Configuration
 driftfile /etc/ntp.drift
+
+# Servidores NTP públicos
 server 0.pool.ntp.org iburst
 server 1.pool.ntp.org iburst
 server 2.pool.ntp.org iburst
 server time.google.com iburst
+
+# Restricciones
 restrict default limited kod nomodify notrap nopeer noquery
 restrict 127.0.0.1
 NTPEOF
@@ -60,11 +86,11 @@ PASO 1: INSTALACIÓN DE RPMs (como root)
 # En VIOS, primero entrar en modo root:
 oem_setup_env
 
-cd /ruta/a/rpms
-rpm -ivh libqrencode-4.1.1-3.aix7.3.sixe.aix7.3.ppc.rpm
+cd /tmp
+rpm -ivh libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
 rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
 
-NOTA: Después de este paso, el 2FA NO está activo aún. El acceso actual no se ve afectado.
+NOTA: Después de este paso, 2FA aún NO está activo. El acceso actual no se ve afectado.
 
 
 PASO 2: CONFIGURAR PAM (como root)
@@ -91,8 +117,8 @@ Reiniciar SSH:
 stopsrc -s sshd
 startsrc -s sshd
 
-NOTA: Después de este paso, el 2FA está ACTIVO para SSH. Los usuarios con
-~/.google_authenticator necesitarán password + código. Los usuarios sin él
+NOTA: Después de este paso, 2FA está ACTIVO para SSH. Los usuarios con
+~/.google_authenticator necesitarán password + código. Los que no lo tengan
 solo necesitarán password (nullok).
 
 
@@ -102,18 +128,18 @@ Cada usuario que quiera 2FA ejecuta:
 
 google-authenticator -t -d -w 17 -r 3 -R 30 -i "NombreEmpresa"
 
-O de forma interactiva:
+O interactivamente:
 
 google-authenticator -t -i "NombreEmpresa"
 
-Escanear el QR con la app (Google Authenticator, Microsoft Authenticator, etc.)
-Guardar los códigos de emergencia en lugar seguro.
+Escanea el código QR con tu app (Google Authenticator, Microsoft Authenticator, etc.)
+Guarda los códigos de emergencia (scratch codes) en un lugar seguro.
 
 
-PASO 5 (OPCIONAL): PROMPT AUTOMÁTICO DE 2FA EN LOGIN
+PASO 5 (OPCIONAL): AVISO AUTOMÁTICO DE 2FA EN LOGIN
 ----------------------------------------------------
-Para que los usuarios sin 2FA reciban un recordatorio al hacer login,
-crear el script y añadirlo a /etc/profile:
+Para avisar a usuarios sin 2FA que lo activen al hacer login, crear el script
+y añadirlo a /etc/profile:
 
 # Crear el script:
 cat > /opt/freeware/bin/2fa-check << 'SCRIPTEOF'
@@ -124,34 +150,34 @@ case $- in *i*) ;; *) return 2>/dev/null ;; esac
 
 echo ""
 echo "╔════════════════════════════════════════════════════════════╗"
-echo "║       TWO-FACTOR AUTHENTICATION (2FA) AVAILABLE            ║"
+echo "║   AUTENTICACIÓN DE DOS FACTORES (2FA) DISPONIBLE           ║"
 echo "╚════════════════════════════════════════════════════════════╝"
-echo "  Your account does not have 2FA enabled."
-echo "  This adds an extra layer of security to your access."
+echo "  Tu cuenta no tiene 2FA activado."
+echo "  Esto añade una capa extra de seguridad a tu acceso."
 echo ""
-printf "  Enable now? (y/n): "
+printf "  ¿Activar ahora? (s/n): "
 read -r resp
 
 case "$resp" in
-    [yY])
+    [sS])
         if [ -x /opt/freeware/bin/google-authenticator ]; then
             echo ""
             /opt/freeware/bin/google-authenticator -t -d -w 17 -r 3 -R 30 -i "$(hostname -s)"
         else
-            echo "Error: google-authenticator not found"
+            echo "Error: google-authenticator no encontrado"
         fi
         ;;
     *)
         echo ""
-        echo "  You can enable it later by running:"
-        echo "    google-authenticator -t -i CompanyName"
+        echo "  Puedes activarlo más tarde ejecutando:"
+        echo "    google-authenticator -t -i NombreEmpresa"
         echo ""
         ;;
 esac
 SCRIPTEOF
 chmod +x /opt/freeware/bin/2fa-check
 
-# Activar en /etc/profile:
+# Habilitar en /etc/profile:
 echo '[ -x /opt/freeware/bin/2fa-check ] && . /opt/freeware/bin/2fa-check' >> /etc/profile
 
 Para desactivar: eliminar la línea de /etc/profile.
@@ -185,7 +211,7 @@ SOLUCIÓN DE PROBLEMAS
 ---------------------
 1. Código no funciona: Verificar NTP (date; ntpq -p)
 2. Usuario bloqueado: chuser "account_locked=false" usuario
-3. SSH falla: Hacer rollback y revisar /etc/pam.conf
+3. SSH falla: Hacer rollback y verificar /etc/pam.conf
 
 
 SOPORTE
@@ -194,5 +220,5 @@ SIXE - IBM Business Partner
 hugo.blanco@sixe.eu | https://sixe.eu
 
 ================================================================================
-  Versión: 1.6 | Diciembre 2025
+  Versión: 1.7 | Enero 2026
 ================================================================================
