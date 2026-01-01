@@ -1,41 +1,33 @@
 ================================================================================
   GOOGLE AUTHENTICATOR 2FA PARA AIX/VIOS
-  Autenticación de Dos Factores (TOTP)
+  Autenticación de Doble Factor (TOTP)
   
   SIXE - IBM Business Partner
   https://sixe.eu | hugo.blanco@sixe.eu
+  
+  LibrePower - https://librepower.org
 ================================================================================
 
 CONTENIDO DEL PAQUETE
 ---------------------
-- google-authenticator-1.10-1.aix7.1.ppc.rpm  (Paquete oficial IBM AIX Toolbox)
-- libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm     (Librería QR para consola)
-- 2fa-check                                    (Script opcional de aviso en login)
+- google-authenticator-1.10-1.aix7.1.ppc.rpm     (Oficial IBM AIX Toolbox)
+- libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm        (Librería de códigos QR)
+- google-authenticator-setup-1.0-2.ppc.rpm       (Asistentes de configuración)
+
+El paquete de asistentes incluye:
+  - google-authenticator-setup      (Asistente en inglés)
+  - google-authenticator-configura  (Asistente en español)
 
 NOTA IMPORTANTE
 ---------------
 Los RPMs solo instalan los binarios. La configuración de PAM y SSH es MANUAL
-para evitar bloqueos accidentales. 2FA NO se activa hasta completar los
+para evitar bloqueos accidentales. El 2FA NO se activa hasta completar los
 pasos 2 y 3. Puedes instalar los RPMs de forma segura sin afectar el acceso
 actual al sistema.
 
-Acceso de emergencia: La consola serie (tty desde HMC) NO usa SSH, por lo que
-nunca pedirá 2FA. Siempre podrás recuperar el acceso desde la consola HMC.
-
-
-PREREQUISITOS
--------------
-1. AIX 7.1 o superior / VIOS 3.x
-2. Acceso root (en VIOS: oem_setup_env)
-3. **CRÍTICO: SINCRONIZACIÓN DE RELOJ (NTP)**
-   TOTP requiere que el reloj del servidor esté sincronizado.
-   Una diferencia de más de 30 segundos causará fallos de autenticación.
-
-
-DESCARGAR RPMs
---------------
-Descarga los RPMs directamente desde GitHub Releases usando curl:
-
+DESCARGA
+--------
+# Descargar con curl (usar -L para seguir redirecciones)
 cd /tmp
 
 curl -L -o libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm \
@@ -44,25 +36,26 @@ curl -L -o libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm \
 curl -L -o google-authenticator-1.10-1.aix7.1.ppc.rpm \
   https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
 
-Verificar que las descargas son archivos RPM válidos:
-  file *.rpm
-  # Debe mostrar: RPM v3.0 bin...
+curl -L -o google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm
 
-NOTA: El flag -L es necesario para seguir las redirecciones de GitHub.
-      NO descargues desde URLs /blob/ - esas devuelven páginas HTML, no binarios.
+# Verificar descargas (debe mostrar "RPM v3.0", NO "HTML")
+file *.rpm
 
+REQUISITOS
+----------
+- AIX 7.1+ o VIOS 3.x
+- NTP configurado y sincronizado (¡CRÍTICO!)
+- Acceso root para instalación
 
 PASO 0: CONFIGURAR NTP (MUY IMPORTANTE)
 ---------------------------------------
-Verificar hora actual:
-  date
-  ntpdate -q pool.ntp.org
+Los códigos TOTP se basan en el tiempo. Si el reloj del servidor difiere más
+de 30 segundos, la autenticación FALLARÁ. Configura NTP antes de configurar 2FA.
 
-Si hay diferencia significativa (>30 seg), sincronizar:
-
-# Configuración NTP
+# Crear configuración NTP
 cat > /etc/ntp.conf << 'NTPEOF'
-# NTP Configuration
+# Configuración NTP
 driftfile /etc/ntp.drift
 
 # Servidores NTP públicos
@@ -76,32 +69,28 @@ restrict default limited kod nomodify notrap nopeer noquery
 restrict 127.0.0.1
 NTPEOF
 
+# Sincronizar hora inmediatamente
 ntpdate -u pool.ntp.org
+
+# Iniciar daemon NTP
 startsrc -s xntpd
+
+# Habilitar en el arranque
+mkitab "xntpd:2:once:/usr/sbin/ntpdate -s pool.ntp.org && /usr/sbin/startsrc -s xntpd"
+
+# Verificar sincronización
 ntpq -p
 
-# Para que arranque automáticamente edita /etc/rc.tcpip u descomenta la entrada de NTP
-
-# Start up Network Time Protocol (NTP) daemon
-start /usr/sbin/xntpd "$src_running"
-
-PASO 1: INSTALACIÓN DE RPMs (como root)
----------------------------------------
-# En VIOS, primero entrar en modo root:
-oem_setup_env
-
+PASO 1: INSTALAR RPMs (como root)
+---------------------------------
 cd /tmp
 rpm -ivh libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
 rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
-
-NOTA: Después de este paso, 2FA aún NO está activo. El acceso actual no se ve afectado.
-
+rpm -ivh google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm
 
 PASO 2: CONFIGURAR PAM (como root)
 ----------------------------------
-Añadir al final de /etc/pam.conf:
-
-# SSH 2FA for AIX made SIMPLE
+Añade estas líneas a /etc/pam.conf (¡EL ORDEN EXACTO ES IMPORTANTE!):
 
 sshd    auth       required   pam_aix
 sshd    auth       required   /usr/lib/security/pam_google_authenticator.so nullok no_increment_hotp
@@ -109,124 +98,113 @@ sshd    account    required   pam_aix
 sshd    password   required   pam_aix
 sshd    session    required   pam_aix
 
-NOTA: "nullok" permite que usuarios SIN 2FA entren solo con password.
-
+Nota: "nullok" permite que usuarios SIN 2FA configurado puedan seguir entrando.
+Elimina "nullok" después para obligar 2FA a todos los usuarios.
 
 PASO 3: CONFIGURAR SSH (como root)
 ----------------------------------
-Añadir a /etc/ssh/sshd_config:
-
-# SSH 2FA for AIX made SIMPLE
+Edita /etc/ssh/sshd_config y añade/modifica:
 
 UsePAM yes
 KbdInteractiveAuthentication yes
 
-Reiniciar SSH:
-stopsrc -s sshd
-startsrc -s sshd
-
-NOTA: Después de este paso, 2FA está ACTIVO para SSH. Los usuarios con
-~/.google_authenticator necesitarán password + código. Los que no lo tengan
-solo necesitarán password (nullok).
-
+Reinicia SSH:
+stopsrc -s sshd && startsrc -s sshd
 
 PASO 4: CONFIGURAR 2FA POR USUARIO
 ----------------------------------
-Cada usuario que quiera 2FA ejecuta:
+Cada usuario debe configurar su propio 2FA. Entra como el usuario (o su - usuario).
 
-google-authenticator -t -d -w 17 -r 3 -R 30 -i "NombreEmpresa"
+OPCIÓN A: Usar el Asistente Fácil (RECOMENDADO)
 
-O interactivamente:
+  google-authenticator-configura       # Español
+  # O
+  google-authenticator-setup           # English (Inglés)
 
-google-authenticator -t -i "NombreEmpresa"
+El asistente:
+  - Verifica la sincronización NTP
+  - Pregunta el nombre del emisor (empresa/servidor)
+  - Genera clave secreta y código QR
+  - Guarda la configuración automáticamente
 
-Escanea el código QR con tu app (Google Authenticator, Microsoft Authenticator, etc.)
-Guarda los códigos de emergencia (scratch codes) en un lugar seguro.
+OPCIÓN B: Comando Manual
 
+  google-authenticator -t -d -f -w 17 -r 3 -R 30 -Q UTF8 -i "TuEmpresa"
 
-PASO 5 (OPCIONAL): AVISO AUTOMÁTICO DE 2FA EN LOGIN
-----------------------------------------------------
-Para avisar a usuarios sin 2FA que lo activen al hacer login, crear el script
-y añadirlo a /etc/profile:
+Parámetros explicados:
+  -t           Basado en tiempo (TOTP)
+  -d           No permitir reutilizar códigos
+  -f           Forzar escritura (no preguntar si guardar)
+  -w 17        Tamaño de ventana (permite ~8 min desfase)
+  -r 3 -R 30   Límite: 3 intentos por 30 segundos
+  -Q UTF8      Mostrar código QR en terminal
+  -i "Nombre"  Nombre del emisor mostrado en la app
 
-# Crear el script:
-cat > /opt/freeware/bin/2fa-check << 'SCRIPTEOF'
-#!/bin/bash
-[ "$(id -u)" = "0" ] && return 2>/dev/null
-[ -f "$HOME/.google_authenticator" ] && return 2>/dev/null
-case $- in *i*) ;; *) return 2>/dev/null ;; esac
+ESCANEA EL CÓDIGO QR con Google Authenticator, Microsoft Authenticator, Authy, etc.
 
-echo ""
-echo "╔════════════════════════════════════════════════════════════╗"
-echo "║   AUTENTICACIÓN DE DOS FACTORES (2FA) DISPONIBLE           ║"
-echo "╚════════════════════════════════════════════════════════════╝"
-echo "  Tu cuenta no tiene 2FA activado."
-echo "  Esto añade una capa extra de seguridad a tu acceso."
-echo ""
-printf "  ¿Activar ahora? (s/n): "
-read -r resp
+GUARDA LOS CÓDIGOS DE EMERGENCIA en un lugar seguro (caja fuerte, gestor de contraseñas).
 
-case "$resp" in
-    [sS])
-        if [ -x /opt/freeware/bin/google-authenticator ]; then
-            echo ""
-            /opt/freeware/bin/google-authenticator -t -d -w 17 -r 3 -R 30 -i "$(hostname -s)"
-        else
-            echo "Error: google-authenticator no encontrado"
-        fi
-        ;;
-    *)
-        echo ""
-        echo "  Puedes activarlo más tarde ejecutando:"
-        echo "    google-authenticator -t -i NombreEmpresa"
-        echo ""
-        ;;
-esac
-SCRIPTEOF
-chmod +x /opt/freeware/bin/2fa-check
+PASO 5: PROBAR ANTES DE CERRAR TU SESIÓN
+----------------------------------------
+¡CRÍTICO! Abre un NUEVO terminal y prueba el login SSH antes de cerrar tu sesión.
 
-# Habilitar en /etc/profile:
-echo '[ -x /opt/freeware/bin/2fa-check ] && . /opt/freeware/bin/2fa-check' >> /etc/profile
+Desde otro terminal:
+  ssh usuario@servidor
 
-Para desactivar: eliminar la línea de /etc/profile.
+Deberías ver:
+  Password: (introduce tu contraseña)
+  Verification code: (introduce el código de 6 dígitos de la app)
 
+Si funciona, has terminado. Si no, todavía tienes tu sesión original abierta.
 
-VERIFICACIÓN
-------------
-Desde otra terminal (no cerrar la sesión actual):
+ACCESO DE EMERGENCIA
+--------------------
+Si te quedas bloqueado:
+1. Consola HMC: La consola serie NUNCA pide 2FA (acceso de emergencia)
+2. Códigos de emergencia: Usa uno de tus scratch codes en lugar del código de la app
+3. Eliminar 2FA: Borra /home/usuario/.google_authenticator
 
-ssh usuario@servidor
+INSTRUCCIONES DE ROLLBACK
+-------------------------
+Si algo sale mal:
 
-Debe pedir:
-1. Password
-2. Verification code (6 dígitos de la app)
+1. Como root, comenta la línea pam_google_authenticator en /etc/pam.conf:
+   # sshd    auth       required   /usr/lib/security/pam_google_authenticator.so nullok
 
+2. Reinicia SSH:
+   stopsrc -s sshd && startsrc -s sshd
 
-DESACTIVAR 2FA PARA UN USUARIO
-------------------------------
-rm ~/.google_authenticator
+3. Eliminar 2FA de un usuario:
+   rm /home/usuario/.google_authenticator
 
-
-ROLLBACK COMPLETO
------------------
-grep -v "pam_google_authenticator" /etc/pam.conf > /tmp/pam.tmp
-mv /tmp/pam.tmp /etc/pam.conf
-stopsrc -s sshd
-startsrc -s sshd
-
+DESPLIEGUE GRADUAL
+------------------
+Para despliegue empresarial:
+1. Instala los RPMs en todos los servidores (seguro, sin impacto)
+2. Configura PAM y SSH con la opción "nullok"
+3. Los usuarios configuran 2FA uno a uno
+4. Cuando todos tengan 2FA, elimina "nullok" para obligar
 
 SOLUCIÓN DE PROBLEMAS
 ---------------------
-1. Código no funciona: Verificar NTP (date; ntpq -p)
-2. Usuario bloqueado: chuser "account_locked=false" usuario
-3. SSH falla: Hacer rollback y verificar /etc/pam.conf
+Problema: Los códigos no funcionan
+  - Verifica NTP: ntpq -p (el desfase debe ser < 30 seg)
+  - Verifica zona horaria: date (debe coincidir con la hora real)
+  - Resincronizar: ntpdate -u pool.ntp.org
 
+Problema: El código QR no se muestra
+  - Asegúrate de que libqrencode está instalado: rpm -qa | grep qrencode
+  - El terminal debe soportar UTF-8
 
-SOPORTE
+Problema: "sudo" no funciona después de configurar
+  - Probablemente cambiaste auth_type en /etc/security/login.cfg
+  - Cámbialo de vuelta a STD_AUTH (NO PAM_AUTH)
+
+VERSIÓN
 -------
-SIXE - IBM Business Partner
-hugo.blanco@sixe.eu | https://sixe.eu
+Versión de documentación: 1.8 (Enero 2026)
 
 ================================================================================
-  Versión: 1.7 | Enero 2026
+  SIXE - IBM Business Partner | https://sixe.eu
+  LibrePower | https://librepower.org
 ================================================================================

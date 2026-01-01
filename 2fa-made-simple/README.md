@@ -1,6 +1,6 @@
 # 2FA Made Simple for AIX/VIOS
 
-Google Authenticator two-factor authentication for AIX/VIOS, with working QR codes, safer configuration, and easy setup.
+Google Authenticator two-factor authentication for AIX/VIOS, with working QR codes, safe configuration, and easy bilingual setup wizards.
 
 ## Download
 
@@ -16,9 +16,9 @@ curl -L -o libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm \
 curl -L -o google-authenticator-1.10-1.aix7.1.ppc.rpm \
   https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
 
-# Optional: Easy setup wizard
-curl -L -o google-authenticator-setup-1.0-1.aix7.3.librepower.ppc.rpm \
-  https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-setup-1.0-1.aix7.3.librepower.ppc.rpm
+# Optional: Easy setup wizards (English & Spanish)
+curl -L -o google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm
 
 # Verify downloads
 file *.rpm
@@ -30,42 +30,36 @@ file *.rpm
 
 Download from [Releases](https://github.com/librepower/aix/releases/tag/2fa-v1.0)
 
-## Easy Setup (NEW!)
+## Easy Setup Wizards (NEW!)
 
-After installing the packages, use our setup wizard:
+After installing the packages, use our setup wizards:
 
+### English
 ```bash
 google-authenticator-setup
+```
+
+### Español
+```bash
+google-authenticator-configura
 ```
 
 Features:
 - ✅ Verifies NTP synchronization before setup
 - ✅ Secure defaults (TOTP, disallow reuse, rate limiting)
-- ✅ Bilingual (English/Spanish, auto-detected)
-- ✅ Step-by-step guidance
-- ✅ Clear emergency access information
-
-Or force a language:
-```bash
-google-authenticator-setup --spanish
-google-authenticator-setup --english
-```
+- ✅ Step-by-step guidance with colored output
+- ✅ Clear emergency access information (HMC console)
 
 ## Quick Start (Manual)
 
 ```bash
 # 1. Configure NTP first (critical for TOTP!)
 cat > /etc/ntp.conf << 'NTPEOF'
-# NTP Configuration
 driftfile /etc/ntp.drift
-
-# Public NTP servers
 server 0.pool.ntp.org iburst
 server 1.pool.ntp.org iburst
 server 2.pool.ntp.org iburst
 server time.google.com iburst
-
-# Restrictions
 restrict default limited kod nomodify notrap nopeer noquery
 restrict 127.0.0.1
 NTPEOF
@@ -76,7 +70,7 @@ startsrc -s xntpd
 # 2. Install packages
 rpm -ivh libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm
 rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
-rpm -ivh google-authenticator-setup-1.0-1.aix7.3.librepower.ppc.rpm  # Optional
+rpm -ivh google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm  # Optional
 
 # 3. Configure PAM - add to /etc/pam.conf:
 sshd    auth       required   pam_aix
@@ -92,10 +86,11 @@ KbdInteractiveAuthentication yes
 # 5. Restart SSH
 stopsrc -s sshd && startsrc -s sshd
 
-# 6. Setup 2FA for a user (use wizard or manual)
-google-authenticator-setup           # Easy wizard
-# OR
-google-authenticator -t -i "Company" # Manual
+# 6. Setup 2FA for a user
+google-authenticator-setup           # English wizard
+google-authenticator-configura       # Spanish wizard
+# OR manual:
+google-authenticator -t -d -f -w 17 -r 3 -R 30 -i "Company"
 ```
 
 ## Why This Package?
@@ -107,7 +102,7 @@ IBM released google-authenticator for AIX but their [official guide](https://com
 | No QR code | "Failed to use libqrencode" | ✅ QR works (libqrencode included) |
 | Breaks sudo | Changes auth_type to PAM_AUTH | ✅ Keeps STD_AUTH |
 | No NTP warning | TOTP fails silently | ✅ NTP checked before setup |
-| Confusing prompts | "update file?" (misleading) | ✅ Clear setup wizard |
+| Confusing prompts | "update file?" (misleading) | ✅ Clear bilingual wizards |
 | No rollback | Users get locked out | ✅ Full rollback instructions |
 | No emergency access | Panic if 2FA fails | ✅ HMC console documented |
 
@@ -123,12 +118,13 @@ IBM released google-authenticator for AIX but their [official guide](https://com
 ├── RPMS/
 │   ├── google-authenticator-1.10-1.aix7.1.ppc.rpm       # IBM official
 │   ├── libqrencode-4.1.1-4.aix7.3.sixe.ppc.rpm          # QR library
-│   └── google-authenticator-setup-1.0-1.aix7.3.librepower.ppc.rpm  # Easy wizard
+│   └── google-authenticator-setup-1.0-2.aix7.3.librepower.ppc.rpm
 ├── SPECS/
 │   └── libqrencode.spec
 ├── SOURCES/
-│   ├── 2fa-check                    # Optional login prompt
-│   └── google-authenticator-setup   # Setup wizard source
+│   ├── 2fa-check                        # Optional login prompt
+│   ├── google-authenticator-setup       # English wizard
+│   └── google-authenticator-configura   # Spanish wizard
 ├── INSTALL_2FA.txt
 ├── INSTALL_2FA_ES.txt
 └── README.md
@@ -152,7 +148,7 @@ IBM released google-authenticator for AIX but their [official guide](https://com
 
 - libqrencode: LGPL-2.1 (compiled for AIX by SIXE)
 - google-authenticator: Apache-2.0 (official IBM package)
-- google-authenticator-setup: Apache-2.0 (LibrePower)
+- google-authenticator-setup/configura: Apache-2.0 (LibrePower)
 - Documentation and scripts: Apache-2.0
 
 ## Credits
