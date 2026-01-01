@@ -18,7 +18,7 @@ NC='\033[0m'
 banner() {
     echo ""
     echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║     CONFIGURACIÓN 2FA - Google Authenticator para AIX       ║"
+    echo "║     CONFIGURACION 2FA - Google Authenticator para AIX       ║"
     echo "║                                                              ║"
     echo "║     LibrePower - https://librepower.org                      ║"
     echo "╚══════════════════════════════════════════════════════════════╝"
