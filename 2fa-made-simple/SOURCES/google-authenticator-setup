@@ -82,9 +82,10 @@ get_issuer() {
     read -r ORG
     ORG="${ORG:-LibrePower}"
     
-    ISSUER="${ORG}: ${USERNAME}@${HOSTNAME}"
+    ISSUER="$ORG"
+    LABEL="${USERNAME}@${HOSTNAME}"
     echo ""
-    echo "  App will show: $ISSUER"
+    echo "  App will show: $ISSUER ($LABEL)"
     echo ""
 }
 
@@ -92,7 +93,7 @@ run_setup() {
     echo -e "${BLUE}[4/4] Generating secret key and QR code...${NC}"
     echo ""
     
-    "$GA_BIN" -t -d -f -w 17 -r 3 -R 30 -Q UTF8 -i "$ISSUER"
+    "$GA_BIN" -t -d -f -w 17 -r 3 -R 30 -Q UTF8 -l "$LABEL" -i "$ISSUER"
     
     RC=$?
     echo ""
