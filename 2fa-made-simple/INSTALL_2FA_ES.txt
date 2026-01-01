@@ -101,6 +101,8 @@ PASO 2: CONFIGURAR PAM (como root)
 ----------------------------------
 Añadir al final de /etc/pam.conf:
 
+# SSH 2FA for AIX made SIMPLE
+
 sshd    auth       required   pam_aix
 sshd    auth       required   /usr/lib/security/pam_google_authenticator.so nullok no_increment_hotp
 sshd    account    required   pam_aix
@@ -113,6 +115,8 @@ NOTA: "nullok" permite que usuarios SIN 2FA entren solo con password.
 PASO 3: CONFIGURAR SSH (como root)
 ----------------------------------
 Añadir a /etc/ssh/sshd_config:
+
+# SSH 2FA for AIX made SIMPLE
 
 UsePAM yes
 KbdInteractiveAuthentication yes
