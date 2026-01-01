@@ -4,146 +4,89 @@
 # Part of LibrePower (https://librepower.org)
 # SIXE - IBM Business Partner (https://sixe.eu)
 #
-# This wrapper provides better UX than the original google-authenticator command:
-# - Checks NTP synchronization before setup
-# - Uses secure defaults (TOTP, disallow reuse)
-# - Clear bilingual messages
-# - Step-by-step guidance
-#
 
 VERSION="1.0"
 GA_BIN="/opt/freeware/bin/google-authenticator"
 
-# Colors (if terminal supports)
+# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Detect language (default English)
-LANG_ES=0
-if [[ "${LANG:-}" == *"es"* ]] || [[ "${LC_ALL:-}" == *"es"* ]]; then
-    LANG_ES=1
-fi
-
-# Messages
-msg() {
-    if [[ $LANG_ES -eq 1 ]]; then
-        echo -e "$2"
-    else
-        echo -e "$1"
-    fi
-}
+NC='\033[0m'
 
 banner() {
     echo ""
     echo "╔══════════════════════════════════════════════════════════════╗"
-    msg "║     2FA SETUP - Google Authenticator for AIX                  ║" \
-        "║     CONFIGURACIÓN 2FA - Google Authenticator para AIX        ║"
+    echo "║     2FA SETUP - Google Authenticator for AIX                 ║"
     echo "║                                                              ║"
-    msg "║     LibrePower - https://librepower.org                       ║" \
-        "║     LibrePower - https://librepower.org                       ║"
+    echo "║     LibrePower - https://librepower.org                      ║"
     echo "╚══════════════════════════════════════════════════════════════╝"
     echo ""
 }
 
 check_ntp() {
-    msg "${BLUE}[1/4] Checking time synchronization...${NC}" \
-        "${BLUE}[1/4] Verificando sincronización de hora...${NC}"
+    echo -e "${BLUE}[1/4] Checking time synchronization...${NC}"
     
-    # Check if xntpd is running
     if ! lssrc -s xntpd 2>/dev/null | grep -q "active"; then
-        msg "${YELLOW}⚠ WARNING: NTP service (xntpd) is not running!${NC}" \
-            "${YELLOW}⚠ ADVERTENCIA: El servicio NTP (xntpd) no está activo!${NC}"
-        msg "  TOTP codes require synchronized time." \
-            "  Los códigos TOTP requieren hora sincronizada."
-        msg "  Run: startsrc -s xntpd" \
-            "  Ejecuta: startsrc -s xntpd"
+        echo -e "${YELLOW}⚠ WARNING: NTP service (xntpd) is not running!${NC}"
+        echo "  TOTP codes require synchronized time."
+        echo "  Run: startsrc -s xntpd"
         echo ""
-        msg "Continue anyway? (y/n): " "¿Continuar de todos modos? (s/n): "
+        echo -n "Continue anyway? (y/n): "
         read -r resp
         case "$resp" in
-            [yYsS]) ;;
+            [yY]) ;;
             *) exit 1 ;;
         esac
     else
-        # Check offset
         OFFSET=$(ntpq -p 2>/dev/null | tail -1 | awk '{print $9}' | tr -d '-')
         if [[ -n "$OFFSET" ]] && [[ "$OFFSET" =~ ^[0-9]+\.?[0-9]*$ ]]; then
-            OFFSET_INT=${OFFSET%.*}
-            if [[ ${OFFSET_INT:-0} -gt 30000 ]]; then
-                msg "${YELLOW}⚠ WARNING: Time offset is ${OFFSET}ms (>30 sec)${NC}" \
-                    "${YELLOW}⚠ ADVERTENCIA: Desfase de tiempo ${OFFSET}ms (>30 seg)${NC}"
-                msg "  Run: ntpdate -u pool.ntp.org" \
-                    "  Ejecuta: ntpdate -u pool.ntp.org"
-            else
-                msg "${GREEN}✓ NTP OK (offset: ${OFFSET}ms)${NC}" \
-                    "${GREEN}✓ NTP OK (desfase: ${OFFSET}ms)${NC}"
-            fi
+            echo -e "${GREEN}✓ NTP OK (offset: ${OFFSET}ms)${NC}"
         else
-            msg "${GREEN}✓ NTP service is running${NC}" \
-                "${GREEN}✓ Servicio NTP activo${NC}"
+            echo -e "${GREEN}✓ NTP service is running${NC}"
         fi
     fi
     echo ""
 }
 
 check_existing() {
-    msg "${BLUE}[2/4] Checking existing configuration...${NC}" \
-        "${BLUE}[2/4] Verificando configuración existente...${NC}"
+    echo -e "${BLUE}[2/4] Checking existing configuration...${NC}"
     
     if [[ -f "$HOME/.google_authenticator" ]]; then
-        msg "${YELLOW}⚠ You already have 2FA configured!${NC}" \
-            "${YELLOW}⚠ Ya tienes 2FA configurado!${NC}"
-        msg "  File: $HOME/.google_authenticator" \
-            "  Archivo: $HOME/.google_authenticator"
+        echo -e "${YELLOW}⚠ You already have 2FA configured!${NC}"
+        echo "  File: $HOME/.google_authenticator"
         echo ""
-        msg "Overwrite and create new configuration? (y/n): " \
-            "¿Sobrescribir y crear nueva configuración? (s/n): "
+        echo -n "Overwrite and create new configuration? (y/n): "
         read -r resp
         case "$resp" in
-            [yYsS]) ;;
+            [yY]) ;;
             *) 
-                msg "Keeping existing configuration." \
-                    "Manteniendo configuración existente."
+                echo "Keeping existing configuration."
                 exit 0 
                 ;;
         esac
     else
-        msg "${GREEN}✓ No existing configuration found${NC}" \
-            "${GREEN}✓ No se encontró configuración previa${NC}"
+        echo -e "${GREEN}✓ No existing configuration found${NC}"
     fi
     echo ""
 }
 
 get_issuer() {
-    msg "${BLUE}[3/4] Configuration...${NC}" \
-        "${BLUE}[3/4] Configuración...${NC}"
+    echo -e "${BLUE}[3/4] Configuration...${NC}"
     
     DEFAULT_ISSUER=$(hostname -s 2>/dev/null || echo "AIX-Server")
     
-    msg "Enter issuer name (shown in authenticator app):" \
-        "Nombre del emisor (se muestra en la app):"
-    msg "  [Default: $DEFAULT_ISSUER]: " \
-        "  [Por defecto: $DEFAULT_ISSUER]: "
+    echo "Enter issuer name (shown in authenticator app):"
+    echo -n "  [Default: $DEFAULT_ISSUER]: "
     read -r ISSUER
     ISSUER="${ISSUER:-$DEFAULT_ISSUER}"
     echo ""
 }
 
 run_setup() {
-    msg "${BLUE}[4/4] Generating secret key and QR code...${NC}" \
-        "${BLUE}[4/4] Generando clave secreta y código QR...${NC}"
+    echo -e "${BLUE}[4/4] Generating secret key and QR code...${NC}"
     echo ""
-    
-    # Run with sensible defaults:
-    # -t = time-based (TOTP)
-    # -d = disallow reuse
-    # -f = force write (don't ask "update file?")
-    # -w 17 = window size for clock skew tolerance
-    # -r 3 -R 30 = rate limiting (3 attempts per 30 seconds)
-    # -Q UTF8 = QR code in terminal
     
     "$GA_BIN" -t -d -f -w 17 -r 3 -R 30 -Q UTF8 -i "$ISSUER"
     
@@ -152,21 +95,15 @@ run_setup() {
     
     if [[ $RC -eq 0 ]]; then
         echo "╔══════════════════════════════════════════════════════════════╗"
-        msg "║  ${GREEN}✓ 2FA CONFIGURED SUCCESSFULLY!${NC}                              ║" \
-            "║  ${GREEN}✓ 2FA CONFIGURADO CORRECTAMENTE!${NC}                            ║"
+        echo -e "║  ${GREEN}✓ 2FA CONFIGURED SUCCESSFULLY!${NC}                              ║"
         echo "╠══════════════════════════════════════════════════════════════╣"
-        msg "║  IMPORTANT:                                                   ║" \
-            "║  IMPORTANTE:                                                  ║"
-        msg "║  • Save the emergency codes in a safe place                   ║" \
-            "║  • Guarda los códigos de emergencia en lugar seguro           ║"
-        msg "║  • Test login from another terminal before closing this one   ║" \
-            "║  • Prueba login en otra terminal antes de cerrar esta         ║"
-        msg "║  • HMC console never asks for 2FA (emergency access)          ║" \
-            "║  • La consola HMC nunca pide 2FA (acceso de emergencia)       ║"
+        echo "║  IMPORTANT:                                                  ║"
+        echo "║  • Save the emergency codes in a safe place                  ║"
+        echo "║  • Test login from another terminal before closing this one  ║"
+        echo "║  • HMC console never asks for 2FA (emergency access)         ║"
         echo "╚══════════════════════════════════════════════════════════════╝"
     else
-        msg "${RED}✗ Setup failed. Check errors above.${NC}" \
-            "${RED}✗ Falló la configuración. Revisa los errores.${NC}"
+        echo -e "${RED}✗ Setup failed. Check errors above.${NC}"
     fi
 }
 
@@ -178,14 +115,14 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  -h, --help     Show this help"
-    echo "  -e, --english  Force English messages"
-    echo "  -s, --spanish  Force Spanish messages"
     echo "  -v, --version  Show version"
     echo ""
     echo "This script wraps google-authenticator with:"
     echo "  • NTP verification before setup"
-    echo "  • Secure defaults (TOTP, disallow reuse)"
-    echo "  • Clear step-by-step guidance"
+    echo "  • Secure defaults (TOTP, disallow reuse, rate limiting)"
+    echo "  • Step-by-step guidance"
+    echo ""
+    echo "Spanish version: google-authenticator-configura"
     echo ""
     echo "https://librepower.org | https://sixe.eu"
 }
@@ -201,14 +138,6 @@ while [[ $# -gt 0 ]]; do
             echo "google-authenticator-setup v$VERSION"
             exit 0
             ;;
-        -e|--english)
-            LANG_ES=0
-            shift
-            ;;
-        -s|--spanish)
-            LANG_ES=1
-            shift
-            ;;
         *)
             echo "Unknown option: $1"
             show_help
@@ -219,19 +148,15 @@ done
 
 # Check if running as root
 if [[ $(id -u) -eq 0 ]]; then
-    msg "${YELLOW}⚠ Running as root. 2FA will be configured for root user.${NC}" \
-        "${YELLOW}⚠ Ejecutando como root. 2FA se configurará para root.${NC}"
-    msg "For regular users, run this command as that user." \
-        "Para usuarios normales, ejecuta como ese usuario."
+    echo -e "${YELLOW}⚠ Running as root. 2FA will be configured for root user.${NC}"
+    echo "For regular users, run this command as that user."
     echo ""
 fi
 
 # Check google-authenticator binary
 if [[ ! -x "$GA_BIN" ]]; then
-    msg "${RED}✗ Error: google-authenticator not found at $GA_BIN${NC}" \
-        "${RED}✗ Error: google-authenticator no encontrado en $GA_BIN${NC}"
-    msg "Install with: rpm -ivh google-authenticator-*.rpm" \
-        "Instala con: rpm -ivh google-authenticator-*.rpm"
+    echo -e "${RED}✗ Error: google-authenticator not found at $GA_BIN${NC}"
+    echo "Install with: rpm -ivh google-authenticator-*.rpm"
     exit 1
 fi
 

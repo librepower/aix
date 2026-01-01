@@ -1,0 +1,168 @@
+#!/opt/freeware/bin/bash
+#
+# google-authenticator-configura - Configuración fácil de 2FA para AIX
+# Parte de LibrePower (https://librepower.org)
+# SIXE - IBM Business Partner (https://sixe.eu)
+#
+
+VERSION="1.0"
+GA_BIN="/opt/freeware/bin/google-authenticator"
+
+# Colores
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+banner() {
+    echo ""
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║     CONFIGURACIÓN 2FA - Google Authenticator para AIX       ║"
+    echo "║                                                              ║"
+    echo "║     LibrePower - https://librepower.org                      ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo ""
+}
+
+check_ntp() {
+    echo -e "${BLUE}[1/4] Verificando sincronización de hora...${NC}"
+    
+    if ! lssrc -s xntpd 2>/dev/null | grep -q "active"; then
+        echo -e "${YELLOW}⚠ ADVERTENCIA: El servicio NTP (xntpd) no está activo!${NC}"
+        echo "  Los códigos TOTP requieren hora sincronizada."
+        echo "  Ejecuta: startsrc -s xntpd"
+        echo ""
+        echo -n "¿Continuar de todos modos? (s/n): "
+        read -r resp
+        case "$resp" in
+            [sS]) ;;
+            *) exit 1 ;;
+        esac
+    else
+        OFFSET=$(ntpq -p 2>/dev/null | tail -1 | awk '{print $9}' | tr -d '-')
+        if [[ -n "$OFFSET" ]] && [[ "$OFFSET" =~ ^[0-9]+\.?[0-9]*$ ]]; then
+            echo -e "${GREEN}✓ NTP OK (desfase: ${OFFSET}ms)${NC}"
+        else
+            echo -e "${GREEN}✓ Servicio NTP activo${NC}"
+        fi
+    fi
+    echo ""
+}
+
+check_existing() {
+    echo -e "${BLUE}[2/4] Verificando configuración existente...${NC}"
+    
+    if [[ -f "$HOME/.google_authenticator" ]]; then
+        echo -e "${YELLOW}⚠ ¡Ya tienes 2FA configurado!${NC}"
+        echo "  Archivo: $HOME/.google_authenticator"
+        echo ""
+        echo -n "¿Sobrescribir y crear nueva configuración? (s/n): "
+        read -r resp
+        case "$resp" in
+            [sS]) ;;
+            *) 
+                echo "Manteniendo configuración existente."
+                exit 0 
+                ;;
+        esac
+    else
+        echo -e "${GREEN}✓ No se encontró configuración previa${NC}"
+    fi
+    echo ""
+}
+
+get_issuer() {
+    echo -e "${BLUE}[3/4] Configuración...${NC}"
+    
+    DEFAULT_ISSUER=$(hostname -s 2>/dev/null || echo "AIX-Server")
+    
+    echo "Nombre del emisor (se muestra en la app):"
+    echo -n "  [Por defecto: $DEFAULT_ISSUER]: "
+    read -r ISSUER
+    ISSUER="${ISSUER:-$DEFAULT_ISSUER}"
+    echo ""
+}
+
+run_setup() {
+    echo -e "${BLUE}[4/4] Generando clave secreta y código QR...${NC}"
+    echo ""
+    
+    "$GA_BIN" -t -d -f -w 17 -r 3 -R 30 -Q UTF8 -i "$ISSUER"
+    
+    RC=$?
+    echo ""
+    
+    if [[ $RC -eq 0 ]]; then
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo -e "║  ${GREEN}✓ ¡2FA CONFIGURADO CORRECTAMENTE!${NC}                           ║"
+        echo "╠══════════════════════════════════════════════════════════════╣"
+        echo "║  IMPORTANTE:                                                 ║"
+        echo "║  • Guarda los códigos de emergencia en lugar seguro          ║"
+        echo "║  • Prueba login en otra terminal antes de cerrar esta        ║"
+        echo "║  • La consola HMC nunca pide 2FA (acceso de emergencia)      ║"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+    else
+        echo -e "${RED}✗ Falló la configuración. Revisa los errores.${NC}"
+    fi
+}
+
+show_help() {
+    echo "google-authenticator-configura v$VERSION"
+    echo "Configuración fácil de 2FA para AIX - LibrePower"
+    echo ""
+    echo "Uso: google-authenticator-configura [opciones]"
+    echo ""
+    echo "Opciones:"
+    echo "  -h, --help     Muestra esta ayuda"
+    echo "  -v, --version  Muestra la versión"
+    echo ""
+    echo "Este script envuelve google-authenticator con:"
+    echo "  • Verificación de NTP antes de configurar"
+    echo "  • Valores seguros por defecto (TOTP, no reutilizar, rate limiting)"
+    echo "  • Guía paso a paso"
+    echo ""
+    echo "Versión en inglés: google-authenticator-setup"
+    echo ""
+    echo "https://librepower.org | https://sixe.eu"
+}
+
+# Parsear argumentos
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help|--ayuda)
+            show_help
+            exit 0
+            ;;
+        -v|--version)
+            echo "google-authenticator-configura v$VERSION"
+            exit 0
+            ;;
+        *)
+            echo "Opción desconocida: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+done
+
+# Verificar si es root
+if [[ $(id -u) -eq 0 ]]; then
+    echo -e "${YELLOW}⚠ Ejecutando como root. 2FA se configurará para root.${NC}"
+    echo "Para usuarios normales, ejecuta como ese usuario."
+    echo ""
+fi
+
+# Verificar binario google-authenticator
+if [[ ! -x "$GA_BIN" ]]; then
+    echo -e "${RED}✗ Error: google-authenticator no encontrado en $GA_BIN${NC}"
+    echo "Instala con: rpm -ivh google-authenticator-*.rpm"
+    exit 1
+fi
+
+# Flujo principal
+banner
+check_ntp
+check_existing
+get_issuer
+run_setup
