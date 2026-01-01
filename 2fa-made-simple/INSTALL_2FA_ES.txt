@@ -80,6 +80,10 @@ ntpdate -u pool.ntp.org
 startsrc -s xntpd
 ntpq -p
 
+# Para que arranque automáticamente edita /etc/rc.tcpip u descomenta la entrada de NTP
+
+# Start up Network Time Protocol (NTP) daemon
+start /usr/sbin/xntpd "$src_running"
 
 PASO 1: INSTALACIÓN DE RPMs (como root)
 ---------------------------------------
