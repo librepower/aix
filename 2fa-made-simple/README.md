@@ -7,13 +7,13 @@ Google Authenticator two-factor authentication for AIX/VIOS, with working QR cod
 | File | Description |
 |------|-------------|
 | [RPMS/google-authenticator-1.10-1.aix7.1.ppc.rpm](RPMS/google-authenticator-1.10-1.aix7.1.ppc.rpm) | Official IBM package |
-| [RPMS/libqrencode-4.1.1-3.aix7.3.sixe.ppc.rpm](RPMS/libqrencode-4.1.1-3.aix7.3.sixe.ppc.rpm) | QR code library |
+| [RPMS/libqrencode-4.1.1-4.aix7.3.sixe.aix7.3.ppc.rpm](RPMS/libqrencode-4.1.1-4.aix7.3.sixe.aix7.3.ppc.rpm) | QR code library |
 
 ## Quick Start
 
 ```bash
 # Install packages
-rpm -ivh RPMS/libqrencode-4.1.1-3.aix7.3.sixe.aix7.3.ppc.rpm
+rpm -ivh RPMS/libqrencode-4.1.1-4.aix7.3.sixe.aix7.3.ppc.rpm
 rpm -ivh RPMS/google-authenticator-1.10-1.aix7.1.ppc.rpm
 
 # Configure PAM - add to /etc/pam.conf:

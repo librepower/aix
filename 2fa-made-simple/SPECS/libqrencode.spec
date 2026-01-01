@@ -1,11 +1,11 @@
 Name:           libqrencode
 Version:        4.1.1
-Release:        3.aix7.3.sixe
+Release:        4.aix7.3.sixe
 Summary:        QR Code encoding library
 License:        LGPL-2.1
 Group:          System Environment/Libraries
 URL:            https://fukuchi.org/works/qrencode/
-Vendor:         SIXE
+Vendor:         SIXE - IBM Business Partner
 Packager:       Hugo Blanco <hugo.blanco@sixe.eu>
 
 %description
@@ -13,7 +13,7 @@ Libqrencode is a library for encoding data in a QR Code symbol.
 Required for QR code display in google-authenticator on AIX.
 
 Compiled for AIX by SIXE - IBM Business Partner
-https://www.sixe.eu
+https://sixe.eu
 
 %install
 mkdir -p %{buildroot}/opt/freeware/lib
@@ -34,4 +34,4 @@ ln -sf libqrencode.so.4 libqrencode.so
 /opt/freeware/include/qrencode.h
 
 %post
-echo "libqrencode %{version} - SIXE (https://www.sixe.eu)"
+echo "libqrencode %{version} installed - SIXE (https://sixe.eu)"

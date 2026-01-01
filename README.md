@@ -27,7 +27,7 @@ Google Authenticator two-factor authentication for AIX/VIOS, done right.
 
 ```bash
 # Download RPMs from 2fa-made-simple/RPMS/
-rpm -ivh libqrencode-4.1.1-3.aix7.3.sixe.aix7.3.ppc.rpm
+rpm -ivh libqrencode-4.1.1-4.aix7.3.sixe.aix7.3.ppc.rpm
 rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
 
 # Then follow INSTALL_2FA.txt for PAM and SSH configuration

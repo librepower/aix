@@ -3,7 +3,7 @@
   Two-Factor Authentication (TOTP)
   
   SIXE - IBM Business Partner
-  https://www.sixe.eu | hugo.blanco@sixe.eu
+  https://sixe.eu | hugo.blanco@sixe.eu
 ================================================================================
 
 PACKAGE CONTENTS
@@ -190,8 +190,8 @@ TROUBLESHOOTING
 SUPPORT
 -------
 SIXE - IBM Business Partner
-hugo.blanco@sixe.eu | https://www.sixe.eu
+hugo.blanco@sixe.eu | https://sixe.eu
 
 ================================================================================
-  Version: 1.5 | December 2025
+  Version: 1.6 | December 2025
 ================================================================================
