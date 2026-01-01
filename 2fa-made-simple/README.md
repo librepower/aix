@@ -160,4 +160,4 @@ IBM released google-authenticator for AIX but their [official guide](https://com
 - Google Authenticator PAM module by Google
 - libqrencode by Kentaro Fukuchi
 - AIX packaging and documentation by [SIXE](https://sixe.eu)
-- Part of the [LibrePower](https://librepower.org) initiative - extending the life of IBM Power hardware through open source
+- Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source 🌍

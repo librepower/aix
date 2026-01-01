@@ -1,8 +1,8 @@
 # LibrePower AIX
 
-Open source tools and packages for AIX/VIOS on IBM Power systems.
+**LibrePower - Unlocking Power Systems through open source. Unmatched RAS and TCO. Minimal footprint 🌍**
 
-Part of the [LibrePower](https://librepower.org) initiative - extending the life of IBM Power hardware through open source.
+Open source tools and packages for AIX/VIOS on IBM Power systems.
 
 ## Available Packages
 
@@ -51,12 +51,6 @@ Contributions welcome! Open an issue or submit a PR.
 - Documentation and scripts: Apache-2.0
 - libqrencode: LGPL-2.1
 - google-authenticator: Apache-2.0
-
-## About LibrePower
-
-LibrePower promotes open source on IBM Power systems and extends the useful life of Power hardware through community-driven software.
-
-🌍 Sustainability through longevity.
 
 ---
 
