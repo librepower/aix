@@ -15,7 +15,7 @@ The incredibly popular command-line fuzzy finder, now on AIX. Search through any
 - ✅ Zero dependencies (single static binary)
 - ✅ AIX-specific helper scripts (fzf-rpm, fzf-proc, fzf-svc)
 - ✅ Shell integration (Ctrl-R history search, Ctrl-T file picker)
-- ✅ First proof that modern Go tools can run on AIX
+- ✅ First? proof that modern Go tools can run on AIX
 
 📁 **[Documentation & Downloads](fzf-fuzzy-finder/)**
 
