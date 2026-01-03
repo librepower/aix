@@ -1,0 +1,19 @@
+#!/opt/freeware/bin/bash
+# fzf-proc: Interactive process viewer for AIX
+# Part of LibrePower (https://librepower.org)
+#
+# Usage: fzf-proc [filter]
+#   Without arguments: interactive browser
+#   With argument: filter and show matching processes
+
+export PATH=/opt/freeware/bin:$PATH
+
+if [ -n "$1" ]; then
+    ps -ef | fzf --header-lines=1 --filter="$1"
+else
+    ps -ef | fzf \
+        --prompt="Process> " \
+        --header-lines=1 \
+        --preview="echo {} | awk '{print \$2}' | xargs ps -fp 2>/dev/null" \
+        --preview-window=down:5
+fi

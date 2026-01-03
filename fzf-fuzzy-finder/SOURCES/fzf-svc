@@ -1,0 +1,17 @@
+#!/opt/freeware/bin/bash
+# fzf-svc: Interactive service browser for AIX
+# Part of LibrePower (https://librepower.org)
+#
+# Usage: fzf-svc [filter]
+#   Without arguments: interactive browser
+#   With argument: filter and show matching services
+
+export PATH=/opt/freeware/bin:$PATH
+
+if [ -n "$1" ]; then
+    lssrc -a | fzf --header-lines=1 --filter="$1"
+else
+    lssrc -a | fzf \
+        --prompt="Service> " \
+        --header-lines=1
+fi

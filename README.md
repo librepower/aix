@@ -6,6 +6,21 @@ Open source tools and packages for AIX/VIOS on IBM Power systems.
 
 ## Available Packages
 
+### 🔍 fzf - Fuzzy Finder
+*NEW - First Go-based tool compiled for AIX*
+
+The incredibly popular command-line fuzzy finder, now on AIX. Search through anything: files, processes, packages, command history.
+
+- ✅ Blazing fast (500,000 items in < 1 second)
+- ✅ Zero dependencies (single static binary)
+- ✅ AIX-specific helper scripts (fzf-rpm, fzf-proc, fzf-svc)
+- ✅ Shell integration (Ctrl-R history search, Ctrl-T file picker)
+- ✅ First proof that modern Go tools can run on AIX
+
+📁 **[Documentation & Downloads](fzf-fuzzy-finder/)**
+
+---
+
 ### 🔐 2FA Made Simple
 
 Google Authenticator two-factor authentication for AIX/VIOS, done right.
@@ -17,6 +32,21 @@ Google Authenticator two-factor authentication for AIX/VIOS, done right.
 - ✅ Full rollback and emergency access instructions
 
 📁 **[Documentation & Downloads](2fa-made-simple/)**
+
+## Quick Install
+
+### fzf
+```bash
+curl -L -o fzf.rpm https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm
+rpm -ivh fzf.rpm
+```
+
+### 2FA Made Simple
+```bash
+curl -L -o libqrencode.rpm https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
+curl -L -o google-auth.rpm https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
+rpm -ivh libqrencode.rpm google-auth.rpm
+```
 
 ## Contribute
 

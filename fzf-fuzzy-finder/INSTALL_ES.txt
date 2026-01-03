@@ -1,0 +1,283 @@
+================================================================================
+fzf - Buscador Difuso de Línea de Comandos para AIX
+Guía de Instalación
+================================================================================
+
+Versión: 0.46.1
+Plataforma: AIX 7.1+ / VIOS 3.x (ppc/ppc64)
+Empaquetado por: SIXE - IBM Business Partner (https://sixe.eu)
+Parte de: LibrePower (https://librepower.org)
+
+================================================================================
+¿QUÉ ES FZF?
+================================================================================
+
+fzf es un buscador difuso de propósito general para línea de comandos. Es un
+filtro interactivo para cualquier tipo de lista: archivos, historial de
+comandos, procesos, hostnames, bookmarks, commits de git, y más.
+
+Características principales:
+- Increíblemente rápido (500.000 elementos en menos de 1 segundo)
+- Portable (un solo binario, sin dependencias)
+- Flexible (funciona con cualquier lista)
+- Sintaxis de búsqueda potente (difusa, exacta, prefijo, sufijo, negación)
+- Soporte para ventana de preview
+- Integración con shell (completado, atajos de teclado)
+
+================================================================================
+INSTALACIÓN
+================================================================================
+
+PASO 1: Descargar el RPM
+------------------------
+
+# Usando curl (recomendado)
+cd /tmp
+curl -L -o fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm
+
+# Verificar la descarga
+file fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm
+# Debe mostrar: RPM v3 bin ppc
+
+PASO 2: Instalar el paquete
+---------------------------
+
+rpm -ivh fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm
+
+PASO 3: Verificar la instalación
+--------------------------------
+
+fzf --version
+# Debe mostrar: 0.46.1 (aix-port)
+
+================================================================================
+USO BÁSICO
+================================================================================
+
+Modo interactivo (seleccionar con flechas, Enter para confirmar):
+
+    ls | fzf                    # Seleccionar un archivo
+    rpm -qa | fzf               # Seleccionar un paquete
+    ps -ef | fzf                # Seleccionar un proceso
+    find /opt -type f | fzf     # Seleccionar de búsqueda de archivos
+
+Modo filtro (no interactivo, muestra líneas que coinciden):
+
+    rpm -qa | fzf --filter="python"
+    ps -ef | fzf --filter="oracle"
+    lssrc -a | fzf --filter="active"
+
+================================================================================
+SCRIPTS AUXILIARES PARA AIX
+================================================================================
+
+Este paquete incluye scripts listos para usar en tareas comunes de AIX:
+
+fzf-rpm - Explorar paquetes RPM
+-------------------------------
+    fzf-rpm                     # Explorador interactivo con preview
+    fzf-rpm python              # Filtrar paquetes que contienen "python"
+    fzf-rpm oracle              # Filtrar paquetes que contienen "oracle"
+
+fzf-proc - Explorar procesos
+----------------------------
+    fzf-proc                    # Visor interactivo de procesos
+    fzf-proc sshd               # Filtrar procesos que contienen "sshd"
+    fzf-proc db2sysc            # Filtrar procesos de DB2
+
+fzf-svc - Explorar servicios AIX
+--------------------------------
+    fzf-svc                     # Explorador interactivo de servicios
+    fzf-svc active              # Filtrar servicios activos
+    fzf-svc inoperative         # Filtrar servicios detenidos
+
+fzf-hist - Buscar en historial de comandos
+------------------------------------------
+    fzf-hist                    # Búsqueda interactiva en historial
+    fzf-hist rpm                # Filtrar comandos que contienen "rpm"
+
+================================================================================
+SINTAXIS DE BÚSQUEDA
+================================================================================
+
+Patrón          Descripción                     Ejemplo
+------          -----------                     -------
+term            Coincidencia difusa             oracl -> oracle
+'term           Coincidencia exacta (comilla)   'oracle -> solo oracle
+^term           Coincidencia de prefijo         ^ora -> oracle, no dboracle
+term$           Coincidencia de sufijo          cle$ -> oracle
+!term           Negación (excluir)              !test -> excluye "test"
+term1 term2     AND (ambos deben coincidir)     ora db -> líneas con ambos
+term1 | term2   OR (cualquiera coincide)        ora | mysql -> cualquiera
+
+================================================================================
+INTEGRACIÓN CON SHELL (OPCIONAL)
+================================================================================
+
+Para funcionalidad mejorada, añadir a ~/.bashrc:
+
+    # Integración fzf con shell
+    source /opt/freeware/share/fzf/shell/completion.bash
+    source /opt/freeware/share/fzf/shell/key-bindings.bash
+
+Después de recargar el shell, obtienes:
+
+    Ctrl-T      Pegar ruta de archivo seleccionado en línea de comandos
+    Ctrl-R      Buscar en historial de comandos interactivamente
+    Alt-C       cd al directorio seleccionado
+    **<Tab>     Completado difuso (ej: vim **<Tab>, cd **<Tab>)
+
+================================================================================
+EJEMPLOS PRÁCTICOS PARA ADMINISTRADORES AIX
+================================================================================
+
+1. Encontrar y editar un archivo de configuración:
+   vim $(find /etc -name "*.conf" 2>/dev/null | fzf)
+
+2. Matar un proceso interactivamente:
+   kill $(ps -ef | fzf | awk '{print $2}')
+
+3. Ver información de paquete interactivamente:
+   rpm -qi $(rpm -qa | fzf)
+
+4. Explorar reporte de errores:
+   errpt -a | fzf
+
+5. Ver uso de sistemas de archivos:
+   df -g | fzf --header-lines=1
+
+6. Seguir un archivo de log seleccionado:
+   tail -f $(find /var/log -type f 2>/dev/null | fzf)
+
+7. SSH a un host configurado:
+   ssh $(grep "^Host " ~/.ssh/config 2>/dev/null | cut -d' ' -f2 | fzf)
+
+8. Reiniciar un servicio:
+   stopsrc -s $(lssrc -a | fzf --header-lines=1 | awk '{print $1}')
+
+================================================================================
+BENCHMARKS DE RENDIMIENTO
+================================================================================
+
+Probado en AIX 7.3 TL4 (POWER9):
+
+    Elementos           Tiempo
+    ---------           ------
+    22.000 archivos     0.28 segundos
+    100.000 líneas      0.15 segundos
+    500.000 líneas      0.71 segundos
+
+fzf es significativamente más rápido que usar grep para filtrado interactivo.
+
+================================================================================
+DESINSTALAR
+================================================================================
+
+rpm -e fzf
+
+Esto elimina todos los archivos instalados por el paquete. Tu configuración
+de shell (~/.bashrc) no se modifica - elimina las líneas source manualmente
+si las añadiste.
+
+================================================================================
+ARCHIVOS INSTALADOS
+================================================================================
+
+/opt/freeware/bin/fzf                           Binario principal
+/opt/freeware/bin/fzf-rpm                       Script explorador de RPMs
+/opt/freeware/bin/fzf-proc                      Script explorador de procesos
+/opt/freeware/bin/fzf-svc                       Script explorador de servicios
+/opt/freeware/bin/fzf-hist                      Script búsqueda de historial
+/opt/freeware/share/fzf/shell/completion.bash   Completado para Bash
+/opt/freeware/share/fzf/shell/completion.zsh    Completado para Zsh
+/opt/freeware/share/fzf/shell/key-bindings.bash Atajos de teclado Bash
+/opt/freeware/share/fzf/shell/key-bindings.zsh  Atajos de teclado Zsh
+/opt/freeware/share/man/man1/fzf.1              Página de manual
+
+================================================================================
+SOLUCIÓN DE PROBLEMAS
+================================================================================
+
+P: Comando fzf no encontrado
+R: Añade /opt/freeware/bin a tu PATH:
+   export PATH=/opt/freeware/bin:$PATH
+
+P: Atajos de teclado no funcionan
+R: Asegúrate de haber ejecutado source y recargado tu shell:
+   source ~/.bashrc
+   
+P: La ventana de preview no muestra contenido
+R: Algunos comandos de preview pueden no funcionar en AIX. La funcionalidad
+   básica siempre funciona.
+
+P: fzf-hist no muestra resultados
+R: Comprueba que tu archivo de historial existe. Por defecto es ~/.sh_history
+
+================================================================================
+INFORMACIÓN TÉCNICA
+================================================================================
+
+Esta es la primera herramienta basada en Go compilada para AIX como parte
+de LibrePower.
+
+Detalles de compilación:
+- Compilador: Go 1.21.6 toolchain oficial (de go.dev)
+- NO compilado con gccgo (que tiene problemas de runtime en AIX)
+- Tipo de binario: Ejecutable XCOFF de 64 bits
+- Dependencias: libc.a, libpthreads.a (incluidas en AIX base)
+
+================================================================================
+LICENCIA
+================================================================================
+
+fzf: Licencia MIT
+Copyright (c) 2013-2024 Junegunn Choi
+
+Empaquetado AIX y scripts: Licencia MIT
+Copyright (c) 2025 SIXE / LibrePower
+
+================================================================================
+SOPORTE
+================================================================================
+
+Issues en GitHub: https://github.com/librepower/aix/issues
+Email: hugo.blanco@sixe.eu
+
+================================================================================
+CRÉDITOS
+================================================================================
+
+- fzf por Junegunn Choi (https://github.com/junegunn/fzf)
+- Port para AIX por SIXE - IBM Business Partner (https://sixe.eu)
+- Parte de LibrePower - Desbloqueando Power Systems con open source
+  https://librepower.org
+================================================================================
+
+================================================================================
+CONFIGURACIÓN ESPECÍFICA PARA AIX (¡IMPORTANTE!)
+================================================================================
+
+Cuando ejecutas fzf sin entrada por pipe, intenta usar un comando find por
+defecto con opciones de GNU/Linux que el find nativo de AIX no soporta.
+
+Para solucionarlo, añade a tu ~/.bashrc o ~/.profile:
+
+    # Comando por defecto de fzf para AIX
+    export FZF_DEFAULT_COMMAND='find . -type f -print 2>/dev/null'
+
+O si tienes GNU find de AIX Toolbox:
+
+    export FZF_DEFAULT_COMMAND='/opt/freeware/bin/find . -type f 2>/dev/null'
+
+Después de añadir esto, fzf funcionará al llamarlo sin entrada:
+
+    cd /algun/directorio
+    fzf                    # ¡Ahora funciona!
+
+Sin esta configuración, usa siempre fzf con entrada por pipe:
+
+    ls | fzf               # Siempre funciona
+    rpm -qa | fzf          # Siempre funciona
+    find /etc -name "*.conf" | fzf   # Siempre funciona
+
