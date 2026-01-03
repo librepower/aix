@@ -1,0 +1,24 @@
+#!/opt/freeware/bin/bash
+# fzf-rpm: Interactive RPM browser for AIX
+# Part of LibrePower (https://librepower.org)
+#
+# Usage: fzf-rpm [filter]
+#   Without arguments: interactive browser
+#   With argument: filter and show matching packages
+
+export PATH=/opt/freeware/bin:$PATH
+
+if [ -n "$1" ]; then
+    rpm -qa | sort | fzf --filter="$1"
+else
+    selected=$(rpm -qa | sort | fzf \
+        --prompt="RPM> " \
+        --header="Select package (Enter=info, Ctrl-C=exit)" \
+        --preview="rpm -qi {}" \
+        --preview-window=right:50%)
+    
+    if [ -n "$selected" ]; then
+        echo ""
+        rpm -qi "$selected"
+    fi
+fi

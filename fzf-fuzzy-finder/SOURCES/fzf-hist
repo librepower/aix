@@ -1,0 +1,29 @@
+#!/opt/freeware/bin/bash
+# fzf-hist: Interactive command history search for AIX
+# Part of LibrePower (https://librepower.org)
+#
+# Usage: fzf-hist [filter]
+#   Without arguments: interactive browser
+#   With argument: filter and show matching commands
+
+export PATH=/opt/freeware/bin:$PATH
+
+HISTFILE="${HISTFILE:-$HOME/.sh_history}"
+
+if [ ! -f "$HISTFILE" ]; then
+    echo "History file not found: $HISTFILE"
+    exit 1
+fi
+
+if [ -n "$1" ]; then
+    cat "$HISTFILE" | fzf --filter="$1" --tac
+else
+    selected=$(cat "$HISTFILE" | fzf \
+        --prompt="History> " \
+        --tac \
+        --no-sort)
+    
+    if [ -n "$selected" ]; then
+        echo "$selected"
+    fi
+fi
