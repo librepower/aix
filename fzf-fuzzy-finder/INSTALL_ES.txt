@@ -33,17 +33,17 @@ PASO 1: Descargar el RPM
 
 # Usando curl (recomendado)
 cd /tmp
-curl -L -o fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm \
-  https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm
+curl -L -o fzf-0.46.1-1.librepower.aix7.3.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
 
 # Verificar la descarga
-file fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm
+file fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
 # Debe mostrar: RPM v3 bin ppc
 
 PASO 2: Instalar el paquete
 ---------------------------
 
-rpm -ivh fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm
+rpm -ivh fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
 
 PASO 3: Verificar la instalación
 --------------------------------
