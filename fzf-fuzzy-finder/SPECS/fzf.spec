@@ -1,6 +1,6 @@
 Name:           fzf
 Version:        0.46.1
-Release:        1.aix7.3.sixe
+Release:        1.librepower
 Summary:        A command-line fuzzy finder
 License:        MIT
 Group:          Applications/Text

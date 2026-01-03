@@ -23,8 +23,8 @@ Compare that to piping `grep` through large datasets.
 ```bash
 cd /tmp
 
-curl -L -o fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm \
-  https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm
+curl -L -o fzf-0.46.1-1.librepower.aix7.3.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
 
 # Verify download
 file *.rpm
@@ -39,7 +39,7 @@ Download from [Releases](https://github.com/librepower/aix/releases/tag/fzf-v0.4
 ## Installation
 
 ```bash
-rpm -ivh fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm
+rpm -ivh fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
 ```
 
 No dependencies required - single binary, works out of the box.
@@ -172,7 +172,7 @@ Want to compile fzf yourself or understand how Go works on AIX?
 ```
 fzf-fuzzy-finder/
 ├── RPMS/
-│   └── fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm
+│   └── fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
 ├── SPECS/
 │   └── fzf.spec
 ├── SOURCES/

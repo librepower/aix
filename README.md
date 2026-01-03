@@ -37,7 +37,7 @@ Google Authenticator two-factor authentication for AIX/VIOS, done right.
 
 ### fzf
 ```bash
-curl -L -o fzf.rpm https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.aix7.3.sixe.aix7.3.ppc.rpm
+curl -L -o fzf.rpm https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
 rpm -ivh fzf.rpm
 ```
 
