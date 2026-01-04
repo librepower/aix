@@ -93,7 +93,9 @@ Have you compiled open source software for AIX? Built something useful for Power
    ├── RPMS/           # Compiled RPMs
    ├── SPECS/          # Spec files (for reproducibility)
    ├── SOURCES/        # Scripts, patches, configs
-   └── README.md       # Documentation
+   ├── README.md       # Documentation
+   └── BUILD.md        # Bulding instructions / DIY
+   
    ```
 3. **Submit** a Pull Request
 
