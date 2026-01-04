@@ -66,7 +66,7 @@
             border-radius: 8px; padding: 20px; font-family: 'SF Mono', 'Consolas', monospace;
             font-size: 14px; overflow-x: auto; position: relative; margin-bottom: 16px;
         }
-        .code-block code { color: var(--text-primary); }
+        .code-block code { color: var(--text-primary); white-space: pre; }
         .code-block .comment { color: var(--text-secondary); }
         .code-block .command { color: var(--accent-green); }
         .copy-btn {
@@ -80,7 +80,7 @@
         .section-header { text-align: center; margin-bottom: 48px; }
         .section-header h2 { font-size: 32px; margin-bottom: 12px; }
         .section-header p { color: var(--text-secondary); }
-        .packages-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+        .packages-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
         .package-card {
             background: var(--bg-card); border: 1px solid var(--border-color);
             border-radius: 12px; padding: 24px; transition: border-color 0.2s;
@@ -88,7 +88,7 @@
         .package-card:hover { border-color: var(--accent-green); }
         .package-name { font-size: 18px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .package-version { font-size: 12px; background: rgba(34, 197, 94, 0.1); color: var(--accent-green); padding: 2px 8px; border-radius: 4px; }
-        .package-desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; }
+        .package-desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; min-height: 60px; }
         .package-install { font-family: 'SF Mono', monospace; font-size: 13px; background: var(--bg-primary); padding: 8px 12px; border-radius: 6px; color: var(--accent-green); }
         footer { padding: 40px 0; border-top: 1px solid var(--border-color); text-align: center; }
         .footer-brand { margin-bottom: 16px; }
@@ -130,14 +130,11 @@
                     <div class="install-title">Quick Install</div>
                     <div class="code-block">
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                        <code>
-<span class="comment"># Add LibrePower repository</span>
+                        <code><span class="comment"># Add LibrePower repository</span>
 <span class="command">curl -fsSL https://aix.librepower.org/install.sh | sh</span>
 
 <span class="comment"># Install packages</span>
-<span class="command">dnf install fzf</span>
-<span class="command">dnf install linux-compat</span>
-                        </code>
+<span class="command">dnf install fzf nano</span></code>
                     </div>
                     <p style="color: var(--text-secondary); font-size: 13px;">Requires AIX 7.2+ with DNF installed from AIX Toolbox.</p>
                 </div>
@@ -151,14 +148,19 @@
                 </div>
                 <div class="packages-grid">
                     <div class="package-card">
+                        <div class="package-name">2FA Made Simple <span class="package-version">1.0</span></div>
+                        <p class="package-desc">Google Authenticator with QR codes for AIX. Secure your SSH access with TOTP two-factor authentication.</p>
+                        <div class="package-install">See GitHub for install guide</div>
+                    </div>
+                    <div class="package-card">
                         <div class="package-name">fzf <span class="package-version">0.57.0</span></div>
                         <p class="package-desc">Command-line fuzzy finder. Search files, command history, processes, and more with interactive filtering.</p>
                         <div class="package-install">dnf install fzf</div>
                     </div>
                     <div class="package-card">
-                        <div class="package-name">linux-compat <span class="package-version">1.0</span></div>
-                        <p class="package-desc">Linux compatibility layer. Adds GNU tool aliases and familiar commands for easier transition from Linux to AIX.</p>
-                        <div class="package-install">dnf install linux-compat</div>
+                        <div class="package-name">nano <span class="package-version">8.3</span></div>
+                        <p class="package-desc">Easy-to-use text editor. A familiar editing experience for users coming from Linux environments.</p>
+                        <div class="package-install">dnf install nano</div>
                     </div>
                     <div class="package-card" style="border-style: dashed; opacity: 0.7;">
                         <div class="package-name">More coming soon...</div>
