@@ -6,8 +6,23 @@ Open source tools and packages for AIX/VIOS on IBM Power systems.
 
 ## Available Packages
 
+### ✏️ nano - GNU Text Editor
+*NEW - Simple, friendly editor for everyone*
+
+The default editor on many Linux distributions, now on AIX. If you prefer something simpler than vi, nano is for you.
+
+- ✅ Simple, intuitive interface (no modal editing)
+- ✅ Syntax highlighting for 40+ languages (enabled by default)
+- ✅ UTF-8 support
+- ✅ Auto-indentation enabled
+- ✅ On-screen keyboard shortcuts
+
+📁 **[Documentation & Downloads](nano-editor/)**
+
+---
+
 ### 🔍 fzf - Fuzzy Finder
-*NEW - First Go-based tool compiled for AIX*
+*First Go-based tool compiled for AIX*
 
 The incredibly popular command-line fuzzy finder, now on AIX. Search through anything: files, processes, packages, command history.
 
@@ -15,7 +30,7 @@ The incredibly popular command-line fuzzy finder, now on AIX. Search through any
 - ✅ Zero dependencies (single static binary)
 - ✅ AIX-specific helper scripts (fzf-rpm, fzf-proc, fzf-svc)
 - ✅ Shell integration (Ctrl-R history search, Ctrl-T file picker)
-- ✅ First? proof that modern Go tools can run on AIX
+- ✅ First proof that modern Go tools can run on AIX
 
 📁 **[Documentation & Downloads](fzf-fuzzy-finder/)**
 
@@ -35,17 +50,25 @@ Google Authenticator two-factor authentication for AIX/VIOS, done right.
 
 ## Quick Install
 
+> **Tip**: Use `dnf install` to automatically resolve dependencies from AIX Toolbox.
+
+### nano
+```bash
+curl -L -o nano.rpm https://github.com/librepower/aix/releases/download/nano-v8.3/nano-8.3-3.librepower.aix7.3.ppc.rpm
+dnf install ./nano.rpm
+```
+
 ### fzf
 ```bash
 curl -L -o fzf.rpm https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
-rpm -ivh fzf.rpm
+dnf install ./fzf.rpm
 ```
 
 ### 2FA Made Simple
 ```bash
 curl -L -o libqrencode.rpm https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
 curl -L -o google-auth.rpm https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
-rpm -ivh libqrencode.rpm google-auth.rpm
+dnf install ./libqrencode.rpm ./google-auth.rpm
 ```
 
 ## Contribute
