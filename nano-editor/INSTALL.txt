@@ -1,0 +1,173 @@
+================================================================================
+nano - GNU Text Editor for AIX
+Installation Guide
+================================================================================
+
+Version: 8.3
+Release: 3.librepower
+Platform: AIX 7.1+ / VIOS 3.x (ppc/ppc64)
+Packaged by: SIXE - IBM Business Partner (https://sixe.eu)
+Part of: LibrePower (https://librepower.org)
+
+================================================================================
+WHAT IS NANO?
+================================================================================
+
+GNU nano is a small and friendly text editor. It's the default editor on many
+Linux distributions and a popular alternative to vi for users who prefer a
+simpler, more intuitive interface.
+
+Key features:
+- Simple, intuitive interface with on-screen shortcuts
+- Syntax highlighting for 40+ languages (ENABLED BY DEFAULT)
+- Search and replace with regex support
+- Multiple file buffers
+- UTF-8 support
+- Undo/redo functionality
+- Auto-indentation (enabled by default)
+- Line numbering
+
+================================================================================
+INSTALLATION
+================================================================================
+
+OPTION 1: DNF Install (Recommended)
+-----------------------------------
+
+DNF automatically resolves dependencies from AIX Toolbox:
+
+    cd /tmp
+    curl -L -o nano.rpm \
+      https://github.com/librepower/aix/releases/download/nano-v8.3/nano-8.3-3.librepower.aix7.3.ppc.rpm
+    
+    dnf install ./nano.rpm
+
+OPTION 2: RPM Install (if ncurses is already installed)
+-------------------------------------------------------
+
+    cd /tmp
+    curl -L -o nano.rpm \
+      https://github.com/librepower/aix/releases/download/nano-v8.3/nano-8.3-3.librepower.aix7.3.ppc.rpm
+    
+    rpm -ivh nano.rpm
+
+    Note: If you get dependency errors, install ncurses first:
+    dnf install ncurses
+
+VERIFY INSTALLATION
+-------------------
+
+    nano --version
+    # Should show: GNU nano, version 8.3
+
+================================================================================
+SYNTAX HIGHLIGHTING
+================================================================================
+
+Syntax highlighting is ENABLED BY DEFAULT for 40+ file types.
+
+The global configuration at /opt/freeware/etc/nanorc includes:
+
+    include "/opt/freeware/share/nano/*.nanorc"
+    set autoindent
+
+Supported languages include: C, C++, Python, Shell, Perl, Ruby, Go, Rust,
+Java, JavaScript, JSON, YAML, XML, HTML, CSS, SQL, Makefile, and more.
+
+================================================================================
+BASIC USAGE
+================================================================================
+
+Edit a file:
+
+    nano filename.txt
+
+Edit with line numbers:
+
+    nano -l filename.txt
+
+Open multiple files:
+
+    nano file1.txt file2.txt
+    # Use Alt+> and Alt+< to switch between files
+
+================================================================================
+KEY BINDINGS
+================================================================================
+
+nano displays shortcuts at the bottom of the screen. The ^ symbol means Ctrl.
+
+Essential shortcuts:
+
+    Ctrl+O      Save file (Write Out)
+    Ctrl+X      Exit nano
+    Ctrl+K      Cut current line
+    Ctrl+U      Paste cut text
+    Ctrl+W      Search forward
+    Ctrl+\      Search and replace
+    Ctrl+G      Display help
+    Alt+U       Undo
+    Alt+E       Redo
+
+================================================================================
+CONFIGURATION
+================================================================================
+
+Configuration files:
+- /opt/freeware/etc/nanorc - Global defaults
+- ~/.nanorc                - User overrides
+
+To customize, create ~/.nanorc:
+
+    set linenumbers
+    set mouse
+    set tabsize 4
+    set tabstospaces
+
+================================================================================
+UNINSTALLATION
+================================================================================
+
+    rpm -e nano
+    # or
+    dnf remove nano
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Q: Syntax highlighting not showing colors
+A: Ensure your terminal supports colors: export TERM=xterm-256color
+
+Q: "Error opening terminal" message
+A: Try: export TERM=vt100
+
+Q: Dependency errors during installation
+A: Use dnf instead of rpm: dnf install ./nano.rpm
+
+================================================================================
+PACKAGE INFORMATION
+================================================================================
+
+Name:         nano
+Version:      8.3
+Release:      3.librepower
+Architecture: ppc (64-bit)
+Size:         ~391 KB
+License:      GPL-3.0
+Vendor:       SIXE - IBM Business Partner
+
+Dependencies:
+- libc.a (AIX base)
+- libpthreads.a (AIX base)
+- libncursesw.a (AIX Toolbox - auto-installed with dnf)
+
+================================================================================
+SUPPORT
+================================================================================
+
+Issues: https://github.com/librepower/aix/issues
+Email:  hugo.blanco@sixe.eu
+SIXE:   https://sixe.eu
+
+================================================================================
