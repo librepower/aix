@@ -85,6 +85,47 @@ A configuration layer for IBM's GNU tools. Makes the excellent IBM AIX Toolbox p
 
 📁 **[Documentation & Downloads](linux-compat/)**
 
+---
+
+### 🔍 C-Sentinel - Semantic Observability for AIX
+*AI-assisted system monitoring and anomaly detection*
+
+Lightweight system prober that captures "system fingerprints" for AI-assisted analysis. Features advanced PID attribution, baseline learning, and web dashboard.
+
+- ✅ **95% feature parity** with Linux version on AIX 7.1/7.2/7.3
+- ✅ **PID attribution for 70+ ports** (SSH, PostgreSQL, MySQL, Oracle, DB2, Informix, WebSphere, SAP, etc.)
+- ✅ **System monitoring** via libperfstat (uptime, load, memory)
+- ✅ **Process monitoring** - 408+ processes tracked via /proc/psinfo
+- ✅ **Network monitoring** - TCP/UDP listeners with intelligent PID detection
+- ✅ **Config drift detection** - SHA256 checksums with baseline comparison
+- ✅ **Process chain analysis** - Detect suspicious parent-child relationships
+- ✅ **Baseline learning** - Automatic learning and anomaly detection
+- ✅ **Web dashboard** - Multi-user authentication, PostgreSQL backend, real-time alerts
+- ✅ **RPM package** - Easy installation via DNF
+
+**Installation:**
+```bash
+dnf install csentinel4aix
+```
+
+**Quick start:**
+```bash
+sentinel -q -n          # Quick analysis
+sentinel -l -n          # Learn baseline
+sentinel -b -q -n       # Compare against baseline
+```
+
+**Features:**
+- JSON output for automation and AI analysis
+- Email and Slack alerts
+- Brute force detection
+- Privacy-preserving username hashing
+- Risk scoring with explainable factors
+
+📁 **[Documentation & Downloads](csentinel4aix/)**
+
+---
+
 ## Contribute
 
 **We welcome contributions from the community!**
