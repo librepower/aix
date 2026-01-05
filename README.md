@@ -16,9 +16,7 @@ The easiest way to install our packages. One-time setup, then use `dnf install` 
 curl -fsSL https://aix.librepower.org/install.sh | sh
 
 # Install packages
-dnf install fzf
-dnf install nano
-dnf install linux-compat
+dnf install fzf nano etc
 ```
 
 📦 **Repository:** [aix.librepower.org](https://aix.librepower.org)
