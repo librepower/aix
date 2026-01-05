@@ -30,6 +30,8 @@ LibrePower is more than AIX—we're building open source support across the enti
 
 ## Installation
 
+> ℹ️ **What's included**: The RPM package installs the **command-line tool** (`/usr/local/bin/sentinel`). The web dashboard is **optional** and requires separate installation (PostgreSQL, Python 3.11+, nginx). See [Dashboard README](dashboard/README.md) for details.
+
 ### Option 1: dnf (Recommended)
 
 Add the LibrePower repository and install with one command:
@@ -62,6 +64,24 @@ rpm -ivh csentinel4aix-1.0.0-1.aix7.3.ppc.rpm
 ### Option 3: Build from Source
 
 See [RPM-BUILD.md](RPM-BUILD.md) for detailed build instructions.
+
+### Quick Start (After Installation)
+
+```bash
+# Quick system analysis
+sentinel -q -n
+
+# Learn baseline (first time)
+sentinel -l -n
+
+# Compare against baseline
+sentinel -b -q -n
+
+# Generate JSON for AI analysis
+sentinel --json --network > system-fingerprint.json
+```
+
+For the optional web dashboard installation, see [dashboard/README.md](dashboard/README.md).
 
 ---
 
