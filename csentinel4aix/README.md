@@ -28,6 +28,43 @@ LibrePower is more than AIX—we're building open source support across the enti
 
 ---
 
+## Installation
+
+### Option 1: dnf (Recommended)
+
+Add the LibrePower repository and install with one command:
+
+```bash
+# Add repository (one-time setup)
+curl -fsSL https://aix.librepower.org/install.sh | sh
+
+# Install C-Sentinel
+dnf install csentinel4aix
+```
+
+📦 Repository details: https://aix.librepower.org/
+
+### Option 2: Direct RPM Install
+
+```bash
+cd /tmp
+
+# Download RPM from GitLab releases
+curl -L -o csentinel4aix-1.0.0-1.aix7.3.ppc.rpm \
+  https://gitlab.com/librepower-tools/aix/-/raw/main/csentinel4aix/RPMS/csentinel4aix-1.0.0-1.aix7.3.ppc.rpm
+
+# Install
+rpm -ivh csentinel4aix-1.0.0-1.aix7.3.ppc.rpm
+```
+
+> ⚠️ **Note**: Use `-L` flag with curl to follow redirects.
+
+### Option 3: Build from Source
+
+See [RPM-BUILD.md](RPM-BUILD.md) for detailed build instructions.
+
+---
+
 ## ⚠️ IMPORTANT: Development Status
 
 **AIX Port Status: ACTIVE DEVELOPMENT - NOT YET PRODUCTION READY**
