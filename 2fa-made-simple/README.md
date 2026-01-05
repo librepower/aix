@@ -6,17 +6,20 @@
 
 Google Authenticator two-factor authentication for AIX/VIOS, with working QR codes, safe configuration, and easy bilingual setup wizards.
 
-## Why 2FA on AIX?
+## Why This Package?
 
-**Because passwords alone aren't enough anymore.**
+**IBM released google-authenticator for AIX, but their guide has critical issues:**
 
-Your AIX servers run critical workloads - databases, ERP systems, financial applications. A compromised password means full access. 2FA adds a second layer: even if someone steals a password, they can't get in without the code from your phone.
+| Problem | IBM's Approach | Our Solution |
+|---------|---------------|--------------|
+| No QR code | "Failed to use libqrencode" | ✅ QR works (libqrencode included) |
+| Breaks sudo | Changes auth_type to PAM_AUTH | ✅ Keeps STD_AUTH |
+| No NTP warning | TOTP fails silently | ✅ NTP checked before setup |
+| Confusing prompts | "update file?" (misleading) | ✅ Clear bilingual wizards |
+| No rollback | Users get locked out | ✅ Full rollback instructions |
+| No emergency access | Panic if 2FA fails | ✅ HMC console documented |
 
-| Without 2FA | With 2FA |
-|-------------|----------|
-| Password stolen = Full access | Password stolen = Still locked out |
-| Brute force possible | Brute force useless |
-| Keylogger captures all | Keylogger misses rotating codes |
+**We fixed all of that.**
 
 ## Compatible Authenticator Apps
 
@@ -139,19 +142,6 @@ google-authenticator-setup           # English wizard
 google-authenticator-configura       # Spanish wizard
 ```
 
-## Why This Package?
-
-IBM released google-authenticator for AIX but their [official guide](https://community.ibm.com/community/user/discussion/google-authenticator-libpam-is-now-available-on-aix-toolbox) has issues:
-
-| Problem | IBM's Approach | Our Solution |
-|---------|---------------|--------------|
-| No QR code | "Failed to use libqrencode" | ✅ QR works (libqrencode included) |
-| Breaks sudo | Changes auth_type to PAM_AUTH | ✅ Keeps STD_AUTH |
-| No NTP warning | TOTP fails silently | ✅ NTP checked before setup |
-| Confusing prompts | "update file?" (misleading) | ✅ Clear bilingual wizards |
-| No rollback | Users get locked out | ✅ Full rollback instructions |
-| No emergency access | Panic if 2FA fails | ✅ HMC console documented |
-
 ## Documentation
 
 - **[INSTALL_2FA.txt](INSTALL_2FA.txt)** - Full English documentation
@@ -178,7 +168,7 @@ IBM released google-authenticator for AIX but their [official guide](https://com
 
 ## Requirements
 
-- AIX 7.1+ or VIOS 3.x
+- AIX 7.1+ or VIOS 3.x (tested on AIX 7.3 TL04)
 - NTP configured (critical for TOTP)
 - Root access
 
