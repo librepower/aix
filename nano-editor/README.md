@@ -1,10 +1,23 @@
 # nano - GNU Text Editor for AIX
 
+![AIX 7.3](https://img.shields.io/badge/AIX-7.3+-blue)
+![Version](https://img.shields.io/badge/nano-8.3-orange)
+![License](https://img.shields.io/badge/license-GPL--3.0-green)
+
 The simple, friendly GNU text editor, now available for AIX. If you're tired of vi's modal editing, nano gives you a familiar, intuitive experience.
 
 ## Why nano?
 
+**If you know how to type, you know how to use nano.**
+
 nano is the default editor on many Linux distributions for good reason: it's simple, fast, and gets out of your way. Perfect for quick edits, config files, and anyone who doesn't want to learn vi keybindings.
+
+| Feature | vi/vim | nano |
+|---------|--------|------|
+| Learning curve | Steep | None |
+| Mode switching | Yes (insert/command) | No |
+| Keyboard shortcuts | On-screen | Hidden |
+| Save and quit | `:wq` | Ctrl+O, Ctrl+X |
 
 ### Features
 
@@ -18,20 +31,30 @@ nano is the default editor on many Linux distributions for good reason: it's sim
 
 ## Installation
 
-### Option 1: DNF (Recommended)
+### Option 1: dnf (Recommended)
 
-DNF automatically resolves dependencies from AIX Toolbox:
+Add the LibrePower repository and install with one command:
 
 ```bash
-curl -L -o nano.rpm https://github.com/librepower/aix/releases/download/nano-v8.3/nano-8.3-3.librepower.aix7.3.ppc.rpm
-dnf install ./nano.rpm
+# Add repository (one-time setup)
+curl -fsSL https://aix.librepower.org/install.sh | sh
+
+# Install (automatically resolves ncurses dependency)
+dnf install nano
 ```
 
-### Option 2: RPM (if ncurses is already installed)
+📦 Repository details: https://aix.librepower.org/
+
+### Option 2: curl (if dnf/yum not available)
 
 ```bash
-curl -L -o nano.rpm https://github.com/librepower/aix/releases/download/nano-v8.3/nano-8.3-3.librepower.aix7.3.ppc.rpm
-rpm -ivh nano.rpm
+cd /tmp
+
+curl -L -o nano-8.3-3.librepower.aix7.3.ppc.rpm \
+  https://github.com/librepower/aix/releases/download/nano-v8.3/nano-8.3-3.librepower.aix7.3.ppc.rpm
+
+# Requires ncurses from AIX Toolbox
+rpm -ivh nano-8.3-3.librepower.aix7.3.ppc.rpm
 ```
 
 > ⚠️ **Note**: Use `-L` flag with curl to follow redirects.
@@ -135,9 +158,9 @@ nano-editor/
 │   └── nano-8.3-3.librepower.aix7.3.ppc.rpm
 ├── SPECS/
 │   └── nano.spec
-├── BUILD.md
-├── INSTALL.txt
-├── INSTALL_ES.txt
+├── BUILD.md          # How to compile from source
+├── INSTALL.txt       # English installation guide
+├── INSTALL_ES.txt    # Spanish installation guide
 └── README.md
 ```
 

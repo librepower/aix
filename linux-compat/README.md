@@ -1,8 +1,25 @@
 # Linux Compatibility for AIX
 
+![AIX 7.2](https://img.shields.io/badge/AIX-7.2+-blue)
+![noarch](https://img.shields.io/badge/arch-noarch-lightgrey)
+![License](https://img.shields.io/badge/license-GPL--3.0-green)
+
 **A configuration layer for IBM's GNU tools in AIX Toolbox**
 
 Provides a familiar GNU/Linux command-line experience for AIX administrators coming from Linux environments.
+
+## Why linux-compat?
+
+**Because muscle memory matters.**
+
+You've spent years typing `ls -lh`, `grep -rP`, `systemctl status`. Now you're on AIX and nothing works the same way. The tools exist (IBM ported them!), but they're not in your PATH and AIX services use different commands.
+
+| Linux muscle memory | AIX native | With linux-compat |
+|---------------------|------------|-------------------|
+| `ls -lh --color` | `ls -l` (no -h, no color) | ✅ Works |
+| `grep -rP "regex"` | `/opt/freeware/bin/grep...` | ✅ Works |
+| `systemctl status sshd` | `lssrc -s sshd` | ✅ Works |
+| `watch -n 5 command` | ❌ Doesn't exist | ✅ Works |
 
 ## What This Package Does
 
@@ -27,7 +44,7 @@ Credit where it's due: **IBM did the hard work of porting these tools. We just m
 
 ## Installation
 
-### Via DNF Repository (Recommended)
+### Option 1: dnf (Recommended)
 
 ```bash
 # Add LibrePower repository (one time)
@@ -41,7 +58,9 @@ linux-compat-setup install
 source ~/.linux-compat-profile
 ```
 
-### Manual Installation
+📦 Repository details: https://aix.librepower.org/
+
+### Option 2: curl (if dnf/yum not available)
 
 ```bash
 # Download RPM
@@ -177,6 +196,11 @@ linux-compat-setup install
 
 After activation, type `linuxhelp` for a quick reference card.
 
+## Documentation
+
+- **[INSTALL.txt](INSTALL.txt)** - Full English documentation
+- **[INSTALL_ES.txt](INSTALL_ES.txt)** - Documentación completa en español
+
 ## Requirements
 
 - AIX 7.2 or later
@@ -195,6 +219,6 @@ GPL-3.0 - See [LICENSE](../LICENSE)
 
 ---
 
-*Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source*
+*Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source 🌍*
 
 *Maintained by [SIXE](https://sixe.eu) - IBM Business Partner*

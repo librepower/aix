@@ -1,10 +1,30 @@
 # fzf - Command-Line Fuzzy Finder for AIX
 
+![AIX 7.3](https://img.shields.io/badge/AIX-7.3+-blue)
+![Go](https://img.shields.io/badge/Go-1.21.6-00ADD8)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 The popular fuzzy finder, now available for AIX. Fast, portable, and incredibly useful for any sysadmin workflow.
+
+## Demo
+
+![fzf demo on AIX](fzf.gif)
 
 ## Why fzf?
 
 fzf transforms how you work with lists in the terminal. Search through files, command history, processes, packages - anything.
+
+**Instead of:**
+```bash
+ps -ef | grep -i oracle | grep -v grep
+```
+
+**Just do:**
+```bash
+ps -ef | fzf
+```
+
+Type "oracle", watch results filter in real-time, press Enter. Done.
 
 ### Performance on AIX
 
@@ -14,11 +34,23 @@ fzf transforms how you work with lists in the terminal. Search through files, co
 | 100,000 lines | 0.15 seconds |
 | 500,000 lines | 0.71 seconds |
 
-Compare that to piping `grep` through large datasets.
+## Installation
 
-## Download
+### Option 1: dnf (Recommended)
 
-### Option 1: curl (Recommended)
+Add the LibrePower repository and install with one command:
+
+```bash
+# Add repository (one-time setup)
+curl -fsSL https://aix.librepower.org/install.sh | sh
+
+# Install
+dnf install fzf
+```
+
+📦 Repository details: https://aix.librepower.org/
+
+### Option 2: curl (if dnf/yum not available)
 
 ```bash
 cd /tmp
@@ -26,23 +58,14 @@ cd /tmp
 curl -L -o fzf-0.46.1-1.librepower.aix7.3.ppc.rpm \
   https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
 
-# Verify download
-file *.rpm
-```
-
-> ⚠️ **Important**: Use `-L` flag to follow redirects. Do NOT download from `/blob/` URLs.
-
-### Option 2: GitHub Releases Page
-
-Download from [Releases](https://github.com/librepower/aix/releases/tag/fzf-v0.46.1)
-
-## Installation
-
-```bash
 rpm -ivh fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
 ```
 
-No dependencies required - single binary, works out of the box.
+> ⚠️ **Important**: Use `-L` flag to follow redirects.
+
+### Option 3: GitHub Releases Page
+
+Download from [Releases](https://github.com/librepower/aix/releases/tag/fzf-v0.46.1)
 
 ## Quick Start
 
@@ -183,6 +206,7 @@ fzf-fuzzy-finder/
 ├── BUILD.md          # How to compile from source
 ├── INSTALL.txt       # English installation guide
 ├── INSTALL_ES.txt    # Spanish installation guide
+├── fzf.gif           # Demo animation
 └── README.md
 ```
 

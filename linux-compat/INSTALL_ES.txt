@@ -1,0 +1,223 @@
+================================================================================
+         LINUX COMPATIBILITY FOR AIX - GUÍA DE INSTALACIÓN
+================================================================================
+
+Versión: 2.1
+Fecha: Enero 2026
+Autor: SIXE - IBM Business Partner (https://sixe.eu)
+Proyecto: LibrePower (https://librepower.org)
+
+================================================================================
+                            ¿QUÉ ES ESTO?
+================================================================================
+
+linux-compat es una capa de configuración que hace que las herramientas GNU
+de IBM AIX Toolbox sean el comportamiento predeterminado en tu shell interactivo.
+
+NO compilamos ninguna herramienta. IBM ya hizo ese trabajo con AIX Toolbox.
+Nosotros solo configuramos tu entorno para que las uses por defecto.
+
+Qué proporciona IBM (instalado como dependencias):
+  - GNU coreutils (ls, cp, mv, cat, head, tail, wc, sort, etc.)
+  - GNU grep, sed, awk, find, diff
+  - GNU tar con soporte gzip/bzip2/xz
+  - vim, tmux, jq, tree, y más
+
+Qué añadimos nosotros:
+  - Perfil de shell que pone las herramientas GNU primero en tu PATH
+  - Aliases para operaciones comunes (ll, la, lt, etc.)
+  - Comandos emulados que no existen en AIX (watch, pgrep, pkill, free)
+  - Wrappers systemctl/service para AIX SRC
+  - Documentación bilingüe
+
+================================================================================
+                              REQUISITOS
+================================================================================
+
+- AIX 7.2 o posterior
+- DNF configurado con repositorio AIX Toolbox
+- bash (incluido en dependencias)
+
+================================================================================
+                            INSTALACIÓN
+================================================================================
+
+OPCIÓN 1: DNF (Recomendado)
+---------------------------
+
+# Añadir repositorio LibrePower (una sola vez)
+curl -fsSL https://aix.librepower.org/install.sh | sh
+
+# Instalar
+dnf install linux-compat
+
+# Activar para tu usuario
+linux-compat-setup install
+source ~/.linux-compat-profile
+
+
+OPCIÓN 2: Descarga manual
+-------------------------
+
+# Descargar RPM
+curl -LO https://github.com/librepower/aix/releases/download/linux-compat-v2.1/linux-compat-2.1-1.librepower.aix7.3.noarch.rpm
+
+# Instalar (dnf resuelve dependencias automáticamente)
+dnf install ./linux-compat-2.1-1.librepower.aix7.3.noarch.rpm
+
+# Activar para tu usuario
+linux-compat-setup install
+source ~/.linux-compat-profile
+
+================================================================================
+                          LO QUE OBTIENES
+================================================================================
+
+HERRAMIENTAS GNU NATIVAS (de IBM AIX Toolbox)
+---------------------------------------------
+
+Estos son binarios reales, no emulaciones:
+
+  ls -lh --color=auto    # GNU ls con tamaños humanos y colores
+  grep -rP "patrón"      # grep recursivo con regex Perl
+  find . -name "*.log" -mtime -1   # GNU find con todas las opciones
+  sed -i 's/viejo/nuevo/g'   # Edición in-place
+  tar -xzf archivo.tar.gz    # Extracción directa
+
+
+GESTIÓN DE SERVICIOS (wrappers systemctl/service)
+-------------------------------------------------
+
+AIX usa SRC (System Resource Controller) en lugar de systemd.
+Proporcionamos wrappers familiares:
+
+  # Estilo systemctl (recomendado)
+  systemctl status              # Listar todos los servicios
+  systemctl start sshd          # Iniciar servicio
+  systemctl stop sshd           # Detener servicio
+  systemctl restart sshd        # Reiniciar servicio
+  systemctl reload sshd         # Recargar configuración
+  systemctl is-active sshd      # Comprobar si está activo
+
+  # Operaciones de grupo (usar prefijo @)
+  systemctl start @tcpip        # Iniciar todos los servicios TCP/IP
+  systemctl stop @nfs           # Detener todos los servicios NFS
+  systemctl status @tcpip       # Estado del grupo TCP/IP
+  systemctl list-groups         # Mostrar grupos disponibles
+
+  # Alternativa estilo SysV
+  service sshd start
+  service sshd stop
+  service sshd status
+
+  # Aliases rápidos
+  services                      # Listar todos (lssrc -a)
+  services-active               # Solo servicios activos
+  services-down                 # Solo servicios detenidos
+
+NOTA: enable/disable no están disponibles. AIX usa /etc/rc.tcpip,
+      /etc/inittab para configuración de arranque.
+
+
+COMANDOS EMULADOS
+-----------------
+
+Estos no existen nativamente en AIX, así que proporcionamos equivalentes:
+
+  watch -n 5 'ps -ef | wc -l'   # Repetir comando cada 5 segundos
+  pgrep java                     # Encontrar PIDs por nombre de proceso
+  pkill -9 zombie                # Matar procesos por nombre
+  free                           # Uso de memoria (usa svmon)
+
+
+ALIASES CONVENIENTES
+--------------------
+
+  # Listado de directorios
+  ll                  # ls -lh con colores
+  la                  # ls -lha (mostrar ocultos)
+  lt                  # ls -lht (ordenar por tiempo)
+  lS                  # ls -lhS (ordenar por tamaño)
+
+  # Navegación
+  ..                  # cd ..
+  ...                 # cd ../..
+  mkcd directorio     # mkdir + cd
+
+  # Búsqueda
+  ff patrón           # Encontrar archivos por nombre
+  fif texto           # Encontrar en archivos (grep -rn)
+  psg proceso         # ps -ef | grep
+
+  # Sistema
+  sysinfo             # Resumen rápido del sistema
+  top                 # Abre topas
+  df                  # Espacio libre (formato humano)
+  path                # Mostrar entradas PATH numeradas
+
+================================================================================
+                       GARANTÍAS DE SEGURIDAD
+================================================================================
+
+1. SOLO SHELLS INTERACTIVOS
+   Scripts usando #!/bin/sh o #!/bin/ksh NO se ven afectados
+
+2. COMANDOS NATIVOS PRESERVADOS
+   /usr/bin/ls, /usr/bin/ps, etc. siempre funcionan
+
+3. REVERSIBLE INSTANTÁNEAMENTE
+   linux-compat-setup uninstall elimina todo
+
+4. SIN MODIFICACIONES AL SISTEMA
+   Solo toca el directorio home del usuario
+
+================================================================================
+                      GESTIÓN DE LA INSTALACIÓN
+================================================================================
+
+# Ver estado actual
+linux-compat-setup status
+
+# Desactivar temporalmente (sesión actual)
+export LINUX_COMPAT_DISABLE=1
+exec $SHELL
+
+# Desinstalar completamente
+linux-compat-setup uninstall
+
+# Reinstalar
+linux-compat-setup install
+
+================================================================================
+                        REFERENCIA RÁPIDA
+================================================================================
+
+Después de activar, escribe 'linuxhelp' para una tarjeta de referencia rápida.
+
+================================================================================
+                            CRÉDITOS
+================================================================================
+
+- IBM por portar las herramientas GNU a AIX y mantener AIX Toolbox
+- GNU Project por las excelentes herramientas de línea de comandos
+- Comunidad AIX por el soporte continuo de la plataforma
+
+================================================================================
+                            LICENCIA
+================================================================================
+
+GPL-3.0
+
+================================================================================
+                           CONTACTO
+================================================================================
+
+Proyecto: LibrePower
+Web: https://librepower.org (lanzamiento Febrero 2026)
+GitHub: https://github.com/librepower/aix
+
+Mantenido por SIXE - IBM Business Partner
+https://sixe.eu
+hugo.blanco@sixe.eu
+
+================================================================================
