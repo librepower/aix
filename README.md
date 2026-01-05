@@ -37,6 +37,8 @@ Google Authenticator two-factor authentication for AIX/VIOS, done right.
 
 📁 **[Documentation & Downloads](2fa-made-simple/)**
 
+---
+
 ### ✏️ nano - GNU Text Editor
 *Simple, friendly editor for everyone*
 
