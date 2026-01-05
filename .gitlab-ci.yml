@@ -1,0 +1,68 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  PACKAGES_DIR: packages
+
+build-repo:
+  stage: build
+  image: ubuntu:22.04
+  before_script:
+    - apt-get update && apt-get install -y createrepo-c curl jq
+  script:
+    - mkdir -p $PACKAGES_DIR
+    
+    # Download RPMs from GitLab releases
+    - |
+      echo "Downloading RPMs from releases..."
+      RELEASES=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+        "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases")
+      
+      echo "$RELEASES" | jq -r '.[].assets.links[]? | select(.name | endswith(".rpm")) | .direct_asset_url' | while read -r url; do
+        if [ -n "$url" ]; then
+          filename=$(basename "$url" | sed 's/?.*//')
+          echo "Downloading: $filename"
+          curl -L -o "$PACKAGES_DIR/$filename" "$url"
+        fi
+      done
+      
+      # Also check for release assets (uploaded files)
+      echo "$RELEASES" | jq -r '.[].assets.sources[]?.url // empty' | head -1 > /dev/null || true
+    
+    - echo "Downloaded packages:" && ls -la $PACKAGES_DIR/ || echo "No packages yet"
+    
+    # Generate repository metadata
+    - |
+      if ls $PACKAGES_DIR/*.rpm 1> /dev/null 2>&1; then
+        echo "Generating repository metadata..."
+        createrepo_c $PACKAGES_DIR/
+      else
+        echo "No RPMs found, creating empty repo structure"
+        mkdir -p $PACKAGES_DIR/repodata
+        createrepo_c $PACKAGES_DIR/
+      fi
+    
+    # Prepare site
+    - mkdir -p public
+    - cp index.html public/
+    - cp install.sh public/
+    - cp -r $PACKAGES_DIR public/
+    - echo "Site structure:" && find public -type f | head -30
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
+
+pages:
+  stage: deploy
+  script:
+    - echo "Deploying to GitLab Pages..."
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
+  environment:
+    name: production
+    url: https://librepower-tools.gitlab.io/aix
