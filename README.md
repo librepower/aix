@@ -4,10 +4,46 @@
 
 Open source tools and packages for AIX/VIOS on IBM Power systems.
 
+## Quick Install via DNF Repository
+
+The easiest way to install our packages. One-time setup, then use `dnf install` like on Linux.
+
+```bash
+# Add LibrePower repository (one time)
+curl -fsSL https://aix.librepower.org/install.sh | sh
+
+# Install packages
+dnf install fzf
+dnf install nano
+dnf install linux-compat
+```
+
+📦 **Repository:** [aix.librepower.org](https://aix.librepower.org)
+
+---
+
 ## Available Packages
 
+### 🐧 Linux Compatibility
+*NEW - Feel at home on AIX*
+
+A configuration layer for IBM's GNU tools. Makes the excellent IBM AIX Toolbox packages the default in your interactive shell.
+
+**What IBM provides:** GNU coreutils, grep, sed, awk, find, tar, vim, tmux, jq, and more (via AIX Toolbox)  
+**What we add:** Shell configuration, aliases, emulated commands, and `systemctl`/`service` wrappers for AIX SRC
+
+- ✅ Puts IBM's GNU tools first in your interactive PATH
+- ✅ `systemctl` and `service` wrappers for familiar service management
+- ✅ Emulates missing commands (`watch`, `pgrep`, `pkill`, `free`)
+- ✅ Safe by design—only interactive shells affected
+- ✅ Scripts using `#!/bin/sh` remain untouched
+
+📁 **[Documentation & Downloads](linux-compat/)**
+
+---
+
 ### ✏️ nano - GNU Text Editor
-*NEW - Simple, friendly editor for everyone*
+*Simple, friendly editor for everyone*
 
 The default editor on many Linux distributions, now on AIX. If you prefer something simpler than vi, nano is for you.
 
@@ -48,27 +84,37 @@ Google Authenticator two-factor authentication for AIX/VIOS, done right.
 
 📁 **[Documentation & Downloads](2fa-made-simple/)**
 
-## Quick Install
+## Manual Install (without DNF repository)
 
-> **Tip**: Use `dnf install` to automatically resolve dependencies from AIX Toolbox.
+If you prefer to download RPMs directly:
+
+> **Tip**: Use `dnf install ./file.rpm` to automatically resolve dependencies from AIX Toolbox.
+
+### linux-compat
+```bash
+curl -LO https://github.com/librepower/aix/releases/download/linux-compat-v2.1/linux-compat-2.1-1.librepower.aix7.3.noarch.rpm
+dnf install ./linux-compat-2.1-1.librepower.aix7.3.noarch.rpm
+linux-compat-setup install
+source ~/.linux-compat-profile
+```
 
 ### nano
 ```bash
-curl -L -o nano.rpm https://github.com/librepower/aix/releases/download/nano-v8.3/nano-8.3-3.librepower.aix7.3.ppc.rpm
-dnf install ./nano.rpm
+curl -LO https://github.com/librepower/aix/releases/download/nano-v8.3/nano-8.3-3.librepower.aix7.3.ppc.rpm
+dnf install ./nano-8.3-3.librepower.aix7.3.ppc.rpm
 ```
 
 ### fzf
 ```bash
-curl -L -o fzf.rpm https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
-dnf install ./fzf.rpm
+curl -LO https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
+dnf install ./fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
 ```
 
 ### 2FA Made Simple
 ```bash
-curl -L -o libqrencode.rpm https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
-curl -L -o google-auth.rpm https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
-dnf install ./libqrencode.rpm ./google-auth.rpm
+curl -LO https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
+curl -LO https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
+dnf install ./libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm ./google-authenticator-1.10-1.aix7.1.ppc.rpm
 ```
 
 ## Contribute
@@ -94,7 +140,7 @@ Have you compiled open source software for AIX? Built something useful for Power
    ├── SPECS/          # Spec files (for reproducibility)
    ├── SOURCES/        # Scripts, patches, configs
    ├── README.md       # Documentation
-   └── BUILD.md        # Bulding instructions / DIY
+   └── BUILD.md        # Building instructions / DIY
    
    ```
 3. **Submit** a Pull Request
