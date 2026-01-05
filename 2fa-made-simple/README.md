@@ -1,6 +1,22 @@
 # 2FA Made Simple for AIX/VIOS
 
+![AIX 7.3](https://img.shields.io/badge/AIX-7.1+-blue)
+![TOTP](https://img.shields.io/badge/TOTP-RFC%206238-orange)
+![License](https://img.shields.io/badge/license-Apache--2.0-green)
+
 Google Authenticator two-factor authentication for AIX/VIOS, with working QR codes, safe configuration, and easy bilingual setup wizards.
+
+## Why 2FA on AIX?
+
+**Because passwords alone aren't enough anymore.**
+
+Your AIX servers run critical workloads - databases, ERP systems, financial applications. A compromised password means full access. 2FA adds a second layer: even if someone steals a password, they can't get in without the code from your phone.
+
+| Without 2FA | With 2FA |
+|-------------|----------|
+| Password stolen = Full access | Password stolen = Still locked out |
+| Brute force possible | Brute force useless |
+| Keylogger captures all | Keylogger misses rotating codes |
 
 ## Compatible Authenticator Apps
 
@@ -47,16 +63,13 @@ curl -L -o google-authenticator-1.10-1.aix7.1.ppc.rpm \
 curl -L -o google-authenticator-setup-1.0-5.librepower.aix7.3.ppc.rpm \
   https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-setup-1.0-5.librepower.aix7.3.ppc.rpm
 
-# Verify downloads
-file *.rpm
-
 # Install
 rpm -ivh libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
 rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
 rpm -ivh google-authenticator-setup-1.0-5.librepower.aix7.3.ppc.rpm
 ```
 
-> ⚠️ **Important**: Use `-L` flag to follow redirects. Do NOT download from `/blob/` URLs.
+> ⚠️ **Important**: Use `-L` flag to follow redirects.
 
 ### Option 3: GitHub Releases Page
 
@@ -150,7 +163,7 @@ IBM released google-authenticator for AIX but their [official guide](https://com
 2fa-made-simple/
 ├── RPMS/
 │   ├── google-authenticator-1.10-1.aix7.1.ppc.rpm       # IBM official
-│   ├── libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm          # QR library
+│   ├── libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm    # QR library
 │   └── google-authenticator-setup-1.0-5.librepower.aix7.3.ppc.rpm
 ├── SPECS/
 │   └── libqrencode.spec
@@ -165,7 +178,7 @@ IBM released google-authenticator for AIX but their [official guide](https://com
 
 ## Requirements
 
-- AIX 7.1+ or VIOS 3.x (currently tested on AIX 7.3 TL04 with the std dnf_toolbox installed)
+- AIX 7.1+ or VIOS 3.x
 - NTP configured (critical for TOTP)
 - Root access
 
