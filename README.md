@@ -2,7 +2,7 @@
 
 **LibrePower - Unlocking Power Systems through open source. Unmatched RAS and TCO. Minimal footprint 🌍**
 
-Open source tools and packages for AIX/VIOS on IBM Power systems.
+Open-source tools and packages for AIX/VIOS on IBM Power systems.
 
 > ⚠️ **Early Release**: These packages are provided as-is for testing and evaluation. 
 > While we use them in production, bugs may exist. 
