@@ -9,7 +9,7 @@
 
 set -e
 
-REPO_FILE="/opt/freeware/etc/yum/repos.d/librepower.repo"
+REPO_FILE="/opt/freeware/etc/yum.repos.d/librepower.repo"
 REPO_URL="https://aix.librepower.org"
 
 echo ""
@@ -17,7 +17,7 @@ echo "╔═══════════════════════�
 echo "║                                                                ║"
 echo "║   LibrePower AIX Repository Installer                         ║"
 echo "║                                                                ║"
-echo "║   🌍 Unlocking Power Systems through open source               ║"
+echo "║   Unlocking Power Systems through open source                  ║"
 echo "║                                                                ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo ""
@@ -38,16 +38,21 @@ fi
 
 # Check if DNF is installed
 if ! command -v dnf >/dev/null 2>&1; then
-    echo "Warning: DNF is not installed."
-    echo "Please install DNF from AIX Toolbox first:"
-    echo "  https://public.dhe.ibm.com/aix/freeSoftware/aixtoolbox/"
-    exit 1
+    if [ -x /opt/freeware/bin/dnf ]; then
+        echo "Note: DNF found at /opt/freeware/bin/dnf"
+        echo "Add /opt/freeware/bin to your PATH for easier use."
+    else
+        echo "Warning: DNF is not installed."
+        echo "Please install DNF from AIX Toolbox first:"
+        echo "  https://public.dhe.ibm.com/aix/freeSoftware/aixtoolbox/"
+        exit 1
+    fi
 fi
 
 # Check if repo directory exists
-if [ ! -d "/opt/freeware/etc/yum/repos.d" ]; then
-    echo "Creating repos.d directory..."
-    mkdir -p /opt/freeware/etc/yum/repos.d
+if [ ! -d "/opt/freeware/etc/yum.repos.d" ]; then
+    echo "Creating yum.repos.d directory..."
+    mkdir -p /opt/freeware/etc/yum.repos.d
 fi
 
 # Create repository file
@@ -61,19 +66,19 @@ gpgcheck=0
 REPOEOF
 
 echo ""
-echo "✓ LibrePower repository installed successfully!"
+echo "LibrePower repository installed successfully!"
 echo ""
 echo "Repository file: ${REPO_FILE}"
 echo ""
 echo "You can now install packages with:"
 echo "  dnf install fzf"
-echo "  dnf install linux-compat"
+echo "  dnf install nano"
 echo ""
 echo "To list available packages:"
 echo "  dnf --repo=librepower list available"
 echo ""
-echo "────────────────────────────────────────────────────────────────"
+echo "------------------------------------------------------------"
 echo "  LibrePower - SIXE IBM Business Partner"
 echo "  https://sixe.eu | https://librepower.org"
-echo "────────────────────────────────────────────────────────────────"
+echo "------------------------------------------------------------"
 echo ""
