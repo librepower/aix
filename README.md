@@ -100,7 +100,7 @@ A configuration layer for IBM's GNU tools. Makes the excellent IBM AIX Toolbox p
 ### 🔍 C-Sentinel - Semantic Observability for AIX
 *AI-assisted system monitoring and anomaly detection*
 
-Lightweight system prober that captures "system fingerprints" for AI-assisted analysis. Features advanced PID attribution, baseline learning, and web dashboard.
+AIX port of [C-Sentinel](https://github.com/williamofai/c-sentinel) by William. Lightweight system prober that captures "system fingerprints" for AI-assisted analysis. Features advanced PID attribution, baseline learning, and web dashboard.
 
 - ✅ **95% feature parity** with Linux version on AIX 7.1/7.2/7.3
 - ✅ **PID attribution for 70+ ports** (SSH, PostgreSQL, MySQL, Oracle, DB2, Informix, WebSphere, SAP, etc.)

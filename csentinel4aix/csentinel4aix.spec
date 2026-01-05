@@ -12,13 +12,16 @@ BuildRequires:  make
 Requires:       /bin/sh
 
 %description
+AIX port of C-Sentinel (https://github.com/williamofai/c-sentinel).
+Original project by William (@williamofai).
+
 C-Sentinel is a lightweight, portable system prober that captures
 "system fingerprints" for AI-assisted analysis of non-obvious risks.
 Features process monitoring, network analysis with PID attribution
 for 70+ ports (SSH, databases, IBM middleware, SAP), configuration
 drift detection, and baseline learning.
 
-AIX port with 95%% feature parity supporting AIX 7.1, 7.2, and 7.3.
+This AIX port provides 95%% feature parity supporting AIX 7.1, 7.2, and 7.3.
 
 %prep
 %setup -q

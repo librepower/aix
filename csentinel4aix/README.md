@@ -1,8 +1,14 @@
-# C-Sentinel
+# C-Sentinel for AIX
 
-**Semantic Observability for UNIX Systems - Now with AIX Support!**
+**AIX Port of C-Sentinel - Semantic Observability for UNIX Systems**
 
-A lightweight, portable system prober written in C that captures "system fingerprints" for AI-assisted analysis of non-obvious risks. Features auditd integration, explainable risk scoring, and a live web dashboard with enterprise-grade multi-user authentication.
+> 🔗 **Original Project:** [github.com/williamofai/c-sentinel](https://github.com/williamofai/c-sentinel)
+> 👤 **Original Author:** William ([@williamofai](https://github.com/williamofai))
+> 📦 **This Repository:** AIX 7.1/7.2/7.3 port by [LibrePower](https://librepower.org)
+
+This is a port of the excellent C-Sentinel system monitoring tool to IBM AIX. All core functionality and design credit goes to the original author. We are only responsible for the AIX-specific adaptations and maintaining compatibility with AIX 7.x systems.
+
+**About C-Sentinel:** A lightweight, portable system prober written in C that captures "system fingerprints" for AI-assisted analysis of non-obvious risks. Features auditd integration, explainable risk scoring, and a live web dashboard with enterprise-grade multi-user authentication.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Version](https://img.shields.io/badge/version-1.0.0--aix-blue)
