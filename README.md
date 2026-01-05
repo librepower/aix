@@ -4,6 +4,9 @@
 
 Open source tools and packages for AIX/VIOS on IBM Power systems.
 
+> ⚠️ **Early Release**: These packages are provided as-is for testing and evaluation. 
+> While we use them in production, bugs may exist. 
+
 ## Quick Install via DNF Repository
 
 The easiest way to install our packages. One-time setup, then use `dnf install` like on Linux.
@@ -24,8 +27,50 @@ dnf install linux-compat
 
 ## Available Packages
 
+### 🔐 2FA for AIX Made Simple
+
+Google Authenticator two-factor authentication for AIX/VIOS, done right.
+
+- ✅ QR codes work (libqrencode included)
+- ✅ Bilingual setup wizards (EN/ES)
+- ✅ NTP verification before setup
+- ✅ Secure defaults
+- ✅ Full rollback and emergency access instructions
+
+📁 **[Documentation & Downloads](2fa-made-simple/)**
+
+### ✏️ nano - GNU Text Editor
+*Simple, friendly editor for everyone*
+
+The default editor on many Linux distributions, now on AIX. 
+
+- ✅ Simple, intuitive interface (no modal editing)
+- ✅ Syntax highlighting for 40+ languages (enabled by default!)
+- ✅ UTF-8 support
+- ✅ Auto-indentation enabled
+- ✅ On-screen keyboard shortcuts
+
+📁 **[Documentation & Downloads](nano-editor/)**
+
+---
+
+### 🔍 fzf - Fuzzy Finder
+*First? Go-based tool compiled for AIX*
+
+The incredibly popular command-line fuzzy finder, now on AIX. Search through anything: files, processes, packages, command history.
+
+- ✅ Blazing fast (500,000 items in < 1 second)
+- ✅ Zero dependencies (single static binary)
+- ✅ AIX-specific helper scripts (fzf-rpm, fzf-proc, fzf-svc)
+- ✅ Shell integration (Ctrl-R history search, Ctrl-T file picker)
+- ✅ The proof that modern Go tools can run on AIX
+
+📁 **[Documentation & Downloads](fzf-fuzzy-finder/)**
+
+---
+
 ### 🐧 Linux Compatibility
-* Used to Linux? Feel at home on AIX*
+*Used to Linux? Feel at home on AIX*
 
 A configuration layer for IBM's GNU tools. Makes the excellent IBM AIX Toolbox packages the default in your interactive shell.
 
@@ -39,50 +84,6 @@ A configuration layer for IBM's GNU tools. Makes the excellent IBM AIX Toolbox p
 - ✅ Scripts using `#!/bin/sh` remain untouched
 
 📁 **[Documentation & Downloads](linux-compat/)**
-
----
-
-### ✏️ nano - GNU Text Editor
-*Simple, friendly editor for everyone*
-
-The default editor on many Linux distributions, now on AIX. If you prefer something simpler than vi, nano is for you.
-
-- ✅ Simple, intuitive interface (no modal editing)
-- ✅ Syntax highlighting for 40+ languages (enabled by default)
-- ✅ UTF-8 support
-- ✅ Auto-indentation enabled
-- ✅ On-screen keyboard shortcuts
-
-📁 **[Documentation & Downloads](nano-editor/)**
-
----
-
-### 🔍 fzf - Fuzzy Finder
-*First Go-based tool compiled for AIX*
-
-The incredibly popular command-line fuzzy finder, now on AIX. Search through anything: files, processes, packages, command history.
-
-- ✅ Blazing fast (500,000 items in < 1 second)
-- ✅ Zero dependencies (single static binary)
-- ✅ AIX-specific helper scripts (fzf-rpm, fzf-proc, fzf-svc)
-- ✅ Shell integration (Ctrl-R history search, Ctrl-T file picker)
-- ✅ First proof that modern Go tools can run on AIX
-
-📁 **[Documentation & Downloads](fzf-fuzzy-finder/)**
-
----
-
-### 🔐 2FA Made Simple
-
-Google Authenticator two-factor authentication for AIX/VIOS, done right.
-
-- ✅ QR codes work (libqrencode included)
-- ✅ Bilingual setup wizards (EN/ES)
-- ✅ NTP verification before setup
-- ✅ Secure defaults
-- ✅ Full rollback and emergency access instructions
-
-📁 **[Documentation & Downloads](2fa-made-simple/)**
 
 ## Contribute
 
