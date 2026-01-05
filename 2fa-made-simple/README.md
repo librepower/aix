@@ -2,9 +2,36 @@
 
 Google Authenticator two-factor authentication for AIX/VIOS, with working QR codes, safe configuration, and easy bilingual setup wizards.
 
-## Download
+## Compatible Authenticator Apps
 
-### Option 1: curl (Recommended)
+Despite the name "Google Authenticator", this uses the open **TOTP standard (RFC 6238)**. Works with any TOTP-compatible app:
+
+- ✅ Microsoft Authenticator
+- ✅ Google Authenticator
+- ✅ Authy
+- ✅ 1Password
+- ✅ Bitwarden
+- ✅ FreeOTP
+- ✅ Aegis
+- ✅ Any TOTP-compatible app
+
+## Installation
+
+### Option 1: dnf (Recommended)
+
+Add the LibrePower repository and install with one command:
+
+```bash
+# Add repository (one-time setup)
+curl -fsSL https://aix.librepower.org/install.sh | sh
+
+# Install packages
+dnf install google-authenticator libqrencode google-authenticator-setup
+```
+
+📦 Repository details: https://aix.librepower.org/
+
+### Option 2: curl (if dnf/yum not available)
 
 ```bash
 cd /tmp
@@ -22,11 +49,16 @@ curl -L -o google-authenticator-setup-1.0-5.librepower.aix7.3.ppc.rpm \
 
 # Verify downloads
 file *.rpm
+
+# Install
+rpm -ivh libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
+rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
+rpm -ivh google-authenticator-setup-1.0-5.librepower.aix7.3.ppc.rpm
 ```
 
 > ⚠️ **Important**: Use `-L` flag to follow redirects. Do NOT download from `/blob/` URLs.
 
-### Option 2: GitHub Releases Page
+### Option 3: GitHub Releases Page
 
 Download from [Releases](https://github.com/librepower/aix/releases/tag/2fa-v1.0)
 
@@ -67,10 +99,7 @@ ntpdate -u pool.ntp.org
 startsrc -s xntpd
 # Enable at boot: edit /etc/rc.tcpip and uncomment the xntpd entry
 
-# 2. Install packages
-rpm -ivh libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
-rpm -ivh google-authenticator-1.10-1.aix7.1.ppc.rpm
-rpm -ivh google-authenticator-setup-1.0-5.librepower.aix7.3.ppc.rpm
+# 2. Install packages (see Installation section above)
 
 # 3. Configure PAM - add to /etc/pam.conf:
 # SSH 2FA for AIX made SIMPLE
