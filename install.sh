@@ -3,14 +3,10 @@
 # https://aix.librepower.org
 #
 # Usage: curl -fsSL https://aix.librepower.org/install.sh | sh
-#
-# Part of LibrePower initiative by SIXE - IBM Business Partner
-# https://sixe.eu | https://librepower.org
 
 set -e
 
 REPO_FILE="/opt/freeware/etc/yum.repos.d/librepower.repo"
-REPO_URL="https://aix.librepower.org"
 
 echo ""
 echo "╔════════════════════════════════════════════════════════════════╗"
@@ -24,36 +20,27 @@ echo ""
 
 # Check if running as root
 if [ "$(id -u)" -ne 0 ]; then
-    echo "Warning: This script requires root privileges."
-    echo "Please run: sudo sh -c 'curl -fsSL ${REPO_URL}/install.sh | sh'"
+    echo "Error: This script requires root privileges."
+    echo "Please run: sudo sh -c 'curl -fsSL https://aix.librepower.org/install.sh | sh'"
     exit 1
 fi
 
 # Check if AIX
 if [ "$(uname -s)" != "AIX" ]; then
-    echo "Warning: This repository is for AIX systems only."
+    echo "Error: This repository is for AIX systems only."
     echo "Detected OS: $(uname -s)"
     exit 1
 fi
 
-# Check if DNF is installed
-if ! command -v dnf >/dev/null 2>&1; then
-    if [ -x /opt/freeware/bin/dnf ]; then
-        echo "Note: DNF found at /opt/freeware/bin/dnf"
-        echo "Add /opt/freeware/bin to your PATH for easier use."
-    else
-        echo "Warning: DNF is not installed."
-        echo "Please install DNF from AIX Toolbox first:"
-        echo "  https://public.dhe.ibm.com/aix/freeSoftware/aixtoolbox/"
-        exit 1
-    fi
+# Check if DNF is available
+if ! command -v dnf >/dev/null 2>&1 && [ ! -x /opt/freeware/bin/dnf ]; then
+    echo "Error: DNF is not installed."
+    echo "Install it from AIX Toolbox: https://public.dhe.ibm.com/aix/freeSoftware/aixtoolbox/"
+    exit 1
 fi
 
-# Check if repo directory exists
-if [ ! -d "/opt/freeware/etc/yum.repos.d" ]; then
-    echo "Creating yum.repos.d directory..."
-    mkdir -p /opt/freeware/etc/yum.repos.d
-fi
+# Create repo directory if needed
+mkdir -p /opt/freeware/etc/yum.repos.d 2>/dev/null
 
 # Create repository file
 echo "Installing LibrePower repository..."
@@ -66,19 +53,16 @@ gpgcheck=0
 REPOEOF
 
 echo ""
-echo "LibrePower repository installed successfully!"
+echo "Done! Repository installed: ${REPO_FILE}"
 echo ""
-echo "Repository file: ${REPO_FILE}"
-echo ""
-echo "You can now install packages with:"
+echo "Install packages with:"
 echo "  dnf install fzf"
 echo "  dnf install nano"
 echo ""
-echo "To list available packages:"
+echo "List available:"
 echo "  dnf --repo=librepower list available"
 echo ""
-echo "------------------------------------------------------------"
-echo "  LibrePower - SIXE IBM Business Partner"
-echo "  https://sixe.eu | https://librepower.org"
-echo "------------------------------------------------------------"
+echo "────────────────────────────────────────────────────────────────"
+echo "  LibrePower - https://librepower.org"
+echo "────────────────────────────────────────────────────────────────"
 echo ""
