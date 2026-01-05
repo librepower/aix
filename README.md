@@ -25,7 +25,7 @@ dnf install linux-compat
 ## Available Packages
 
 ### 🐧 Linux Compatibility
-*NEW - Feel at home on AIX*
+* Used to Linux? Feel at home on AIX*
 
 A configuration layer for IBM's GNU tools. Makes the excellent IBM AIX Toolbox packages the default in your interactive shell.
 
@@ -83,39 +83,6 @@ Google Authenticator two-factor authentication for AIX/VIOS, done right.
 - ✅ Full rollback and emergency access instructions
 
 📁 **[Documentation & Downloads](2fa-made-simple/)**
-
-## Manual Install (without DNF repository)
-
-If you prefer to download RPMs directly:
-
-> **Tip**: Use `dnf install ./file.rpm` to automatically resolve dependencies from AIX Toolbox.
-
-### linux-compat
-```bash
-curl -LO https://github.com/librepower/aix/releases/download/linux-compat-v2.1/linux-compat-2.1-1.librepower.aix7.3.noarch.rpm
-dnf install ./linux-compat-2.1-1.librepower.aix7.3.noarch.rpm
-linux-compat-setup install
-source ~/.linux-compat-profile
-```
-
-### nano
-```bash
-curl -LO https://github.com/librepower/aix/releases/download/nano-v8.3/nano-8.3-3.librepower.aix7.3.ppc.rpm
-dnf install ./nano-8.3-3.librepower.aix7.3.ppc.rpm
-```
-
-### fzf
-```bash
-curl -LO https://github.com/librepower/aix/releases/download/fzf-v0.46.1/fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
-dnf install ./fzf-0.46.1-1.librepower.aix7.3.ppc.rpm
-```
-
-### 2FA Made Simple
-```bash
-curl -LO https://github.com/librepower/aix/releases/download/2fa-v1.0/libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm
-curl -LO https://github.com/librepower/aix/releases/download/2fa-v1.0/google-authenticator-1.10-1.aix7.1.ppc.rpm
-dnf install ./libqrencode-4.1.1-4.librepower.aix7.3.ppc.rpm ./google-authenticator-1.10-1.aix7.1.ppc.rpm
-```
 
 ## Contribute
 
