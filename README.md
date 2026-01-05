@@ -122,7 +122,7 @@ Have you compiled open source software for AIX? Built something useful for Power
 
 ### Ideas welcome too
 
-No code yet? Open an [Issue](https://github.com/librepower/aix/issues) with your ideas, requests, or questions.
+No code yet? Open an [Issue](https://gitlab.com/librepower-tools/aix/issues) with your ideas, requests, or questions.
 
 ---
 
