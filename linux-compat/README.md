@@ -1,6 +1,6 @@
 # Linux Compatibility for AIX
 
-![AIX 7.2](https://img.shields.io/badge/AIX-7.2+-blue)
+![AIX 7.3](https://img.shields.io/badge/AIX-7.2+-blue)
 ![noarch](https://img.shields.io/badge/arch-noarch-lightgrey)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 
@@ -8,18 +8,17 @@
 
 Provides a familiar GNU/Linux command-line experience for AIX administrators coming from Linux environments.
 
-## Why linux-compat?
+## Why This Package?
 
-**Because muscle memory matters.**
+**You already know Linux. Why relearn everything on AIX?**
 
-You've spent years typing `ls -lh`, `grep -rP`, `systemctl status`. Now you're on AIX and nothing works the same way. The tools exist (IBM ported them!), but they're not in your PATH and AIX services use different commands.
-
-| Linux muscle memory | AIX native | With linux-compat |
-|---------------------|------------|-------------------|
-| `ls -lh --color` | `ls -l` (no -h, no color) | ✅ Works |
-| `grep -rP "regex"` | `/opt/freeware/bin/grep...` | ✅ Works |
-| `systemctl status sshd` | `lssrc -s sshd` | ✅ Works |
-| `watch -n 5 command` | ❌ Doesn't exist | ✅ Works |
+| Task | Linux | AIX (native) | AIX (with linux-compat) |
+|------|-------|--------------|-------------------------|
+| List files | `ls -lh --color` | `ls -l` (no -h, no color) | `ls -lh --color` ✅ |
+| Find files | `find -name "*.log"` | Same, but PATH issues | Just works ✅ |
+| Service status | `systemctl status sshd` | `lssrc -s sshd` | `systemctl status sshd` ✅ |
+| Watch command | `watch df -h` | ❌ Doesn't exist | `watch df -h` ✅ |
+| Find process | `pgrep java` | ❌ Doesn't exist | `pgrep java` ✅ |
 
 ## What This Package Does
 
@@ -40,7 +39,7 @@ Let's be clear about what this is and isn't:
 - `systemctl` and `service` wrappers for AIX SRC (System Resource Controller)
 - Bilingual documentation
 
-Credit where it's due: **IBM did the hard work of porting these tools. We just make them easier to use by default.**
+**Credit where it's due: IBM did the hard work of porting these tools. We just make them easier to use by default.**
 
 ## Installation
 
@@ -217,8 +216,7 @@ After activation, type `linuxhelp` for a quick reference card.
 
 GPL-3.0 - See [LICENSE](../LICENSE)
 
----
+## Credits
 
-*Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source 🌍*
-
-*Maintained by [SIXE](https://sixe.eu) - IBM Business Partner*
+- Shell scripts and wrappers by [SIXE](https://sixe.eu)
+- Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source 🌍
