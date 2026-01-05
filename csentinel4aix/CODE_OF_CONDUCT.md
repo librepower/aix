@@ -29,7 +29,7 @@ This Code of Conduct applies within all community spaces, including the GitHub r
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behaviour may be reported to the project maintainer at william@fstopify.com. All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behaviour may be reported to the project maintainer at hello@librepower.org. All complaints will be reviewed and investigated promptly and fairly.
 
 ## Attribution
 

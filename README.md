@@ -103,25 +103,6 @@ Lightweight system prober that captures "system fingerprints" for AI-assisted an
 - ✅ **Web dashboard** - Multi-user authentication, PostgreSQL backend, real-time alerts
 - ✅ **RPM package** - Easy installation via DNF
 
-**Installation:**
-```bash
-dnf install csentinel4aix
-```
-
-**Quick start:**
-```bash
-sentinel -q -n          # Quick analysis
-sentinel -l -n          # Learn baseline
-sentinel -b -q -n       # Compare against baseline
-```
-
-**Features:**
-- JSON output for automation and AI analysis
-- Email and Slack alerts
-- Brute force detection
-- Privacy-preserving username hashing
-- Risk scoring with explainable factors
-
 📁 **[Documentation & Downloads](csentinel4aix/)**
 
 ---

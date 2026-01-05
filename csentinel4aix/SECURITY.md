@@ -15,7 +15,7 @@ If you discover a security vulnerability in C-Sentinel, please report it respons
 
 ### How to Report
 
-**Email**: william@fstopify.com
+**Email**: hello@librepower.org
 
 **Please include**:
 - Description of the vulnerability
