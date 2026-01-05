@@ -1,0 +1,101 @@
+#!/bin/bash
+#
+# sentinel-push - Send sentinel fingerprint to dashboard
+#
+# Usage: sentinel-push [options]
+#
+# Runs sentinel and POSTs the JSON output to the configured dashboard.
+#
+
+set -e
+
+# Configuration - override with environment variables
+SENTINEL_BIN="${SENTINEL_BIN:-/usr/local/bin/sentinel}"
+DASHBOARD_URL="${DASHBOARD_URL:-https://sentinel.speytech.com/api/ingest}"
+API_KEY="${SENTINEL_API_KEY:-}"
+
+# Parse arguments
+SENTINEL_ARGS="--json --network"
+
+usage() {
+    echo "Usage: $0 [options]"
+    echo
+    echo "Options:"
+    echo "  -u, --url URL      Dashboard URL (default: \$DASHBOARD_URL)"
+    echo "  -k, --key KEY      API key (default: \$SENTINEL_API_KEY)"
+    echo "  -b, --baseline     Include baseline comparison"
+    echo "  -v, --verbose      Show output"
+    echo "  -h, --help         Show this help"
+    echo
+    exit 1
+}
+
+VERBOSE=0
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -u|--url)
+            DASHBOARD_URL="$2"
+            shift 2
+            ;;
+        -k|--key)
+            API_KEY="$2"
+            shift 2
+            ;;
+        -b|--baseline)
+            SENTINEL_ARGS="$SENTINEL_ARGS --baseline"
+            shift
+            ;;
+        -v|--verbose)
+            VERBOSE=1
+            shift
+            ;;
+        -h|--help)
+            usage
+            ;;
+        *)
+            echo "Unknown option: $1"
+            usage
+            ;;
+    esac
+done
+
+# Check requirements
+if [ -z "$API_KEY" ]; then
+    echo "Error: API key required. Set SENTINEL_API_KEY or use -k option."
+    exit 1
+fi
+
+if [ ! -x "$SENTINEL_BIN" ]; then
+    echo "Error: Sentinel binary not found at $SENTINEL_BIN"
+    exit 1
+fi
+
+# Run sentinel and capture output
+OUTPUT=$("$SENTINEL_BIN" $SENTINEL_ARGS 2>&1)
+EXIT_CODE=$?
+
+if [ $VERBOSE -eq 1 ]; then
+    echo "Sentinel exit code: $EXIT_CODE"
+    echo "Sending to: $DASHBOARD_URL"
+fi
+
+# Send to dashboard
+RESPONSE=$(echo "$OUTPUT" | curl -s -X POST \
+    -H "Content-Type: application/json" \
+    -H "X-API-Key: $API_KEY" \
+    -H "X-Exit-Code: $EXIT_CODE" \
+    -d @- \
+    "$DASHBOARD_URL")
+
+if [ $VERBOSE -eq 1 ]; then
+    echo "Response: $RESPONSE"
+fi
+
+# Check response
+if echo "$RESPONSE" | grep -q '"status": "ok"'; then
+    [ $VERBOSE -eq 1 ] && echo "Successfully sent fingerprint"
+    exit 0
+else
+    echo "Failed to send fingerprint: $RESPONSE"
+    exit 1
+fi

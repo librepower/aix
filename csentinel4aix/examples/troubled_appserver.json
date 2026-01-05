@@ -1,0 +1,110 @@
+{
+  "sentinel_version": "0.1.0",
+  "probe_time": "2025-01-15T10:30:00Z",
+  "probe_duration_ms": 45.67,
+  "probe_errors": 0,
+  "system": {
+    "hostname": "app-server-03",
+    "kernel": "Linux 5.4.0-150-generic",
+    "uptime_days": 127.45,
+    "load_average": [4.82, 4.65, 4.21],
+    "memory_total_gb": 16.00,
+    "memory_free_gb": 0.89,
+    "memory_used_percent": 94.4
+  },
+  "process_summary": {
+    "total_count": 342,
+    "notable_processes": [
+      {
+        "pid": 12847,
+        "name": "java",
+        "state": "S",
+        "age_days": 127.45,
+        "memory_mb": 8234.5,
+        "open_fds": 847,
+        "threads": 156,
+        "flag": "high_memory"
+      },
+      {
+        "pid": 18923,
+        "name": "python3",
+        "state": "S",
+        "age_days": 89.23,
+        "memory_mb": 2156.8,
+        "open_fds": 312,
+        "threads": 24,
+        "flag": "high_fd_count"
+      },
+      {
+        "pid": 4521,
+        "name": "defunct",
+        "state": "Z",
+        "age_days": 45.12,
+        "memory_mb": 0.0,
+        "open_fds": 0,
+        "threads": 1,
+        "flag": "zombie"
+      },
+      {
+        "pid": 4522,
+        "name": "defunct",
+        "state": "Z",
+        "age_days": 45.12,
+        "memory_mb": 0.0,
+        "open_fds": 0,
+        "threads": 1,
+        "flag": "zombie"
+      },
+      {
+        "pid": 8841,
+        "name": "mysqld",
+        "state": "D",
+        "age_days": 0.15,
+        "memory_mb": 1847.2,
+        "open_fds": 234,
+        "threads": 48,
+        "flag": "potentially_stuck"
+      },
+      {
+        "pid": 2341,
+        "name": "logrotate",
+        "state": "S",
+        "age_days": 89.45,
+        "memory_mb": 12.3,
+        "open_fds": 156,
+        "threads": 1,
+        "flag": "very_long_running"
+      }
+    ],
+    "zombie_count": 2,
+    "high_fd_count": 2,
+    "stuck_count": 1
+  },
+  "config_files": [
+    {
+      "path": "/etc/mysql/my.cnf",
+      "size_bytes": 4521,
+      "modified": "2024-06-15T03:22:00Z",
+      "permissions": "0644",
+      "owner_uid": 0,
+      "checksum": "deadbeef12345678"
+    },
+    {
+      "path": "/etc/security/limits.conf",
+      "size_bytes": 2156,
+      "modified": "2024-03-01T11:45:00Z",
+      "permissions": "0777",
+      "owner_uid": 0,
+      "checksum": "cafebabe87654321",
+      "warning": "world_writable"
+    },
+    {
+      "path": "/var/log/app/debug.log",
+      "size_bytes": 15728640000,
+      "modified": "2025-01-15T10:29:58Z",
+      "permissions": "0644",
+      "owner_uid": 1000,
+      "checksum": "1111222233334444"
+    }
+  ]
+}

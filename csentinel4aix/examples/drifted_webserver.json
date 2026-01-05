@@ -1,0 +1,59 @@
+{
+  "sentinel_version": "0.1.0",
+  "probe_time": "2025-01-15T10:30:00Z",
+  "probe_duration_ms": 11.23,
+  "probe_errors": 0,
+  "system": {
+    "hostname": "web-prod-02",
+    "kernel": "Linux 5.15.0-89-generic",
+    "uptime_days": 12.18,
+    "load_average": [1.82, 1.95, 2.12],
+    "memory_total_gb": 32.00,
+    "memory_free_gb": 8.23,
+    "memory_used_percent": 74.3
+  },
+  "process_summary": {
+    "total_count": 195,
+    "notable_processes": [
+      {
+        "pid": 9912,
+        "name": "nginx",
+        "state": "S",
+        "age_days": 12.18,
+        "memory_mb": 245.6,
+        "open_fds": 128,
+        "threads": 9,
+        "flag": "high_fd_count"
+      }
+    ],
+    "zombie_count": 0,
+    "high_fd_count": 1,
+    "stuck_count": 0
+  },
+  "config_files": [
+    {
+      "path": "/etc/nginx/nginx.conf",
+      "size_bytes": 2912,
+      "modified": "2025-01-10T16:45:00Z",
+      "permissions": "0644",
+      "owner_uid": 0,
+      "checksum": "f0f0f0f0e1e1e1e1"
+    },
+    {
+      "path": "/etc/ssh/sshd_config",
+      "size_bytes": 3312,
+      "modified": "2024-11-15T14:22:00Z",
+      "permissions": "0600",
+      "owner_uid": 0,
+      "checksum": "1234567890abcdef"
+    },
+    {
+      "path": "/etc/sysctl.conf",
+      "size_bytes": 1847,
+      "modified": "2025-01-08T09:12:00Z",
+      "permissions": "0644",
+      "owner_uid": 0,
+      "checksum": "9999888877776666"
+    }
+  ]
+}

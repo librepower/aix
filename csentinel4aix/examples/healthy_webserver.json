@@ -1,0 +1,40 @@
+{
+  "sentinel_version": "0.1.0",
+  "probe_time": "2025-01-15T10:30:00Z",
+  "probe_duration_ms": 12.34,
+  "probe_errors": 0,
+  "system": {
+    "hostname": "web-prod-01",
+    "kernel": "Linux 5.15.0-91-generic",
+    "uptime_days": 45.32,
+    "load_average": [0.42, 0.38, 0.35],
+    "memory_total_gb": 32.00,
+    "memory_free_gb": 18.45,
+    "memory_used_percent": 42.3
+  },
+  "process_summary": {
+    "total_count": 187,
+    "notable_processes": [],
+    "zombie_count": 0,
+    "high_fd_count": 0,
+    "stuck_count": 0
+  },
+  "config_files": [
+    {
+      "path": "/etc/nginx/nginx.conf",
+      "size_bytes": 2847,
+      "modified": "2024-12-01T08:15:00Z",
+      "permissions": "0644",
+      "owner_uid": 0,
+      "checksum": "a1b2c3d4e5f67890"
+    },
+    {
+      "path": "/etc/ssh/sshd_config",
+      "size_bytes": 3312,
+      "modified": "2024-11-15T14:22:00Z",
+      "permissions": "0600",
+      "owner_uid": 0,
+      "checksum": "1234567890abcdef"
+    }
+  ]
+}
