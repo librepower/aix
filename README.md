@@ -4,8 +4,18 @@
 
 Open-source tools and packages for AIX/VIOS on IBM Power systems.
 
-> ⚠️ **Early Release**: These packages are provided as-is for testing and evaluation. 
-> While we use them in production, bugs may exist. 
+> ⚠️ **Early Release**: These packages are provided as-is for testing and evaluation.
+> While we use them in production, bugs may exist.
+
+## Join the Community
+
+LibrePower is more than AIX—we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power (ppc64le).
+
+📬 **[Subscribe to our newsletter](https://librepower.substack.com/subscribe)** for releases, technical articles, and community updates.
+
+🌐 **[librepower.org](https://librepower.org)** — Launching February 2026
+
+---
 
 ## Quick Install via DNF Repository
 
