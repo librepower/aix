@@ -117,6 +117,22 @@ AIX port of [C-Sentinel](https://github.com/williamofai/c-sentinel) by William. 
 
 ---
 
+### 📂 lpsof - List Open Files for AIX
+*Native lsof implementation for AIX sysadmins*
+
+Production-ready tool to list open files, track changes, and diagnose system issues. Uses AIX-native APIs (getprocs64, libperfstat) for full TCP/UDP socket information.
+
+- ✅ **Safety limits** - Default 100 process limit prevents system overload
+- ✅ **Delta tracking** - Compare snapshots for incident response
+- ✅ **Watch mode** - Continuous monitoring with configurable interval
+- ✅ **Summary mode** - Top processes by open file count
+- ✅ **Full socket info** - TCP/UDP ports, addresses, connection states
+- ✅ **Security hardened** - Input validation, no command injection
+
+📁 **[Documentation & Downloads](lpsof/)**
+
+---
+
 ## Contribute
 
 **We welcome contributions from the community!**
