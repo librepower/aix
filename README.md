@@ -144,7 +144,7 @@ Port of [doom-ascii](https://github.com/wojciech-graj/doom-ascii) to AIX/POWER. 
 - ✅ **Multiple scaling options** - Adjust resolution to your terminal size
 - ✅ **Color support** - 256-color terminal rendering
 
-📁 **[Documentation & Downloads](doom-ascii-aix/)**
+📁 **[Documentation & Downloads](doom-ascii/)**
 
 ---
 
