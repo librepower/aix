@@ -6,13 +6,37 @@ This is a port of [doom-ascii](https://github.com/wojciech-graj/doom-ascii) to I
 
 ![DOOM ASCII](screenshots/logo.png)
 
+## Quick Install
+
+```bash
+# Install via DNF (recommended)
+dnf install doom-ascii
+
+# Download shareware WAD
+mkdir -p ~/.doom
+/opt/freeware/bin/curl -L -o ~/.doom/doom1.wad \
+  https://distro.ibiblio.org/slitaz/sources/packages/d/doom1.wad
+
+# Play!
+doom
+```
+
 ## Requirements
 
 - IBM AIX 7.2 or later on POWER architecture
-- GCC (from AIX Toolbox for Open Source - `/opt/freeware/bin/gcc`)
 - For Unicode block/braille characters: UTF-8 locale (`bos.loc.utf.EN_US`)
 
-## Building on AIX
+## Manual Install
+
+Download the RPM from [RPMS/](RPMS/) and install:
+
+```bash
+rpm -ivh doom-ascii-0.3.1-1.aix.aix7.3.ppc.rpm
+```
+
+## Building from Source
+
+Requires GCC from AIX Toolbox (`/opt/freeware/bin/gcc`).
 
 ```bash
 # Set up environment
