@@ -133,6 +133,21 @@ Production-ready tool to list open files, track changes, and diagnose system iss
 
 ---
 
+### 👾 DOOM ASCII
+*Text-based DOOM running in your terminal*
+
+Port of [doom-ascii](https://github.com/wojciech-graj/doom-ascii) to AIX/POWER. Play the classic DOOM game rendered entirely in ASCII or Unicode block characters directly in your terminal.
+
+- ✅ **Big-endian support** - Proper byte-swapping for POWER architecture
+- ✅ **64-bit XCOFF binary** - Native AIX executable
+- ✅ **Unicode block/braille characters** - Higher resolution with UTF-8 locale
+- ✅ **Multiple scaling options** - Adjust resolution to your terminal size
+- ✅ **Color support** - 256-color terminal rendering
+
+📁 **[Documentation & Downloads](doom-ascii-aix/)**
+
+---
+
 ## Contribute
 
 **We welcome contributions from the community!**
