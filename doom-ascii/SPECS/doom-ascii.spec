@@ -1,6 +1,6 @@
 Name:           doom-ascii
 Version:        0.3.1
-Release:        1.aix
+Release:        1.librepower
 Summary:        Text-based DOOM for terminal - AIX/POWER port
 License:        GPL-2.0
 URL:            https://github.com/wojciech-graj/doom-ascii

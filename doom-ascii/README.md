@@ -31,7 +31,7 @@ doom
 Download the RPM from [RPMS/](RPMS/) and install:
 
 ```bash
-rpm -ivh doom-ascii-0.3.1-1.aix.aix7.3.ppc.rpm
+rpm -ivh doom-ascii-0.3.1-1.librepower.aix7.3.ppc.rpm
 ```
 
 ## Building from Source
