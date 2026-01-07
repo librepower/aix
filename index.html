@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LibrePower AIX Repository</title>
+    <title>LibrePower AIX Repository - Modern Open Source Tools for IBM Power</title>
+    <meta name="description" content="DNF repository with modern CLI tools for AIX. Install fzf, nano, and more with a single command. Part of LibrePower.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -31,10 +32,7 @@
         header { padding: 24px 0; border-bottom: 1px solid var(--border-color); }
         .header-content { display: flex; justify-content: space-between; align-items: center; }
         .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-primary); }
-        .logo-icon {
-            width: 40px; height: 40px;
-            border-radius: 10px;
-        }
+        .logo-icon { width: 40px; height: 40px; border-radius: 10px; }
         .logo-icon img { width: 100%; height: 100%; object-fit: contain; }
         .logo-text { font-size: 20px; font-weight: 600; }
         .logo-text span { color: var(--accent-green); }
@@ -82,19 +80,29 @@
         .packages-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
         .package-card {
             background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 24px; transition: border-color 0.2s;
+            border-radius: 12px; padding: 24px; transition: border-color 0.2s, transform 0.2s;
         }
-        .package-card:hover { border-color: var(--accent-green); }
+        .package-card:hover { border-color: var(--accent-green); transform: translateY(-2px); }
         .package-name { font-size: 18px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .package-version { font-size: 12px; background: rgba(34, 197, 94, 0.1); color: var(--accent-green); padding: 2px 8px; border-radius: 4px; }
         .package-desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; min-height: 60px; }
         .package-install { font-family: 'SF Mono', monospace; font-size: 13px; background: var(--bg-primary); padding: 8px 12px; border-radius: 6px; color: var(--accent-green); }
-        footer { padding: 40px 0; border-top: 1px solid var(--border-color); text-align: center; }
-        .footer-brand { margin-bottom: 16px; }
-        .footer-text { color: var(--text-secondary); font-size: 14px; }
+        .cta-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s;
+        }
+        .cta-btn-primary { background: var(--accent-green); color: #000; }
+        .cta-btn-primary:hover { background: var(--accent-green-dark); }
+        .cta-btn-secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); }
+        .cta-btn-secondary:hover { border-color: var(--accent-green); }
+        footer { padding: 48px 0; border-top: 1px solid var(--border-color); text-align: center; }
+        .footer-logo { margin-bottom: 20px; }
+        .footer-logo img { height: 48px; }
+        .footer-text { color: var(--text-secondary); font-size: 14px; margin-bottom: 8px; }
         .footer-text a { color: var(--accent-green); text-decoration: none; }
-        .footer-tagline { margin-top: 16px; font-size: 13px; color: var(--text-secondary); }
-        .footer-tagline span { color: var(--accent-green); }
+        .footer-text a:hover { text-decoration: underline; }
+        .footer-slogan { margin-top: 20px; font-size: 14px; color: var(--text-secondary); }
+        .footer-slogan span { color: var(--accent-green); font-weight: 500; }
         @media (max-width: 768px) {
             h1 { font-size: 32px; }
             .header-content { flex-direction: column; gap: 16px; }
@@ -107,112 +115,117 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="/" class="logo">
+                <a href="https://librepower.org" class="logo">
                     <div class="logo-icon"><img src="https://librepower.org/wp-content/uploads/2025/12/logo-librepower-1.svg" alt="LibrePower"></div>
                     <div class="logo-text">Libre<span>Power</span> AIX</div>
                 </a>
                 <nav>
-                    <a href="https://gitlab.com/librepower/aix">GitLab</a>
-                    <a href="https://gitlab.com/librepower/aix/-/releases">Releases</a>
-                    <a href="https://sixe.eu">SIXE</a>
+                    <a href="https://librepower.org">LibrePower</a>
+                    <a href="https://gitlab.com/librepower/aix">Source Code</a>
+                    <a href="https://librepower.substack.com">Newsletter</a>
                 </nav>
             </div>
         </div>
     </header>
+
     <main>
         <section class="hero">
             <div class="container">
-                <div class="badge">DNF Repository for AIX</div>
-                <h1>AIX is <span>Awesome</span>. Let's Prove It.</h1>
-                <p class="subtitle">From essential sysadmin tools to games—we're porting everything to AIX. Modern languages compile flawlessly. The only limit is imagination. Welcome to the new era of IBM Power.</p>
+                <div class="badge">Open Source DNF Repository</div>
+                <h1>Modern Tools for <span>AIX</span></h1>
+                <p class="subtitle">Your favorite CLI tools, compiled for IBM Power. Install with DNF just like on Linux. From productivity essentials to games—because AIX deserves nice things too.</p>
                 <div class="install-section">
-                    <div class="install-title">Quick Install</div>
+                    <div class="install-title">Get Started in 30 Seconds</div>
                     <div class="code-block">
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                        <code><span class="comment"># Add LibrePower repository</span>
+                        <code><span class="comment"># One-time setup</span>
 <span class="command">curl -fsSL https://aix.librepower.org/install.sh | sh</span>
 
-<span class="comment"># Install packages</span>
+<span class="comment"># Install your first package</span>
 <span class="command">dnf install fzf nano linux-compat</span></code>
                     </div>
-                    <p style="color: var(--text-secondary); font-size: 13px;">Requires AIX 7.2+ with DNF installed from AIX Toolbox.</p>
+                    <p style="color: var(--text-secondary); font-size: 13px;">Works on AIX 7.2+ with DNF from IBM AIX Toolbox.</p>
                 </div>
             </div>
         </section>
+
         <section class="packages-section">
             <div class="container">
                 <div class="section-header">
                     <h2>Available Packages</h2>
-                    <p>Actively developed. Community-driven. Use them, break them, improve them. Your adventure, your rules.</p>
+                    <p>Open source. Actively maintained. Free to use, modify, and redistribute.</p>
                 </div>
                 <div class="packages-grid">
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/linux-compat" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">linux-compat <span class="package-version">2.1</span></div>
-                        <p class="package-desc">GNU/Linux CLI experience for AIX. Configuration layer for IBM's GNU tools. Includes systemctl/service wrappers and emulated commands.</p>
+                        <p class="package-desc">Feel at home on AIX. GNU coreutils in your PATH, systemctl wrappers, and familiar commands like watch and pgrep.</p>
                         <div class="package-install">dnf install linux-compat</div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/fzf-fuzzy-finder" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">fzf <span class="package-version">0.46.1</span></div>
-                        <p class="package-desc">Command-line fuzzy finder. Search files, command history, processes, and more with interactive filtering.</p>
+                        <p class="package-desc">The beloved fuzzy finder. Search files, history, processes—anything. Ctrl+R will never be the same.</p>
                         <div class="package-install">dnf install fzf</div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/nano-editor" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">nano <span class="package-version">8.3</span></div>
-                        <p class="package-desc">Easy-to-use text editor. A familiar editing experience for users coming from Linux environments.</p>
+                        <p class="package-desc">The friendly text editor. Syntax highlighting, intuitive shortcuts. No steep learning curve.</p>
                         <div class="package-install">dnf install nano</div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/2fa-made-simple" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">2FA Made Simple <span class="package-version">1.0</span></div>
-                        <p class="package-desc">Google Authenticator with QR codes for AIX. Secure your SSH access with TOTP two-factor authentication.</p>
+                        <p class="package-desc">Google Authenticator for AIX, done right. QR codes that actually work. Bilingual wizards. Peace of mind.</p>
                         <div class="package-install">dnf install google-authenticator-setup</div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/csentinel4aix" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">C-Sentinel <span class="package-version">1.0.0</span></div>
-                        <p class="package-desc">Semantic observability for AIX. AI-assisted system monitoring with PID attribution (70+ ports), baseline learning, and anomaly detection.</p>
+                        <p class="package-desc">AI-ready observability. Capture system fingerprints, detect anomalies, track 70+ services. Built for AIX.</p>
                         <div class="package-install">dnf install csentinel4aix</div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/lpsof" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">lpsof <span class="package-version">0.3.0</span></div>
-                        <p class="package-desc">Native lsof for AIX. List open files, track changes, full TCP/UDP socket info. Uses AIX-native APIs for maximum accuracy.</p>
+                        <p class="package-desc">Native lsof for AIX. Full socket details, delta tracking, watch mode. Powered by libperfstat.</p>
                         <div class="package-install">dnf install lpsof</div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/doom-ascii" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">DOOM ASCII <span class="package-version">0.3.1</span></div>
-                        <p class="package-desc">Yes, DOOM runs on AIX. Text-based rendering in your terminal. Because if it can run DOOM, it can run anything.</p>
+                        <p class="package-desc">Yes. DOOM. On AIX. In your terminal. Because proving a point has never been this fun.</p>
                         <div class="package-install">dnf install doom-ascii</div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix" class="package-card" style="text-decoration: none; color: inherit; border-style: dashed; opacity: 0.7;">
-                        <div class="package-name">More coming...</div>
-                        <p class="package-desc">yq, glow, lazygit, htop and more. Modern tools for modern workflows. AIX has no limits.</p>
-                        <div class="package-install" style="color: var(--text-secondary);">Contribute on GitLab →</div>
+                        <div class="package-name">Want something else?</div>
+                        <p class="package-desc">Request a package or contribute your own. C, Go, Rust—modern languages compile beautifully on AIX.</p>
+                        <div class="package-install" style="color: var(--text-secondary);">Open an issue on GitLab →</div>
                     </a>
                 </div>
             </div>
         </section>
-        <section class="cta-section" style="padding: 60px 0; background: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+
+        <section style="padding: 80px 0; background: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
             <div class="container" style="text-align: center;">
-                <h2 style="font-size: 28px; margin-bottom: 16px;">Join the Movement</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto;">Get updates on new packages, technical articles, and the future of open source on IBM Power.</p>
+                <h2 style="font-size: 28px; margin-bottom: 16px;">Stay in the Loop</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto;">New packages, deep dives, and the occasional Power Systems hot take. No spam. Unsubscribe anytime.</p>
                 <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                    <a href="https://librepower.substack.com/subscribe" style="display: inline-flex; align-items: center; gap: 8px; background: var(--accent-green); color: #000; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: opacity 0.2s;">
-                        📬 Subscribe to Newsletter
+                    <a href="https://librepower.substack.com/subscribe" class="cta-btn cta-btn-primary">
+                        Subscribe to Newsletter
                     </a>
-                    <a href="https://librepower.org" style="display: inline-flex; align-items: center; gap: 8px; background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: border-color 0.2s;">
-                        🌐 Visit LibrePower.org
+                    <a href="https://librepower.org" class="cta-btn cta-btn-secondary">
+                        Explore LibrePower
                     </a>
                 </div>
             </div>
         </section>
     </main>
+
     <footer>
         <div class="container">
-            <div class="footer-brand">
-                <span style="font-size: 24px; font-weight: 600;">Libre<span style="color: var(--accent-green);">Power</span></span>
+            <div class="footer-logo">
+                <a href="https://librepower.org"><img src="https://librepower.org/wp-content/uploads/2025/12/logo-librepower-1.svg" alt="LibrePower" style="height: 48px;"></a>
             </div>
             <p class="footer-text">Part of the <a href="https://librepower.org">LibrePower</a> initiative by <a href="https://sixe.eu">SIXE</a></p>
-            <p class="footer-tagline">🌍 <span>Unlocking Power Systems through open source.</span> Extend the life of your hardware. Reduce e-waste. AIX is sustainable computing.</p>
+            <p class="footer-slogan"><span>Unlocking Power Systems through open source.</span> Unmatched RAS and TCO. Minimal footprint.</p>
         </div>
     </footer>
+
     <script>
         function copyCode(btn) {
             const code = btn.parentElement.querySelector('code').innerText;
