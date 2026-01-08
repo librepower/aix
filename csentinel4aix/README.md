@@ -51,7 +51,7 @@ cd /tmp
 
 # Download RPM from GitLab releases
 curl -L -o csentinel4aix-1.0.0-1.aix7.3.ppc.rpm \
-  https://gitlab.com/librepower-tools/aix/-/raw/main/csentinel4aix/RPMS/csentinel4aix-1.0.0-1.aix7.3.ppc.rpm
+  https://gitlab.com/librepower/aix/-/raw/main/csentinel4aix/RPMS/csentinel4aix-1.0.0-1.aix7.3.ppc.rpm
 
 # Install
 rpm -ivh csentinel4aix-1.0.0-1.aix7.3.ppc.rpm
@@ -104,7 +104,7 @@ For the optional web dashboard installation, see [dashboard/README.md](dashboard
 
 **Documentation:** [AIX Installation Guide](README.AIX.md) | [Complete Port Status](AIX_PORT_STATUS.md)
 
-**Feedback:** Testing welcome! Report issues on [GitLab](https://gitlab.com/librepower-tools/aix/-/issues)
+**Feedback:** Testing welcome! Report issues on [GitLab](https://gitlab.com/librepower/aix/-/issues)
 
 ---
 
@@ -139,7 +139,7 @@ See [dashboard/README.md](dashboard/README.md) for installation instructions.
 
 ## Support
 
-- **Issues**: https://gitlab.com/librepower-tools/aix/-/issues
+- **Issues**: https://gitlab.com/librepower/aix/-/issues
 - **Documentation**: [README.AIX.md](README.AIX.md) | [AIX_PORT_STATUS.md](AIX_PORT_STATUS.md)
 
 ## License

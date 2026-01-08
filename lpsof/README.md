@@ -156,4 +156,4 @@ MIT License - Copyright 2025-2026 LibrePower Project
 
 ## Support
 
-Report bugs at: https://gitlab.com/librepower-tools/aix/-/issues
+Report bugs at: https://gitlab.com/librepower/aix/-/issues
