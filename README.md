@@ -193,4 +193,4 @@ Let's build something great for Power Systems together.
 
 ---
 
-*Maintained by [SIXE](https://sixe.eu) - IBM Business Partner*
+*Maintained by [LibrePower](https://librepower.org)*

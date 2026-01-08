@@ -220,5 +220,5 @@ This package was built with:
 - fzf 0.46.1
 
 Build date: January 2, 2026
-Built by: SIXE - IBM Business Partner (https://sixe.eu)
+Built by: LibrePower (https://librepower.org)
 Part of: LibrePower (https://librepower.org)

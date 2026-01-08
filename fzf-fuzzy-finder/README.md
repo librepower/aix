@@ -244,5 +244,5 @@ Built with:
 ## Credits
 
 - fzf by [Junegunn Choi](https://github.com/junegunn/fzf)
-- AIX port and packaging by [SIXE](https://sixe.eu)
+- AIX port and packaging by [LibrePower](https://librepower.org)
 - Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source 🌍

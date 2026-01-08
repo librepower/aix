@@ -196,5 +196,5 @@ dump -H /opt/freeware/bin/nano | head -20
 
 ---
 
-**Built by:** SIXE - IBM Business Partner  
+**Built by:** LibrePower  
 **Project:** LibrePower - https://librepower.org

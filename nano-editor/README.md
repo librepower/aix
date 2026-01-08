@@ -198,5 +198,5 @@ nano-editor/
 ## Credits
 
 - GNU nano by the [Free Software Foundation](https://www.nano-editor.org/)
-- AIX port and packaging by [SIXE](https://sixe.eu)
+- AIX port and packaging by [LibrePower](https://librepower.org)
 - Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source 🌍
