@@ -50,6 +50,24 @@ static void print_usage(const char *prog) {
     fprintf(stderr, "C-Sentinel v%s - Semantic Observability for UNIX Systems\n\n", SENTINEL_VERSION);
     fprintf(stderr, "Usage: %s [OPTIONS] [config_files...]\n\n", prog);
     fprintf(stderr, "Options:\n");
+#ifdef _AIX
+    /* AIX: Show short options only (AIX getopt doesn't support long options) */
+    fprintf(stderr, "  -h          Show this help message\n");
+    fprintf(stderr, "  -q          Only show quick analysis summary\n");
+    fprintf(stderr, "  -v          Include all processes (not just notable ones)\n");
+    fprintf(stderr, "  -j          Output JSON to stdout (even in quick mode)\n");
+    fprintf(stderr, "  -w          Continuous monitoring mode\n");
+    fprintf(stderr, "  -i SEC      Interval between probes in watch mode (default: 60)\n");
+    fprintf(stderr, "  -n          Include network probe (listeners, connections)\n");
+    fprintf(stderr, "  -a          Include auditd security events\n");
+    fprintf(stderr, "  -b          Compare against learned baseline\n");
+    fprintf(stderr, "  -l          Learn current state as baseline\n");
+    fprintf(stderr, "  -c          Show current configuration\n");
+    fprintf(stderr, "  -C          Create default config file\n");
+    fprintf(stderr, "  -A          Learn audit baseline\n");
+    fprintf(stderr, "  -K          Force coloured output\n");
+    fprintf(stderr, "  -N          Disable coloured output\n");
+#else
     fprintf(stderr, "  -h, --help           Show this help message\n");
     fprintf(stderr, "  -q, --quick          Only show quick analysis summary\n");
     fprintf(stderr, "  -v, --verbose        Include all processes (not just notable ones)\n");
@@ -65,6 +83,7 @@ static void print_usage(const char *prog) {
     fprintf(stderr, "      --audit-learn    Learn audit baseline\n");
     fprintf(stderr, "      --color          Force coloured output\n");
     fprintf(stderr, "      --no-color       Disable coloured output\n");
+#endif
     fprintf(stderr, "\n");
     fprintf(stderr, "Exit codes:\n");
     fprintf(stderr, "  0 - No issues detected\n");
@@ -75,13 +94,24 @@ static void print_usage(const char *prog) {
     fprintf(stderr, "If no config files are specified, probes common system configs.\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "Baseline:\n");
+#ifdef _AIX
+    fprintf(stderr, "  First, learn what's normal:    %s -l -n\n", prog);
+    fprintf(stderr, "  Then compare against baseline: %s -b -n\n", prog);
+#else
     fprintf(stderr, "  First, learn what's normal:    %s --learn --network\n", prog);
     fprintf(stderr, "  Then compare against baseline: %s --baseline --network\n", prog);
+#endif
     fprintf(stderr, "\n");
     fprintf(stderr, "Audit:\n");
+#ifdef _AIX
+    fprintf(stderr, "  Include security events:       %s -q -a\n", prog);
+    fprintf(stderr, "  Learn audit baseline:          %s -A\n", prog);
+    fprintf(stderr, "  Full analysis with audit:      %s -j -n -a\n", prog);
+#else
     fprintf(stderr, "  Include security events:       %s --quick --audit\n", prog);
     fprintf(stderr, "  Learn audit baseline:          %s --audit-learn\n", prog);
     fprintf(stderr, "  Full analysis with audit:      %s --json --network --audit\n", prog);
+#endif
     fprintf(stderr, "\n");
     fprintf(stderr, "Environment:\n");
     fprintf(stderr, "  NO_COLOR             Disable coloured output (standard)\n");
@@ -89,6 +119,15 @@ static void print_usage(const char *prog) {
     fprintf(stderr, "Config file: ~/.sentinel/config\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "Examples:\n");
+#ifdef _AIX
+    fprintf(stderr, "  %s -q                    One-shot quick analysis\n", prog);
+    fprintf(stderr, "  %s -q -n                 Include network probe\n", prog);
+    fprintf(stderr, "  %s -q -n -a              Include network + security events\n", prog);
+    fprintf(stderr, "  %s -w -i 300             Monitor every 5 minutes\n", prog);
+    fprintf(stderr, "  %s -j > fingerprint.json Save full JSON output\n", prog);
+    fprintf(stderr, "  %s -l -n                 Learn current state as baseline\n", prog);
+    fprintf(stderr, "  %s -b -n                 Compare against baseline\n", prog);
+#else
     fprintf(stderr, "  %s --quick                    One-shot quick analysis\n", prog);
     fprintf(stderr, "  %s --quick --network          Include network probe\n", prog);
     fprintf(stderr, "  %s --quick --network --audit  Include network + security events\n", prog);
@@ -96,6 +135,7 @@ static void print_usage(const char *prog) {
     fprintf(stderr, "  %s --json > fingerprint.json  Save full JSON output\n", prog);
     fprintf(stderr, "  %s --learn --network          Learn current state as baseline\n", prog);
     fprintf(stderr, "  %s --baseline --network       Compare against baseline\n", prog);
+#endif
 }
 
 static void print_timestamp(void) {
