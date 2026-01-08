@@ -4,7 +4,9 @@
 
 This is a port of [doom-ascii](https://github.com/wojciech-graj/doom-ascii) to IBM AIX on POWER architecture (big-endian).
 
-![DOOM ASCII](screenshots/logo.png)
+![DOOM ASCII on AIX](demo/doom-ascii-aix.png)
+
+*DOOM running in a terminal on AIX 7.3 / POWER9*
 
 ## Join the Community
 
