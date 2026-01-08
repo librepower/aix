@@ -31,6 +31,17 @@ dnf install fzf nano etc
 
 📦 **Repository:** [aix.librepower.org](https://aix.librepower.org)
 
+### Man Pages
+
+AIX doesn't search `/opt/freeware/share/man` by default. To access man pages for LibrePower packages:
+
+```bash
+# Add to your ~/.profile or ~/.bashrc
+export MANPATH=/opt/freeware/share/man:${MANPATH:-/usr/share/man}
+```
+
+Or install `linux-compat` which configures this automatically.
+
 ---
 
 ## Available Packages
