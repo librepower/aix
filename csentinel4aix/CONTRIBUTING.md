@@ -184,10 +184,10 @@ make test
 
 # Run with debug symbols
 make DEBUG=1
-./bin/sentinel --quick
+./bin/sentinel -q
 
-# Test with audit (requires root)
-sudo ./bin/sentinel --quick --network --audit
+# Test with network (requires root on AIX)
+sudo ./bin/sentinel -q -n
 ```
 
 ### Dashboard
@@ -258,8 +258,8 @@ Before submitting:
 
 - [ ] `make clean && make` completes with no warnings
 - [ ] `make test` passes
-- [ ] JSON output is valid (`sentinel --json | python3 -m json.tool`)
-- [ ] Audit features tested with root (`sudo ./bin/sentinel --audit`)
+- [ ] JSON output is valid (`sentinel -j | python3 -m json.tool`)
+- [ ] Network probe tested (`sudo ./bin/sentinel -q -n`)
 - [ ] Dashboard changes tested in browser
 - [ ] Multi-user features tested (login, roles, 2FA)
 - [ ] Documentation updated if behaviour changed

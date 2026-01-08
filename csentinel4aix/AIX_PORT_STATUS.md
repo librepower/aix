@@ -285,15 +285,18 @@ bin/sentinel-diff   - 64-bit XCOFF executable (41KB)
 ### 1. Opciones largas (--help, --json, etc.)
 **Problema:** AIX `getopt()` no soporta opciones largas `--xxx`
 
-**Solución implementada:**
-- Opciones cortas funcionan: `-h`, `-j`, `-q`, `-n`
-- Opciones largas muestran error pero no rompen la aplicación
+**Solución implementada (v1.0.0-3):**
+- El binario AIX muestra **solo opciones cortas** en la ayuda (`-h`, `-j`, `-q`, `-n`)
+- El código usa `#ifdef _AIX` para mostrar la ayuda correcta en cada plataforma
+- Las opciones largas no funcionan en AIX - usar siempre cortas
 
-**Workaround para usuario:**
+**Ejemplos:**
 ```bash
-# Usar opciones cortas en AIX
-./sentinel -h        # en lugar de --help
-./sentinel -j -q     # en lugar de --json --quick
+sentinel -h          # Ayuda
+sentinel -q -n       # Análisis rápido con red
+sentinel -j -n       # JSON con red
+sentinel -l -n       # Aprender baseline
+sentinel -b -q -n    # Comparar contra baseline
 ```
 
 ### 2. Network PIDs

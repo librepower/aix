@@ -397,20 +397,16 @@ Risk Level: LOW
 
 ```bash
 # Include audit summary
-sentinel --audit
+sentinel -a
 
 # Audit with network (full security picture)
-sentinel --audit --network
-
-# Audit with custom time window (last 10 minutes)
-sentinel --audit --audit-window 600
-
-# Audit with specific log path
-sentinel --audit --audit-log /var/log/audit/audit.log
+sentinel -a -n
 
 # JSON output with audit
-sentinel --json --audit --network
+sentinel -j -a -n
 ```
+
+> **Note:** On AIX, audit integration is not yet available. These examples show Linux usage.
 
 ---
 
