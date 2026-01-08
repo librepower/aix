@@ -6,6 +6,8 @@
 
 gron transforms JSON into discrete assignments to make it easier to grep and see the absolute path to each value. It also works in reverse with `gron -u`.
 
+![gron Demo](demo/gron-demo.gif)
+
 ## Installation
 
 ```bash
