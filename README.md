@@ -148,6 +148,22 @@ Port of [doom-ascii](https://github.com/wojciech-graj/doom-ascii) to AIX/POWER. 
 
 ---
 
+### 🎨 delta - Syntax-Highlighting Pager for Git
+*First Rust application ported to AIX*
+
+Port of [delta](https://github.com/dandavison/delta) to AIX/POWER. A syntax-highlighting pager for git, diff, and grep output that makes code reviews beautiful.
+
+- ✅ **188 languages** - Syntax highlighting for virtually any language
+- ✅ **Git integration** - Works with git diff, log, show, blame
+- ✅ **Side-by-side view** - Compare changes in parallel columns
+- ✅ **Word-level diffs** - Highlights exactly what changed within lines
+- ✅ **20+ themes** - Dracula, Monokai, Nord, Solarized, and more
+- ✅ **Compiled with Rust 1.90** - IBM Open SDK for Rust on AIX
+
+📁 **[Documentation & Downloads](delta/)**
+
+---
+
 ## Contribute
 
 **We welcome contributions from the community!**
