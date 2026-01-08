@@ -197,4 +197,4 @@ GPL-3.0 - Ver [LICENSE](../LICENSE)
 
 *Parte de [LibrePower](https://librepower.org) - Desbloqueando Power Systems a través del código abierto*
 
-*Mantenido por [SIXE](https://sixe.eu) - IBM Business Partner*
+*Mantenido por [LibrePower](https://librepower.org)*

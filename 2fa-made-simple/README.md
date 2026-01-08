@@ -192,7 +192,7 @@ google-authenticator-configura       # Spanish wizard
 
 ## License
 
-- libqrencode: LGPL-2.1 (compiled for AIX by SIXE)
+- libqrencode: LGPL-2.1 (compiled for AIX by LibrePower)
 - google-authenticator: Apache-2.0 (official IBM package)
 - google-authenticator-setup/configura: Apache-2.0 (LibrePower)
 - Documentation and scripts: Apache-2.0
@@ -201,5 +201,5 @@ google-authenticator-configura       # Spanish wizard
 
 - Google Authenticator PAM module by Google
 - libqrencode by Kentaro Fukuchi
-- AIX packaging and documentation by [SIXE](https://sixe.eu)
+- AIX packaging and documentation by [LibrePower](https://librepower.org)
 - Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source 🌍

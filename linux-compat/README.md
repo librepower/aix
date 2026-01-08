@@ -228,5 +228,5 @@ GPL-3.0 - See [LICENSE](../LICENSE)
 
 ## Credits
 
-- Shell scripts and wrappers by [SIXE](https://sixe.eu)
+- Shell scripts and wrappers by [LibrePower](https://librepower.org)
 - Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source 🌍
