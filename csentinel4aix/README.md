@@ -16,6 +16,14 @@ This is a port of the excellent C-Sentinel system monitoring tool to IBM AIX. Al
 
 ---
 
+## Demo
+
+![C-Sentinel Demo](demo/csentinel-demo.gif)
+
+*Quick analysis, baseline learning, and drift detection on AIX 7.3*
+
+---
+
 ## Join the Community
 
 LibrePower is more than AIX—we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power (ppc64le).
