@@ -4,6 +4,8 @@
 
 A production-ready tool for AIX 7.x sysadmins to list open files, track changes, and diagnose system issues.
 
+![lpsof Demo](demo/lpsof-demo.gif)
+
 ## Join the Community
 
 LibrePower is more than AIX—we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power (ppc64le).

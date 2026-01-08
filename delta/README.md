@@ -4,7 +4,9 @@
 ![Rust](https://img.shields.io/badge/Rust-1.90-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-A syntax-highlighting pager for git, diff, and grep output. First Rust application ported to AIX for LibrePower.
+A syntax-highlighting pager for git, diff, and grep output. **First Rust application ported to AIX!**
+
+![delta Demo](demo/delta-demo.gif)
 
 ## Join the Community
 
