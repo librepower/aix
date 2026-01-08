@@ -4,6 +4,16 @@
 
 A production-ready tool for AIX 7.x sysadmins to list open files, track changes, and diagnose system issues.
 
+## Join the Community
+
+LibrePower is more than AIX—we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power (ppc64le).
+
+📬 **[Subscribe to our newsletter](https://librepower.substack.com/subscribe)** for releases, technical articles, and community updates.
+
+🌐 **[librepower.org](https://librepower.org)** — Launching February 2026
+
+---
+
 ## Features
 
 - **Safety limits** - Output limited to 100 processes by default to prevent system overload
@@ -142,8 +152,8 @@ This is an AIX kernel limitation, not a bug in lpsof.
 
 | File | Purpose |
 |------|---------|
-| `/usr/bin/lpsof` | Installed binary |
-| `/usr/share/man/man1/lpsof.1` | Man page |
+| `/opt/freeware/bin/lpsof` | Installed binary |
+| `/opt/freeware/share/man/man1/lpsof.1` | Man page |
 | `/var/tmp/lpsof.state` | Default state file for delta mode |
 
 ## Version
