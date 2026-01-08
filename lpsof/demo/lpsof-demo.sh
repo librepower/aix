@@ -18,14 +18,14 @@ sleep 2
 # Basic usage
 echo -e "\033[0;33m$ lpsof | head -20\033[0m"
 sleep 1
-$LPSOF 2>/dev/null | head -20
+$LPSOF 2>/dev/null | head -20 | cut -c1-79
 sleep 2
 
 # Filter by user
 echo ""
 echo -e "\033[0;33m$ lpsof -u root | head -15\033[0m  \033[0;32m# Files by user\033[0m"
 sleep 1
-$LPSOF -u root 2>/dev/null | head -15
+$LPSOF -u root 2>/dev/null | head -15 | cut -c1-79
 sleep 2
 
 # Network connections
