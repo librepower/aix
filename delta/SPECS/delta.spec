@@ -5,6 +5,7 @@ Summary:        A syntax-highlighting pager for git, diff, and grep output
 License:        MIT
 URL:            https://github.com/dandavison/delta
 Group:          Development/Tools
+Packager:       Hugo Blanco <hugo.blanco@sixe.eu>
 
 %description
 Delta provides language syntax highlighting, within-line insertion/deletion
@@ -19,7 +20,8 @@ Features:
 - Improved merge conflict display
 - Improved git blame display
 
-Compiled for AIX on IBM POWER by LibrePower.
+First Rust application ported to AIX for LibrePower.
+https://librepower.org
 
 %install
 rm -rf %{buildroot}
