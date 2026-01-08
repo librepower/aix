@@ -6,7 +6,7 @@
 #============================================================================
 
 Name:           linux-compat
-Version:        2.1
+Version:        2.2
 Release:        1.librepower
 Summary:        GNU/Linux CLI experience for AIX system administrators
 License:        GPL-3.0
@@ -117,6 +117,11 @@ if [ "$1" = "0" ]; then
 fi
 
 %changelog
+* Wed Jan 08 2025 Hugo Blanco <hugo.blanco@sixe.eu> - 2.2-1.librepower
+- Added MANPATH configuration for /opt/freeware/share/man
+- Now 'man fzf', 'man nano', etc. work out of the box
+- Colorized man pages
+
 * Sun Jan 05 2025 Hugo Blanco <hugo.blanco@sixe.eu> - 2.1-1.librepower
 - Replaced custom svcstart/svcstop with proper systemctl/service wrappers
 - systemctl now supports groups with @ prefix (e.g., systemctl start @tcpip)

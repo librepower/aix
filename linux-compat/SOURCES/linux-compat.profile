@@ -35,6 +35,12 @@ case ":$LIBPATH:" in
     *) export LIBPATH="/opt/freeware/lib:${LIBPATH:-/usr/lib}" ;;
 esac
 
+# MANPATH - Enable man pages from /opt/freeware/share/man
+case ":$MANPATH:" in
+    *:/opt/freeware/share/man:*) ;;
+    *) export MANPATH="/opt/freeware/share/man:${MANPATH:-/usr/share/man}" ;;
+esac
+
 #============================================================================
 # NATIVE GNU TOOLS - Aliases for GNU options (from IBM AIX Toolbox)
 #============================================================================
@@ -398,6 +404,7 @@ linuxhelp() {
 ║  💻 SYSTEM:                                                               ║
 ║     sysinfo   - quick summary        top     - topas                      ║
 ║     df, du    - disk (human)         lsblk   - disk devices               ║
+║     man <cmd> - colorized + /opt/freeware man pages included              ║
 ║                                                                           ║
 ║  NATIVE AIX: /usr/bin/ls, /usr/bin/ps, startsrc, stopsrc, lssrc           ║
 ║  DISABLE:    export LINUX_COMPAT_DISABLE=1; exec $SHELL                   ║
