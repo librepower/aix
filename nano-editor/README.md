@@ -6,8 +6,6 @@
 
 The simple, friendly GNU text editor, now available for AIX. If you're tired of vi's modal editing, nano gives you a familiar, intuitive experience.
 
-![nano Demo](demo/nano-demo.gif)
-
 ## Join the Community
 
 LibrePower is more than AIX—we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power (ppc64le).

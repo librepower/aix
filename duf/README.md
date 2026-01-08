@@ -6,6 +6,8 @@
 
 duf is a modern replacement for `df`. It shows disk usage in a colorful, easy-to-read table format with sorting, filtering, and JSON output.
 
+![duf Demo](demo/duf-demo.gif)
+
 ## Installation
 
 ```bash
