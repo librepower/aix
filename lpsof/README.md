@@ -156,6 +156,21 @@ This is an AIX kernel limitation, not a bug in lpsof.
 | `/opt/freeware/share/man/man1/lpsof.1` | Man page |
 | `/var/tmp/lpsof.state` | Default state file for delta mode |
 
+## Man Page Access
+
+AIX doesn't search `/opt/freeware/share/man` by default. To access the man page:
+
+```bash
+# Option 1: Direct path
+man -M /opt/freeware/share/man lpsof
+
+# Option 2: Add to your profile (~/.profile or ~/.bashrc)
+export MANPATH=/opt/freeware/share/man:${MANPATH:-/usr/share/man}
+
+# Option 3: Install linux-compat package (sets MANPATH automatically)
+dnf install linux-compat
+```
+
 ## Version
 
 Current version: **0.3.0** (Security-Hardened)
