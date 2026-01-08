@@ -47,11 +47,14 @@ sudo systemctl reload nginx
 Add to crontab on each monitored host:
 
 ```bash
-*/5 * * * * /opt/freeware/bin/sentinel --json --network | curl -s -X POST \
+# AIX (use short options)
+*/5 * * * * /opt/freeware/bin/sentinel -j -n | curl -s -X POST \
   -H "Content-Type: application/json" \
   -H "X-API-Key: YOUR_API_KEY" \
   -d @- https://sentinel.yourdomain.com/api/ingest >/dev/null 2>&1
 ```
+
+> **Note:** AIX does not support GNU-style long options (`--json`). Use short options (`-j -n`) instead.
 
 ## API Endpoints
 

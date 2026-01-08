@@ -76,7 +76,7 @@ sentinel -l -n
 sentinel -b -q -n
 
 # Generate JSON for AI analysis
-sentinel --json --network > system-fingerprint.json
+sentinel -j -n > system-fingerprint.json
 ```
 
 For the optional web dashboard installation, see [dashboard/README.md](dashboard/README.md).
