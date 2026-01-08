@@ -44,9 +44,11 @@ Let's be clear about what this is and isn't:
 
 **What we add:**
 - A shell profile that puts GNU tools first in your PATH
+- **MANPATH** configured so `man fzf`, `man nano`, etc. work out of the box
 - Aliases for common operations (`ll`, `la`, `lt`, etc.)
 - Emulated commands that don't exist on AIX (`watch`, `pgrep`, `pkill`, `free`)
 - `systemctl` and `service` wrappers for AIX SRC (System Resource Controller)
+- Colorized man pages
 - Bilingual documentation
 
 **Credit where it's due: IBM did the hard work of porting these tools. We just make them easier to use by default.**
