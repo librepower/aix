@@ -153,7 +153,7 @@ echo
 echo "  4. Configure sentinel agent to report:"
 echo "     Add to crontab (crontab -e):"
 echo
-echo "     */5 * * * * sudo /usr/local/bin/sentinel --json --network --audit | \\"
+echo "     */5 * * * * sudo sentinel --json --network --audit | \\"
 echo "       curl -s -X POST -H 'Content-Type: application/json' \\"
 echo "       -H 'X-API-Key: ${API_KEY}' \\"
 echo "       -d @- https://your-domain.com/api/ingest"

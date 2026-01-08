@@ -1,6 +1,6 @@
 Name:           csentinel4aix
 Version:        1.0.0
-Release:        1%{?dist}
+Release:        2.librepower
 Summary:        Semantic Observability for AIX Systems
 
 License:        MIT
@@ -33,16 +33,16 @@ This AIX port provides 95%% feature parity supporting AIX 7.1, 7.2, and 7.3.
 rm -rf $RPM_BUILD_ROOT
 
 # Create directories
-mkdir -p $RPM_BUILD_ROOT/usr/local/bin
+mkdir -p $RPM_BUILD_ROOT/opt/freeware/bin
 mkdir -p $RPM_BUILD_ROOT/etc/sentinel
 mkdir -p $RPM_BUILD_ROOT/usr/share/doc/csentinel
 mkdir -p $RPM_BUILD_ROOT/var/lib/sentinel
 
 # Install binaries (AIX compatible)
-cp bin/sentinel $RPM_BUILD_ROOT/usr/local/bin/
-cp bin/sentinel-diff $RPM_BUILD_ROOT/usr/local/bin/
-chmod 0755 $RPM_BUILD_ROOT/usr/local/bin/sentinel
-chmod 0755 $RPM_BUILD_ROOT/usr/local/bin/sentinel-diff
+cp bin/sentinel $RPM_BUILD_ROOT/opt/freeware/bin/
+cp bin/sentinel-diff $RPM_BUILD_ROOT/opt/freeware/bin/
+chmod 0755 $RPM_BUILD_ROOT/opt/freeware/bin/sentinel
+chmod 0755 $RPM_BUILD_ROOT/opt/freeware/bin/sentinel-diff
 
 # Install configuration template
 cat > $RPM_BUILD_ROOT/etc/sentinel/config << 'EOF'
@@ -86,7 +86,7 @@ if command -v mkssys >/dev/null 2>&1; then
 
     # Create new SRC subsystem
     mkssys -s csentinel \
-           -p /usr/local/bin/sentinel \
+           -p /opt/freeware/bin/sentinel \
            -u 0 \
            -a "-w -i 300 -n" \
            -O -Q -S -n 15 -f 9 \
@@ -131,8 +131,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,system,-)
-/usr/local/bin/sentinel
-/usr/local/bin/sentinel-diff
+/opt/freeware/bin/sentinel
+/opt/freeware/bin/sentinel-diff
 %dir /etc/sentinel
 %config(noreplace) /etc/sentinel/config
 %dir /var/lib/sentinel
@@ -143,7 +143,10 @@ rm -rf $RPM_BUILD_ROOT
 %license /usr/share/doc/csentinel/LICENSE
 
 %changelog
-* Sun Jan 05 2025 LibrePower Team <team@librepower.org> - 1.0.0-1
+* Wed Jan 08 2025 LibrePower Team <hello@librepower.org> - 1.0.0-2.librepower
+- Changed install path from /usr/local/bin to /opt/freeware/bin for PATH consistency
+
+* Sun Jan 05 2025 LibrePower Team <hello@librepower.org> - 1.0.0-1
 - Initial AIX port release
 - 95%% feature parity with Linux version
 - PID attribution for 70+ network ports (SSH, databases, IBM middleware, SAP)

@@ -10,7 +10,7 @@
 set -e
 
 # Configuration - override with environment variables
-SENTINEL_BIN="${SENTINEL_BIN:-/usr/local/bin/sentinel}"
+SENTINEL_BIN="${SENTINEL_BIN:-/opt/freeware/bin/sentinel}"
 DASHBOARD_URL="${DASHBOARD_URL:-https://sentinel.speytech.com/api/ingest}"
 API_KEY="${SENTINEL_API_KEY:-}"
 

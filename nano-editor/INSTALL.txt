@@ -6,8 +6,7 @@ Installation Guide
 Version: 8.3
 Release: 3.librepower
 Platform: AIX 7.1+ / VIOS 3.x (ppc/ppc64)
-Packaged by: SIXE - IBM Business Partner (https://sixe.eu)
-Part of: LibrePower (https://librepower.org)
+Part of LibrePower - https://librepower.org
 
 ================================================================================
 WHAT IS NANO?
@@ -155,7 +154,7 @@ Release:      3.librepower
 Architecture: ppc (64-bit)
 Size:         ~391 KB
 License:      GPL-3.0
-Vendor:       SIXE - IBM Business Partner
+Vendor:       LibrePower
 
 Dependencies:
 - libc.a (AIX base)
@@ -166,8 +165,7 @@ Dependencies:
 SUPPORT
 ================================================================================
 
-Issues: https://github.com/librepower/aix/issues
-Email:  hugo.blanco@sixe.eu
-SIXE:   https://sixe.eu
+Issues: https://gitlab.com/librepower/aix/-/issues
+Email:  hello@librepower.org
 
 ================================================================================

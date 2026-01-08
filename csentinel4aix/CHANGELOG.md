@@ -104,7 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1. Rebuild the binary:
    ```bash
    make clean && make
-   sudo cp bin/sentinel /usr/local/bin/
+   sudo cp bin/sentinel /opt/freeware/bin/
    ```
 
 2. Add audit rules for full functionality:

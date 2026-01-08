@@ -28,7 +28,7 @@ LibrePower is more than AIX—we're building open source support across the enti
 
 ## Installation
 
-> ℹ️ **What's included**: The RPM package installs the **command-line tool** (`/usr/local/bin/sentinel`). The web dashboard is **optional** and requires separate installation (PostgreSQL, Python 3.11+, nginx). See [Dashboard README](dashboard/README.md) for details.
+> ℹ️ **What's included**: The RPM package installs the **command-line tool** (`/opt/freeware/bin/sentinel`). The web dashboard is **optional** and requires separate installation (PostgreSQL, Python 3.11+, nginx). See [Dashboard README](dashboard/README.md) for details.
 
 ### Option 1: dnf (Recommended)
 

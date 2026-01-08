@@ -72,7 +72,7 @@ rpm -ivh csentinel4aix-1.0.0-1.aix7.3.ppc.rpm
 
 # Verify installation
 rpm -qi csentinel4aix
-/usr/local/bin/sentinel -q -n
+sentinel -q -n
 
 # Check installed files
 rpm -ql csentinel4aix
@@ -83,8 +83,8 @@ rpm -ql csentinel4aix
 The RPM installs:
 
 ```
-/usr/local/bin/sentinel           - Main binary
-/usr/local/bin/sentinel-diff      - Diff tool
+/opt/freeware/bin/sentinel           - Main binary
+/opt/freeware/bin/sentinel-diff      - Diff tool
 /etc/sentinel/config              - Configuration file
 /usr/share/doc/csentinel/         - Documentation
 /var/lib/sentinel/                - Data directory
@@ -102,13 +102,13 @@ The package automatically:
 
 ```bash
 # Quick analysis
-/usr/local/bin/sentinel -q -n
+sentinel -q -n
 
 # Learn baseline
-/usr/local/bin/sentinel -l -n
+sentinel -l -n
 
 # Compare against baseline
-/usr/local/bin/sentinel -b -q -n
+sentinel -b -q -n
 
 # Continuous monitoring (optional - SRC service)
 startsrc -s csentinel
