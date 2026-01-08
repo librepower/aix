@@ -50,11 +50,11 @@ dnf install csentinel4aix
 cd /tmp
 
 # Download RPM from GitLab releases
-curl -L -o csentinel4aix-1.0.0-1.aix7.3.ppc.rpm \
-  https://gitlab.com/librepower/aix/-/raw/main/csentinel4aix/RPMS/csentinel4aix-1.0.0-1.aix7.3.ppc.rpm
+curl -L -o csentinel4aix-1.0.0-3.librepower.aix7.3.ppc.rpm \
+  https://gitlab.com/librepower/aix/-/raw/main/csentinel4aix/RPMS/csentinel4aix-1.0.0-3.librepower.aix7.3.ppc.rpm
 
 # Install
-rpm -ivh csentinel4aix-1.0.0-1.aix7.3.ppc.rpm
+rpm -ivh csentinel4aix-1.0.0-3.librepower.aix7.3.ppc.rpm
 ```
 
 > ⚠️ **Note**: Use `-L` flag with curl to follow redirects.

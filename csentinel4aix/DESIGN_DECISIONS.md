@@ -167,7 +167,7 @@ A system with only 3 baseline samples cannot reliably detect "above normal" devi
 
 **UX Choice**: The badge disappears at 50+ samples rather than showing "Ready" forever. Absence of the badge *is* the signal of full confidence.
 
-**Auto-Update Decision**: Each probe automatically updates the baseline rather than requiring explicit `--learn` runs. This ensures the baseline evolves with normal system changes.
+**Auto-Update Decision**: Each probe automatically updates the baseline rather than requiring explicit `-l` (learn) runs. This ensures the baseline evolves with normal system changes.
 
 ## Security Posture Summary (v0.5.5)
 

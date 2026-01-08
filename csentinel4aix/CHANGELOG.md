@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Binary size increased to 99KB (from 76KB) to accommodate audit features
-- Systemd service now includes `--audit` flag by default
+- Systemd service now includes `-a` (audit) flag by default
 
 ## [0.3.0] - 2026-01-01
 
@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Web Dashboard** - Flask-based multi-host monitoring interface
 - **SHA256 checksums** - Cryptographic config file integrity tracking
 - **Systemd service** - Production deployment with auto-restart
-- **Baseline learning** - Learn normal patterns with `--learn` flag
+- **Baseline learning** - Learn normal patterns with `-l` flag
 - **Network probe** - Listener and connection monitoring
 - **Watch mode** - Continuous monitoring with configurable intervals
 - **Webhook support** - POST fingerprints to external endpoints
@@ -53,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2025-12-28
 
 ### Added
-- Network probing (`--network` flag)
+- Network probing (`-n` flag)
 - Connection state tracking (ESTABLISHED, LISTEN, etc.)
 - Unusual port detection
 - Process-to-port correlation
@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Process analysis (zombies, high FD, long-running)
 - Config file monitoring with metadata
 - JSON output for LLM analysis
-- Quick mode (`--quick`) for human-readable summary
+- Quick mode (`-q`) for human-readable summary
 - Exit codes for CI/CD integration (0=ok, 1=warning, 2=critical, 3=error)
 
 ---
@@ -114,4 +114,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    sudo auditctl -w /etc/sudoers -p wa -k priv_esc
    ```
 
-3. Update systemd service to include `--audit` flag
+3. Update systemd service to include `-a` (audit) flag
