@@ -42,8 +42,8 @@ chown sentinel:sentinel /var/lib/sentinel
 
 # Install binary
 echo -e "${YELLOW}Installing binary...${NC}"
-cp bin/sentinel /usr/local/bin/sentinel
-chmod 755 /usr/local/bin/sentinel
+cp bin/sentinel /opt/freeware/bin/sentinel
+chmod 755 /opt/freeware/bin/sentinel
 
 # Install config file template
 if [ ! -f /etc/sentinel/config ]; then
@@ -96,5 +96,5 @@ echo "  3. Start service:      sudo systemctl start sentinel"
 echo "  4. Check status:       sudo systemctl status sentinel"
 echo "  5. View logs:          sudo journalctl -u sentinel -f"
 echo
-echo "To learn baseline:       sudo -u sentinel /usr/local/bin/sentinel --learn --network"
+echo "To learn baseline:       sudo -u sentinel sentinel --learn --network"
 echo

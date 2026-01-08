@@ -26,12 +26,12 @@ ls -la bin/
 ### Instalación
 
 ```bash
-# Instalar en /usr/local/bin (requiere root)
+# Instalar en /opt/freeware/bin (requiere root)
 /opt/freeware/bin/make -f Makefile.aix install
 
 # O copiar manualmente
-cp bin/sentinel /usr/local/bin/
-cp bin/sentinel-diff /usr/local/bin/
+cp bin/sentinel /opt/freeware/bin/
+cp bin/sentinel-diff /opt/freeware/bin/
 ```
 
 ## Uso
@@ -309,7 +309,7 @@ ADD COLUMN IF NOT EXISTS audit_brute_force BOOLEAN;'"
 
 ```bash
 # Crear script de inicio
-cat > /usr/local/bin/start-sentinel-dashboard.sh << 'EOF'
+cat > /opt/freeware/bin/start-sentinel-dashboard.sh << 'EOF'
 #!/bin/sh
 cd /path/to/c-sentinel/dashboard
 export DB_HOST=localhost
@@ -322,10 +322,10 @@ export SENTINEL_API_KEY=your-api-key
 /opt/freeware/bin/python3.12 app.py
 EOF
 
-chmod +x /usr/local/bin/start-sentinel-dashboard.sh
+chmod +x /opt/freeware/bin/start-sentinel-dashboard.sh
 
 # Iniciar dashboard
-/usr/local/bin/start-sentinel-dashboard.sh
+/opt/freeware/bin/start-sentinel-dashboard.sh
 ```
 
 El dashboard estará disponible en `http://localhost:5000`
@@ -346,7 +346,7 @@ sentinel -j -n | curl -X POST \
   -d @- http://dashboard-server:5000/api/ingest
 
 # Agregar a crontab para monitoreo continuo (cada 5 minutos)
-*/5 * * * * /usr/local/bin/sentinel -j -n | curl -s -X POST \
+*/5 * * * * sentinel -j -n | curl -s -X POST \
   -H "Content-Type: application/json" \
   -H "X-API-Key: your-api-key" \
   -d @- http://dashboard-server:5000/api/ingest >/dev/null 2>&1

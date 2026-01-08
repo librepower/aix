@@ -5,8 +5,7 @@ Guía de Instalación
 
 Versión: 0.46.1
 Plataforma: AIX 7.1+ / VIOS 3.x (ppc/ppc64)
-Empaquetado por: SIXE - IBM Business Partner (https://sixe.eu)
-Parte de: LibrePower (https://librepower.org)
+Parte de LibrePower - https://librepower.org
 
 ================================================================================
 ¿QUÉ ES FZF?
@@ -242,14 +241,14 @@ SOPORTE
 ================================================================================
 
 Issues en GitHub: https://github.com/librepower/aix/issues
-Email: hugo.blanco@sixe.eu
+Email: hello@librepower.org
 
 ================================================================================
 CRÉDITOS
 ================================================================================
 
 - fzf por Junegunn Choi (https://github.com/junegunn/fzf)
-- Port para AIX por SIXE - IBM Business Partner (https://sixe.eu)
+- Port para AIX por LibrePower (https://librepower.org)
 - Parte de LibrePower - Desbloqueando Power Systems con open source
   https://librepower.org
 ================================================================================

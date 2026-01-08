@@ -31,7 +31,7 @@ systemctl daemon-reload
 
 # Remove binary
 echo -e "${YELLOW}Removing binary...${NC}"
-rm -f /usr/local/bin/sentinel
+rm -f /opt/freeware/bin/sentinel
 
 # Ask about config and data
 echo

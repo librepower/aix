@@ -5,7 +5,7 @@
 #   make          - Build all binaries
 #   make static   - Build statically linked (maximum portability)
 #   make test     - Run test suite
-#   make install  - Install to /usr/local/bin
+#   make install  - Install to /opt/freeware/bin
 
 # Default compiler and flags
 CC = gcc

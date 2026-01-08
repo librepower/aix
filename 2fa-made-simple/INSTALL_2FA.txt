@@ -2,10 +2,8 @@
   GOOGLE AUTHENTICATOR 2FA FOR AIX/VIOS
   Two-Factor Authentication (TOTP)
   
-  SIXE - IBM Business Partner
-  https://sixe.eu | hugo.blanco@sixe.eu
-  
-  LibrePower - https://librepower.org
+  Part of LibrePower - https://librepower.org
+  Contact: hello@librepower.org
 ================================================================================
 
 PACKAGE CONTENTS
@@ -213,6 +211,5 @@ VERSION
 Documentation version: 1.9 (January 2026)
 
 ================================================================================
-  SIXE - IBM Business Partner | https://sixe.eu
-  LibrePower | https://librepower.org
+  LibrePower - https://librepower.org
 ================================================================================

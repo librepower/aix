@@ -47,7 +47,7 @@ sudo systemctl reload nginx
 Add to crontab on each monitored host:
 
 ```bash
-*/5 * * * * /usr/local/bin/sentinel --json --network | curl -s -X POST \
+*/5 * * * * /opt/freeware/bin/sentinel --json --network | curl -s -X POST \
   -H "Content-Type: application/json" \
   -H "X-API-Key: YOUR_API_KEY" \
   -d @- https://sentinel.yourdomain.com/api/ingest >/dev/null 2>&1

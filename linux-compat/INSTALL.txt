@@ -4,8 +4,7 @@
 
 Version: 2.1
 Date: January 2026
-Author: SIXE - IBM Business Partner (https://sixe.eu)
-Project: LibrePower (https://librepower.org)
+Part of LibrePower - https://librepower.org
 
 ================================================================================
                             WHAT IS THIS?
@@ -216,8 +215,7 @@ Project: LibrePower
 Web: https://librepower.org (launching February 2026)
 GitHub: https://github.com/librepower/aix
 
-Maintained by SIXE - IBM Business Partner
-https://sixe.eu
-hugo.blanco@sixe.eu
+Maintained by SIXE
+https://sixe.eu | hello@librepower.org
 
 ================================================================================
