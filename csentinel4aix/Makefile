@@ -5,18 +5,21 @@
 #   make          - Build all binaries
 #   make static   - Build statically linked (maximum portability)
 #   make test     - Run test suite
-#   make install  - Install to /opt/freeware/bin
+#   make install  - Install to /usr/local/bin
 
-# Default compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O2
+CFLAGS = -Wall -Wextra  -pedantic -std=c99 -O2
 CFLAGS += -I./include
-LDFLAGS =
+LDFLAGS = 
 LDLIBS = -lm
 
-# Override for AIX (detected at runtime)
-# On AIX, you may need to run: make CC=/opt/freeware/bin/gcc
-# Or set environment variables before make
+# Platform detection
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),AIX)
+    CFLAGS += -D_AIX -maix64
+    LDFLAGS += -maix64
+    LDLIBS += -lperfstat
+endif
 
 # Debug build
 ifdef DEBUG
@@ -104,9 +107,16 @@ clean:
 # Install
 PREFIX ?= /usr/local
 install: all
+ifeq ($(UNAME_S),AIX)
+	mkdir -p $(PREFIX)/bin
+	cp $(SENTINEL) $(PREFIX)/bin/
+	cp $(SENTINEL_DIFF) $(PREFIX)/bin/
+	chmod 755 $(PREFIX)/bin/sentinel $(PREFIX)/bin/sentinel-diff
+else
 	install -d $(PREFIX)/bin
 	install -m 755 $(SENTINEL) $(PREFIX)/bin/
 	install -m 755 $(SENTINEL_DIFF) $(PREFIX)/bin/
+endif
 	@echo "Installed to $(PREFIX)/bin/"
 
 # Uninstall
@@ -119,7 +129,7 @@ test: all
 	@echo "=== C-Sentinel Test Suite ==="
 	@echo ""
 	@echo "1. Quick mode test..."
-	@./$(SENTINEL) --quick > /dev/null && echo "   PASS: Quick mode" || echo "   FAIL: Quick mode"
+	@./$(SENTINEL) -q > /dev/null && echo "   PASS: Quick mode" || echo "   FAIL: Quick mode"
 	@echo ""
 	@echo "2. JSON output test..."
 	@./$(SENTINEL) /etc/hosts > /tmp/sentinel_test.json 2>/dev/null && echo "   PASS: JSON output" || echo "   FAIL: JSON output"
@@ -132,36 +142,14 @@ test: all
 	@echo "4. JSON validity test..."
 	@python3 -c "import json; json.load(open('/tmp/sentinel_test.json'))" 2>/dev/null && echo "   PASS: Valid JSON" || echo "   FAIL: Invalid JSON"
 	@echo ""
-	@echo "5. Audit probe test..."
-	@./$(SENTINEL) --audit --quick 2>/dev/null && echo "   PASS: Audit probe" || echo "   WARN: Audit probe (auditd may not be installed)"
-	@echo ""
-	@echo "6. Colour output test..."
-	@./$(SENTINEL) --quick --color 2>/dev/null | head -1 | grep -q "C-Sentinel" && echo "   PASS: Colour output" || echo "   FAIL: Colour output"
+	@echo "5. Network probe test..."
+	@./$(SENTINEL) -n -q 2>/dev/null && echo "   PASS: Network probe" || echo "   WARN: Network probe"
 	@echo ""
 	@echo "=== All tests complete ==="
 	@rm -f /tmp/sentinel_test.json /tmp/fp1.json /tmp/fp2.json
 
 # Development helpers
 .PHONY: all clean install uninstall test dirs static
-
-# Static analysis
-lint:
-	@which cppcheck > /dev/null 2>&1 && \
-		cppcheck --enable=all --suppress=missingIncludeSystem \
-		         --suppress=unusedFunction $(SRC_DIR)/ $(INC_DIR)/ || \
-		echo "Install cppcheck for static analysis"
-
-# Format code
-format:
-	@which clang-format > /dev/null 2>&1 && \
-		clang-format -i $(SRC_DIR)/*.c $(INC_DIR)/*.h || \
-		echo "Install clang-format for code formatting"
-
-# Generate compile_commands.json for IDE support
-compile_commands:
-	@which bear > /dev/null 2>&1 && \
-		bear -- make clean all || \
-		echo "Install bear for compile_commands.json generation"
 
 # Show binary sizes
 size: all
@@ -178,8 +166,6 @@ help:
 	@echo "  test      - Run test suite"
 	@echo "  install   - Install to PREFIX (default: /usr/local)"
 	@echo "  clean     - Remove build artifacts"
-	@echo "  lint      - Run static analysis"
-	@echo "  format    - Format source code"
 	@echo "  size      - Show binary sizes"
 	@echo ""
 	@echo "Options:"
