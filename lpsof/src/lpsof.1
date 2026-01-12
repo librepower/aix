@@ -1,0 +1,261 @@
+.\" lpsof - LibrePowerSof manual page
+.\" Copyright (c) 2025-2026 LibrePower Project
+.TH LPSOF 1 "January 2026" "lpsof 0.2.0" "User Commands"
+.SH NAME
+lpsof \- list open files for AIX (LibrePowerSof)
+.SH SYNOPSIS
+.B lpsof
+[\fIsubcommand\fR] [\fIoptions\fR] [\fB\-\-\fR] [\fIfiles\fR]
+.SH DESCRIPTION
+.B lpsof
+is a native AIX implementation of lsof (list open files) designed for
+production sysadmin use. It provides five subcommands for different
+operational needs.
+.PP
+Key features:
+.IP \(bu 2
+Safety limits to prevent system overload
+.IP \(bu 2
+Delta tracking for incident response
+.IP \(bu 2
+Watch mode for continuous monitoring
+.IP \(bu 2
+Summary mode for quick overview
+.IP \(bu 2
+Doctor mode for system diagnostics
+.SH SUBCOMMANDS
+.TP
+.B list
+List open files (default if no subcommand specified).
+Supports all filter options.
+.TP
+.B summary
+Show top N processes by number of open files.
+Output columns: PID, USER, COMMAND, COUNT.
+.TP
+.B watch
+Continuous monitoring with configurable polling interval.
+Prints timestamp and file list on each tick.
+Tolerates PIDs that disappear during scan.
+.TP
+.B delta
+Compare current state with saved snapshot.
+Shows files added (+) and removed (-) since last save.
+Useful for incident investigation.
+.TP
+.B doctor
+Diagnose system capabilities and configuration.
+Reports AIX version, available tools, permissions, and limitations.
+.SH COMMON OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Show help message and exit.
+.TP
+.BR \-v ", " \-\-version
+Show version information and exit.
+.TP
+.BI \-\-limit " N"
+Limit output to N processes (default: 100).
+Safety feature to prevent system overload.
+.TP
+.B \-\-no\-limit
+Remove process limit. Use with caution on busy systems.
+.SH FILTER OPTIONS
+.TP
+.BI \-p ", " \-\-pid " PID"
+Filter by process ID. Prefix with ^ to exclude.
+Comma-separated list supported.
+.TP
+.BI \-u ", " \-\-user " USER"
+Filter by user name or UID. Prefix with ^ to exclude.
+Comma-separated list supported.
+.TP
+.BI \-c ", " \-\-cmd " CMD"
+Filter by command name prefix.
+.TP
+.BI \-\-path " PATH"
+Filter by file path substring.
+Shows only files containing PATH in their name.
+.TP
+.BI \-\-type " TYPE"
+Filter by file type. Valid values:
+.RS
+.IP file 8
+Regular files only
+.IP dir 8
+Directories only
+.IP pipe 8
+Pipes/FIFOs only
+.IP device 8
+Character/block devices only
+.IP socket 8
+Network sockets only
+.IP all 8
+No filtering (default)
+.RE
+.TP
+.BI \-i " [ADDR]"
+Select network files. Optional address format:
+[46][protocol][@host][:port]
+.TP
+.BI +D " DIR"
+Filter files in directory (recursive).
+.SH OUTPUT OPTIONS
+.TP
+.BR \-t ", " \-\-terse
+Output PIDs only (for scripting).
+.TP
+.BR \-H ", " \-\-human
+Human readable sizes (K, M, G).
+.TP
+.BR \-l ", " \-\-numeric\-uid
+Show numeric UIDs instead of names.
+.TP
+.BR \-R ", " \-\-ppid
+Show parent PID column.
+.TP
+.BI +c " W"
+Set command column width (default: 9).
+.SH WATCH OPTIONS
+.TP
+.BI \-\-interval " SEC"
+Polling interval in seconds (default: 2).
+.SH DELTA OPTIONS
+.TP
+.BI \-\-state " PATH"
+State file path (default: /var/tmp/lpsof.state).
+File is created with mode 0600 and uses file locking.
+.TP
+.B \-\-save
+Save current state to file and exit.
+.SH EXAMPLES
+.SS Basic Usage
+.TP
+.B lpsof
+List open files (limited to 100 processes by default).
+.TP
+.B lpsof \-\-no\-limit
+List all open files (use with caution).
+.TP
+.B lpsof \-p 1234
+Show files for specific PID.
+.TP
+.B lpsof \-u oracle
+Show files by user oracle.
+.TP
+.B lpsof \-c db2
+Show files by DB2 processes.
+.SS Filtering by Path and Type
+.TP
+.B lpsof \-\-path /var/log
+Show only files containing "/var/log" in path.
+.TP
+.B lpsof \-\-type socket
+Show only network sockets.
+.TP
+.B lpsof \-\-type device
+Show only device files.
+.TP
+.B lpsof \-\-path /tmp \-\-type file
+Files in /tmp that are regular files.
+.SS Summary Mode
+.TP
+.B lpsof summary
+Top 100 processes by FD count.
+.TP
+.B lpsof summary \-\-limit 20
+Top 20 processes only.
+.SS Watch Mode
+.TP
+.B lpsof watch
+Monitor all files every 2 seconds.
+.TP
+.B lpsof watch \-\-interval 5
+Monitor every 5 seconds.
+.TP
+.B lpsof watch \-u oracle \-\-interval 10
+Monitor oracle user every 10 seconds.
+.SS Delta Mode (Incident Response)
+.TP
+.B lpsof delta \-\-save
+Save current state as baseline.
+.TP
+.B lpsof delta
+Show changes since baseline.
+.TP
+.B lpsof delta \-\-state /tmp/incident.state \-\-save
+Save to custom state file.
+.SS Diagnostics
+.TP
+.B lpsof doctor
+Check system capabilities and configuration.
+.SS Troubleshooting Common Issues
+.TP
+.B lpsof +D /mnt/nfs
+Find processes blocking NFS unmount.
+.TP
+.B lpsof +L1
+Find deleted files still held open.
+.TP
+.B lpsof \-i :22
+Find processes using port 22.
+.TP
+.B lpsof \-t \-c httpd | xargs kill
+Kill all httpd processes.
+.SH SAFETY FEATURES
+.TP
+.B Process Limit
+By default, output is limited to 100 processes to prevent
+system overload on busy servers. Use \-\-limit N to adjust
+or \-\-no\-limit to disable.
+.TP
+.B State File Locking
+The delta state file uses exclusive file locking to prevent
+corruption from concurrent access.
+.TP
+.B State File Permissions
+State file is created with mode 0600 (owner read/write only).
+.SH FILES
+.TP
+.B /var/tmp/lpsof.state
+Default location for delta state file.
+.TP
+.B /proc
+Process filesystem used for file descriptor information.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Error or no files matched.
+.SH NOTES
+.SS AIX\-Specific Behavior
+.B lpsof
+uses the AIX getprocs64() API for process enumeration and
+reads /proc/PID/fd for file descriptor information.
+.PP
+Socket information may be limited compared to Linux lsof
+due to differences in AIX /proc filesystem.
+.SS Performance Tips
+.IP \(bu 2
+Use filters (\-p, \-u, \-c) to reduce scan scope
+.IP \(bu 2
+Use \-\-limit on busy systems
+.IP \(bu 2
+Use \-n and \-P to disable name resolution
+.SS Permissions
+Run as root for full visibility of all processes.
+Non-root users can only see their own processes.
+.SH SEE ALSO
+.BR ps (1),
+.BR netstat (1),
+.BR fuser (1),
+.BR procfiles (1)
+.SH BUGS
+Report bugs at: https://github.com/LibrePower/lpsof/issues
+.SH AUTHOR
+LibrePower Project
+.SH COPYRIGHT
+Copyright 2025-2026 LibrePower Project.
+License: MIT

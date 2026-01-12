@@ -36,8 +36,29 @@ dnf install lpsof
 ### Manual RPM Install
 
 ```bash
-rpm -ivh lpsof-0.3.0-1.aix7.3.ppc.rpm
+rpm -ivh lpsof-0.3.0-3.librepower.aix7.3.ppc.rpm
 ```
+
+### Build from Source
+
+```bash
+# Clone the repository
+git clone https://gitlab.com/librepower/aix.git
+cd aix/lpsof/src
+
+# Build (requires GCC from AIX Toolbox)
+make
+
+# Install to /usr/local
+sudo make install
+
+# Or install to /opt/freeware (LibrePower standard)
+sudo make install PREFIX=/opt/freeware
+```
+
+**Build Requirements:**
+- AIX 7.1+ with `bos.perf.perfstat` fileset (standard on all AIX systems)
+- GCC from AIX Toolbox (`dnf install gcc`)
 
 ## Quick Start
 
@@ -148,7 +169,6 @@ This is an AIX kernel limitation, not a bug in lpsof.
 
 - AIX 7.1, 7.2, or 7.3
 - Root access recommended for full process visibility
-- `bos.perf.perfstat` fileset (libperfstat.a)
 
 ## Files
 
@@ -179,7 +199,9 @@ Current version: **0.3.0** (Security-Hardened)
 
 ## License
 
-MIT License - Copyright 2025-2026 LibrePower Project
+GPL-3.0 - See [LICENSE](src/LICENSE) for details.
+
+Copyright 2025-2026 LibrePower Project
 
 ## Support
 
