@@ -141,8 +141,8 @@
                         <code><span class="comment"># One-time setup</span>
 <span class="command">curl -fsSL https://aix.librepower.org/install.sh | sh</span>
 
-<span class="comment"># Install your first package</span>
-<span class="command">dnf install fzf nano linux-compat</span></code>
+<span class="comment"># Install packages</span>
+<span class="command">dnf install fzf nano linux-compat mariadb11</span></code>
                     </div>
                     <p style="color: var(--text-secondary); font-size: 13px;">Works on AIX 7.2+ with DNF from IBM AIX Toolbox.</p>
                 </div>
@@ -185,6 +185,11 @@
                         <div class="package-name">lpsof <span class="package-version">0.3.0</span></div>
                         <p class="package-desc">Native lsof for AIX. Full socket details, delta tracking, watch mode. Powered by libperfstat.</p>
                         <div class="package-install">dnf install lpsof</div>
+                    </a>
+                    <a href="https://gitlab.com/librepower/mariadb" class="package-card" style="text-decoration: none; color: inherit;">
+                        <div class="package-name">MariaDB <span class="package-version">11.8.0</span></div>
+                        <p class="package-desc">Full-featured SQL database server. Community fork of MySQL with Performance Schema support. Includes AIX SRC integration.</p>
+                        <div class="package-install">dnf install mariadb11</div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/doom-ascii" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">DOOM ASCII <span class="package-version">0.3.1</span></div>
