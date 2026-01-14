@@ -1,0 +1,66 @@
+From: LibrePower Project <hello@librepower.org>
+Date: Mon, 13 Jan 2026 22:47:00 +0100
+Subject: [PATCH] Fix Performance Schema thread ID detection on AIX
+
+The Performance Schema component incorrectly detects pthread_threadid_np()
+and getthrid() as available on AIX, causing compilation failures.
+
+pthread_threadid_np() is macOS-specific and getthrid() is OpenBSD-specific.
+CMake's CHECK_C_SOURCE_COMPILES test passes on AIX (the code compiles) but
+the functions don't exist at runtime, causing 80+ compilation errors.
+
+This patch adds platform-specific guards to exclude these checks on AIX,
+allowing MariaDB to correctly fall back to the POSIX-standard pthread_self().
+
+Tested on: AIX 7.3 POWER9 with GCC 13.3.0
+
+Signed-off-by: LibrePower Project <hello@librepower.org>
+---
+ storage/perfschema/CMakeLists.txt | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/storage/perfschema/CMakeLists.txt b/storage/perfschema/CMakeLists.txt
+index 1234567..abcdefg 100644
+--- a/storage/perfschema/CMakeLists.txt
++++ b/storage/perfschema/CMakeLists.txt
+@@ -283,12 +283,18 @@ SET(PERFSCHEMA_SOURCES
+ )
+ 
+ # Check for pthread_threadid_np()
++# Note: pthread_threadid_np() is macOS-specific and not available on AIX
++IF(NOT CMAKE_SYSTEM_NAME MATCHES "AIX")
+ CHECK_C_SOURCE_COMPILES("
+ #include <pthread.h>
+ int main(int ac, char **av)
+ {
+   unsigned long long tid64;
+   pthread_threadid_np(NULL, &tid64);
+   return (tid64 != 0 ? 0 : 1);
+ }"
+ HAVE_PTHREAD_THREADID_NP)
++ELSE()
++  SET(HAVE_PTHREAD_THREADID_NP 0)
++ENDIF()
+ 
+ # gettid() library function (glibc-2.30+)
+@@ -314,11 +320,17 @@ CHECK_C_SOURCE_COMPILES("
+ HAVE_SYS_GETTID)
+ 
+ # Check for getthrid()
++# Note: getthrid() is OpenBSD-specific and not available on AIX
++IF(NOT CMAKE_SYSTEM_NAME MATCHES "AIX")
+ CHECK_C_SOURCE_COMPILES("
+ #include <unistd.h>
+ int main(int ac, char **av)
+ {
+   unsigned long long tid = getthrid();
+   return (tid != 0 ? 0 : 1);
+ }"
+ HAVE_GETTHRID)
++ELSE()
++  SET(HAVE_GETTHRID 0)
++ENDIF()
+ 
+ # Check for pthread_getthreadid_np()
+-- 
+2.51.2
