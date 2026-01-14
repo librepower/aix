@@ -144,6 +144,22 @@ Production-ready tool to list open files, track changes, and diagnose system iss
 
 ---
 
+### 🗄️ MariaDB - Database Server
+*Enterprise SQL database on POWER architecture*
+
+Full port of MariaDB 11.8.0 to AIX 7.3. Community-developed fork of MySQL with Performance Schema support and minimal AIX-specific patches ready for upstream submission.
+
+- ✅ **Full MariaDB 11.8.0** - Complete SQL database functionality
+- ✅ **Performance Schema** - Working correctly with AIX-specific patches
+- ✅ **AIX SRC integration** - Managed with startsrc/stopsrc commands
+- ✅ **Minimal patches** - Only 2 CMake configuration changes (28 lines)
+- ✅ **Upstream ready** - Patches documented for MariaDB project submission
+- ✅ **C++11 threading** - Uses pthread-enabled libstdc++ automatically
+
+📁 **[Documentation & Downloads](https://gitlab.com/librepower/mariadb)**
+
+---
+
 ### 👾 DOOM ASCII
 *Text-based DOOM running in your terminal*
 
