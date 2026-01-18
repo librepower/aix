@@ -1,5 +1,7 @@
 # MariaDB 11.8.0 - Database Server for AIX
 
+**LibrePower - Unlocking Power Systems through open source. Unmatched RAS and TCO. Minimal footprint 🌍**
+
 ![AIX 7.3](https://img.shields.io/badge/AIX-7.2+-blue)
 ![MariaDB](https://img.shields.io/badge/MariaDB-11.8.0-orange)
 ![License](https://img.shields.io/badge/license-GPLv2-green)
