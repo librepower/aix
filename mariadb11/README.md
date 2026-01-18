@@ -4,15 +4,17 @@
 ![MariaDB](https://img.shields.io/badge/MariaDB-11.8.0-orange)
 ![License](https://img.shields.io/badge/license-GPLv2-green)
 
-Community-developed fork of MySQL, now available for AIX on IBM Power. Full SQL database server with Performance Schema support.
+Community-developed fork of MySQL, now available for AIX on IBM Power. Full SQL database server with Performance Schema support and native AIX SRC integration.
+
+![MariaDB 11.8 on AIX Demo](demo.gif)
 
 ## Join the Community
 
 LibrePower is more than AIX—we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power (ppc64le).
 
-📬 **[Subscribe to our newsletter](https://librepower.substack.com/subscribe)** for releases, technical articles, and community updates.
+**[Subscribe to our newsletter](https://librepower.substack.com/subscribe)** for releases, technical articles, and community updates.
 
-🌐 **[librepower.org](https://librepower.org)** — Launching February 2026
+**[librepower.org](https://librepower.org)** — Launching February 2026
 
 ---
 
@@ -22,6 +24,7 @@ MariaDB is a high-performance, open-source relational database server. It's a dr
 
 **Why use MariaDB on AIX:**
 - Enterprise-grade SQL database on POWER architecture
+- Native AIX SRC (System Resource Controller) integration
 - High availability and clustering support
 - Compatible with MySQL applications and tools
 - Active development and community support
@@ -41,7 +44,7 @@ curl -fsSL https://aix.librepower.org/install.sh | sh
 dnf install mariadb11
 ```
 
-📦 Repository details: https://aix.librepower.org/
+Repository details: https://aix.librepower.org/
 
 > **Note**: Package named `mariadb11` to avoid conflicts with AIX Toolbox's `mariadb10.11`. Both can coexist on the same system.
 
@@ -50,10 +53,10 @@ dnf install mariadb11
 ```bash
 cd /tmp
 
-curl -L -o mariadb11-11.8.0-1.librepower.aix7.3.ppc.rpm \
-  https://aix.librepower.org/packages/mariadb11-11.8.0-1.librepower.aix7.3.ppc.rpm
+curl -L -o mariadb11-11.8.0-4.librepower.ppc.rpm \
+  https://aix.librepower.org/packages/mariadb11-11.8.0-4.librepower.ppc.rpm
 
-rpm -ivh mariadb11-11.8.0-1.librepower.aix7.3.ppc.rpm
+rpm -ivh mariadb11-11.8.0-4.librepower.ppc.rpm
 ```
 
 ## Quick Start
@@ -63,31 +66,63 @@ rpm -ivh mariadb11-11.8.0-1.librepower.aix7.3.ppc.rpm
 ```bash
 cd /opt/freeware/mariadb
 
-# Create data directory
-mkdir -p data
-chown mysql:staff data
-chmod 750 data
-
-# Initialize system tables
+# Initialize system tables (first time only)
 ./bin/mysql_install_db \
   --basedir=/opt/freeware/mariadb \
-  --datadir=/opt/freeware/mariadb/data \
+  --datadir=/var/mariadb/data \
   --user=mysql
+
+# Verify initialization
+ls -la /var/mariadb/data/
 ```
 
-### Start Server
+### Start Server with AIX SRC (Recommended)
+
+MariaDB integrates with AIX System Resource Controller for standard service management:
 
 ```bash
-# Start server (foreground)
+# Start MariaDB
+startsrc -s mariadb11
+
+# Check status
+lssrc -s mariadb11
+# Output: mariadb11    33030542     active
+
+# Stop MariaDB
+stopsrc -s mariadb11
+```
+
+**Enable auto-start on boot:**
+
+```bash
+# Add to inittab
+mkitab "mariadb11:2:once:/usr/bin/startsrc -s mariadb11 > /dev/console 2>&1"
+
+# Remove from inittab (if needed)
+rmitab mariadb11
+```
+
+**Benefits of SRC integration:**
+- Standard AIX service management (same as sshd, inetd, etc.)
+- Automatic LIBPATH configuration
+- Clean startup/shutdown with SIGTERM
+- Process tracking and monitoring
+
+### Alternative: Manual Start
+
+```bash
+cd /opt/freeware/mariadb
+
+# Start directly
 ./bin/mariadbd \
   --basedir=/opt/freeware/mariadb \
-  --datadir=/opt/freeware/mariadb/data \
-  --user=mysql
+  --datadir=/var/mariadb/data \
+  --user=mysql &
 
 # Or use mysqld_safe for automatic restart
 ./bin/mysqld_safe \
   --basedir=/opt/freeware/mariadb \
-  --datadir=/opt/freeware/mariadb/data \
+  --datadir=/var/mariadb/data \
   --user=mysql &
 ```
 
@@ -95,16 +130,42 @@ chmod 750 data
 
 ```bash
 # Connect as root (no password initially)
+mariadb -u root
+
+# Or use mysql client
 mysql -u root
 
-# In MySQL prompt:
+# In MariaDB prompt:
+MariaDB> SELECT VERSION();
++------------------+
+| VERSION()        |
++------------------+
+| 11.8.0-MariaDB   |
++------------------+
+
 MariaDB> SHOW DATABASES;
 MariaDB> CREATE DATABASE testdb;
 MariaDB> USE testdb;
-MariaDB> CREATE TABLE test (id INT, name VARCHAR(50));
-MariaDB> INSERT INTO test VALUES (1, 'AIX on POWER');
-MariaDB> SELECT * FROM test;
+MariaDB> CREATE TABLE servers (id INT, model VARCHAR(50), arch VARCHAR(20));
+MariaDB> INSERT INTO servers VALUES (1, 'Power S924', 'POWER9');
+MariaDB> SELECT * FROM servers;
 MariaDB> EXIT;
+```
+
+### Verify Installation
+
+```bash
+# Check service status
+lssrc -s mariadb11
+
+# Verify process
+ps -ef | grep mariadbd
+
+# Check network port
+netstat -an | grep 3306
+
+# Test connection
+echo "SELECT VERSION();" | mariadb -u root
 ```
 
 ### Secure Installation
@@ -136,13 +197,35 @@ Fully working with AIX-specific patches:
 - Fixed incorrect detection of macOS-specific `pthread_threadid_np()`
 - Fixed incorrect detection of OpenBSD-specific `getthrid()`
 - Uses POSIX-standard `pthread_self()` fallback
+- **1247 performance instruments** available
+
+```bash
+MariaDB> SELECT COUNT(*) FROM performance_schema.setup_instruments;
++----------+
+| COUNT(*) |
++----------+
+|     1247 |
++----------+
+```
+
+### Storage Engines
+
+All major storage engines are fully functional:
+
+| Engine | Support | Description |
+|--------|---------|-------------|
+| InnoDB | DEFAULT | Transactions, row-level locking, ACID |
+| Aria | YES | Crash-safe tables with MyISAM heritage |
+| MEMORY | YES | Hash based, stored in memory |
+| MyISAM | YES | Traditional MySQL storage engine |
 
 ## Package Contents
 
 ```
 mariadb11/
+├── demo.gif                              # Demo GIF
 ├── RPMS/
-│   └── mariadb11-11.8.0-1.librepower.aix7.3.ppc.rpm
+│   └── mariadb11-11.8.0-4.librepower.ppc.rpm
 ├── SPECS/
 │   └── mariadb.spec
 ├── SOURCES/
@@ -152,7 +235,7 @@ mariadb11/
 
 ## What's Included
 
-- **mariadbd** - Main database server
+- **mariadbd** - Main database server (via libserver.so)
 - **mysql_install_db** - Database initialization utility
 - **mysqld_safe** - Server startup wrapper with auto-restart
 - **my_print_defaults** - Configuration display utility
@@ -160,6 +243,7 @@ mariadb11/
 - **perror** - Error code lookup
 - **Performance Schema** - Performance monitoring tables
 - **System tables and data** - Complete MariaDB installation
+- **SRC integration** - Native AIX service management
 
 ## Technical Details
 
@@ -167,11 +251,12 @@ mariadb11/
 
 | Component | Details |
 |-----------|---------|
-| **Platform** | AIX 7.3 TL5 SP2 |
+| **Platform** | AIX 7.3 TL4 |
 | **Architecture** | POWER (tested on POWER9) |
 | **Compiler** | GCC 13.3.0 |
 | **CMake** | 4.2.0 |
 | **Binary Size** | 703 MB (libserver.so) |
+| **Build Time** | ~15 minutes (-j96) |
 | **Patches** | 2 CMake configuration changes |
 
 ### Patches Applied
@@ -189,17 +274,14 @@ These are **minimal, non-invasive changes**:
 - Use existing POSIX fallback implementations
 - Ideal candidates for upstream inclusion
 
-## Complete Documentation
+## Installation Paths
 
-For detailed technical information, see:
-
-📚 **[gitlab.com/librepower/mariadb](https://gitlab.com/librepower/mariadb)**
-
-Includes:
-- **PATCHES.md** - Complete technical analysis of patches
-- **BUGS_REPORT.md** - Detailed bug reports for upstream
-- **UPSTREAM_PR_GUIDE.md** - Guide for submitting to MariaDB
-- **mariadb-aix-perfschema.patch** - Unified patch file
+```
+/opt/freeware/mariadb/bin/         # Server binaries
+/opt/freeware/mariadb/lib/         # libserver.so (703MB)
+/opt/freeware/mariadb/share/       # Error messages, configs
+/var/mariadb/data/                 # Database files
+```
 
 ## Requirements
 
@@ -223,11 +305,11 @@ These patches are ready for submission to the MariaDB project. They benefit the 
 
 - MariaDB by [MariaDB Foundation](https://mariadb.org)
 - AIX port and packaging by [LibrePower](https://librepower.org)
-- Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source 🌍
+- Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source
 
 ## Support
 
-- **Documentation**: https://gitlab.com/librepower/mariadb
+- **Documentation**: https://gitlab.com/librepower/aix
 - **Repository**: https://aix.librepower.org
 - **Newsletter**: https://librepower.substack.com
 - **Email**: hello@librepower.org
