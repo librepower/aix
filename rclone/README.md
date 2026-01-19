@@ -6,6 +6,10 @@
 
 Rclone is a command-line program to manage files on cloud storage. Sync files to and from 70+ cloud providers including S3, Google Drive, Dropbox, Azure, and more.
 
+## Demo
+
+![rclone on AIX demo](rclone.gif)
+
 ## Join the Community
 
 LibrePower is more than AIX—we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power (ppc64le).
