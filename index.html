@@ -142,7 +142,7 @@
 <span class="command">curl -fsSL https://aix.librepower.org/install.sh | sh</span>
 
 <span class="comment"># Install packages</span>
-<span class="command">dnf install fzf nano linux-compat mariadb11</span></code>
+<span class="command">dnf install fzf rclone nano linux-compat</span></code>
                     </div>
                     <p style="color: var(--text-secondary); font-size: 13px;">Works on AIX 7.2+ with DNF from IBM AIX Toolbox.</p>
                 </div>
@@ -165,6 +165,11 @@
                         <div class="package-name">fzf <span class="package-version">0.46.1</span></div>
                         <p class="package-desc">The beloved fuzzy finder. Search files, history, processes—anything. Ctrl+R will never be the same.</p>
                         <div class="package-install">dnf install fzf</div>
+                    </a>
+                    <a href="https://gitlab.com/librepower/aix/-/tree/main/rclone" class="package-card" style="text-decoration: none; color: inherit;">
+                        <div class="package-name">rclone <span class="package-version">1.73.0</span></div>
+                        <p class="package-desc">Rsync for cloud storage. Sync to S3, Google Drive, Dropbox, Azure and 70+ more. Serve files via HTTP/WebDAV/FTP/NFS.</p>
+                        <div class="package-install">dnf install rclone</div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/nano-editor" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">nano <span class="package-version">8.3</span></div>
