@@ -90,6 +90,22 @@ The incredibly popular command-line fuzzy finder, now on AIX. Search through any
 
 ---
 
+### ☁️ rclone - Cloud Sync
+*Rsync for cloud storage - 70+ providers supported*
+
+Sync files to and from cloud storage providers like Amazon S3, Google Drive, Dropbox, Azure, and 70+ more. Full-featured cloud management from the command line.
+
+- ✅ **70+ cloud providers** - S3, Google Drive, Dropbox, Azure, Backblaze, etc.
+- ✅ **Bidirectional sync** - bisync for two-way synchronization
+- ✅ **Built-in servers** - Serve files via HTTP, WebDAV, FTP, or NFS
+- ✅ **Encryption** - Client-side encryption with crypt backend
+- ✅ **Zero dependencies** - Single static binary
+- ✅ **serve nfs** - Mount alternative for AIX (no FUSE needed)
+
+📁 **[Documentation & Downloads](rclone/)**
+
+---
+
 ### 🐧 Linux Compatibility
 *Used to Linux? Feel at home on AIX*
 
