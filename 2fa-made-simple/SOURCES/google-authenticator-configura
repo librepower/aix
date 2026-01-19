@@ -4,7 +4,7 @@
 # LibrePower (https://librepower.org)
 #
 
-VERSION="1.0"
+VERSION="1.1"
 GA_BIN="/opt/freeware/bin/google-authenticator"
 
 # Colores
@@ -27,8 +27,25 @@ banner() {
 check_ntp() {
     echo -e "${BLUE}[1/4] Verificando sincronización de hora...${NC}"
     
-    if ! lssrc -s xntpd 2>/dev/null | grep -q "active"; then
-        echo -e "${YELLOW}⚠ ADVERTENCIA: El servicio NTP (xntpd) no está activo!${NC}"
+    NTP_OK=0
+    
+    # Método 1: lssrc (solo funciona como root)
+    if lssrc -s xntpd 2>/dev/null | grep -q "active"; then
+        NTP_OK=1
+    fi
+    
+    # Método 2: verificar proceso xntpd (funciona sin root)
+    if [[ $NTP_OK -eq 0 ]] && ps -ef 2>/dev/null | grep -v grep | grep -q "xntpd"; then
+        NTP_OK=1
+    fi
+    
+    # Método 3: ntpq puede conectar (funciona sin root)
+    if [[ $NTP_OK -eq 0 ]] && ntpq -p 127.0.0.1 >/dev/null 2>&1; then
+        NTP_OK=1
+    fi
+    
+    if [[ $NTP_OK -eq 0 ]]; then
+        echo -e "${YELLOW}⚠ ADVERTENCIA: El servicio NTP (xntpd) no parece estar activo!${NC}"
         echo "  Los códigos TOTP requieren hora sincronizada."
         echo "  Ejecuta: startsrc -s xntpd"
         echo ""
