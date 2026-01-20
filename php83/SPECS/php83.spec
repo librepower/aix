@@ -34,7 +34,7 @@ BuildRequires:  gettext-devel
 BuildRequires:  postgresql18-devel
 
 Requires:       libxml2
-Requires:       openssl
+# Requires: openssl (provided by AIX installp)
 Requires:       curl
 Requires:       libsodium
 Requires:       sqlite
@@ -43,8 +43,8 @@ Requires:       gmp
 Requires:       libicu
 Requires:       oniguruma
 Requires:       libgd
-Requires:       freetype
-Requires:       libjpeg-turbo
+Requires:       freetype2
+Requires:       libjpeg
 Requires:       libpng
 Requires:       bzip2
 Requires:       zlib
