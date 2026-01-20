@@ -194,7 +194,7 @@ Full port of MariaDB 11.8.0 to AIX 7.3. Community-developed fork of MySQL with P
 
 ### 🌐 Complete Web Stack for AIX
 
-**Run WordPress, Drupal, Odoo, or any PHP application on AIX!**
+**Run WordPress, Nextcloud, Flarum, Lychee, Kanboard and more on AIX!**
 
 Between LibrePower and IBM AIX Toolbox, you now have a complete LAMP/LEMP stack:
 
