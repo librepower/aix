@@ -160,6 +160,22 @@ Production-ready tool to list open files, track changes, and diagnose system iss
 
 ---
 
+### 🐘 PHP 8.3 - Modern PHP for AIX
+*The latest PHP LTS release with 53 extensions*
+
+Full port of PHP 8.3.16 to AIX 7.3. Modern web development with Fibers, opcache, PHP-FPM, and complete database support. Perfect for WordPress, Drupal, Zabbix frontend.
+
+- ✅ **53 extensions** - bcmath, curl, gd, intl, mbstring, mysqli, pgsql, soap, sodium, zip...
+- ✅ **Fibers support** - Native ppc64 assembly for coroutines
+- ✅ **PHP-FPM** - Production-ready process manager
+- ✅ **Database ready** - MySQL, PostgreSQL, SQLite
+- ✅ **Zabbix compatible** - All required extensions included
+- ✅ **Benchmark** - 2.436s (Zend bench.php on POWER9)
+
+📁 **[Documentation & Downloads](php83/)**
+
+---
+
 ### 🗄️ MariaDB - Database Server
 *Enterprise SQL database on POWER architecture*
 
@@ -173,6 +189,35 @@ Full port of MariaDB 11.8.0 to AIX 7.3. Community-developed fork of MySQL with P
 - ✅ **C++11 threading** - Uses pthread-enabled libstdc++ automatically
 
 📁 **[Documentation & Downloads](https://gitlab.com/librepower/mariadb)**
+
+---
+
+### 🌐 Complete Web Stack for AIX
+
+**Run WordPress, Drupal, Odoo, or any PHP application on AIX!**
+
+Between LibrePower and IBM AIX Toolbox, you now have a complete LAMP/LEMP stack:
+
+| Component | Version | Source | Install |
+|-----------|---------|--------|---------|
+| **Apache httpd** | 2.4.66 | IBM AIX Toolbox | `dnf install httpd` |
+| **nginx** | 1.27.4 | IBM AIX Toolbox | `dnf install nginx` |
+| **PHP** | 8.3.16 | LibrePower | `dnf install php83 php83-fpm` |
+| **MariaDB** | 11.8.0 | LibrePower | `dnf install mariadb11` |
+| **PostgreSQL** | 16.x | IBM AIX Toolbox | `dnf install postgresql16-server` |
+
+**Quick LAMP setup:**
+```bash
+# Add LibrePower repository
+curl -fsSL https://aix.librepower.org/install.sh | sh
+
+# Install web stack
+dnf install httpd php83 mariadb11
+
+# Start services
+startsrc -s httpd
+startsrc -s mariadb11
+```
 
 ---
 
