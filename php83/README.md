@@ -266,3 +266,142 @@ All dependencies available via `dnf` from AIX Toolbox.
 - **Repository**: https://aix.librepower.org
 - **Newsletter**: https://librepower.substack.com
 - **Email**: hello@librepower.org
+
+---
+
+## SRC Integration (AIX System Resource Controller)
+
+Manage PHP-FPM and web services with native AIX SRC commands:
+
+### PHP-FPM via SRC
+
+```bash
+# Register PHP-FPM with SRC (run once)
+mkssys -s php-fpm \
+       -p /opt/freeware/sbin/php-fpm \
+       -a "-F" \
+       -u 0 -S -n 15 -f 9
+
+# Start/Stop/Status
+startsrc -s php-fpm
+stopsrc -s php-fpm
+lssrc -s php-fpm
+
+# Auto-start at boot
+mkitab 'php-fpm:2:once:/usr/bin/startsrc -s php-fpm'
+```
+
+### Apache httpd via SRC
+
+```bash
+mkssys -s httpd \
+       -p /opt/freeware/sbin/httpd \
+       -a "-DFOREGROUND" \
+       -u 0 -S -n 15 -f 9
+
+startsrc -s httpd
+```
+
+**Note**: SRC requires foreground mode flags (`-F` for php-fpm, `-DFOREGROUND` for httpd).
+
+---
+
+## Complete Web Stack (LAMP/LEMP)
+
+PHP 8.3 integrates with IBM AIX Toolbox for a complete stack:
+
+| Component | Version | Source | Install |
+|-----------|---------|--------|---------|
+| Apache httpd | 2.4.66 | IBM AIX Toolbox | `dnf install httpd` |
+| nginx | 1.27.4 | IBM AIX Toolbox | `dnf install nginx` |
+| **PHP** | **8.3.16** | **LibrePower** | `dnf install php83 php83-fpm` |
+| **MariaDB** | **11.8.0** | **LibrePower** | `dnf install mariadb11` |
+| PostgreSQL | 16.x | IBM AIX Toolbox | `dnf install postgresql16-server` |
+
+### Apache + PHP-FPM Configuration
+
+Add to `/opt/freeware/etc/httpd/conf/httpd.conf`:
+
+```apache
+# Load modules (use 32-bit path - Apache from Toolbox is 32-bit)
+LoadModule proxy_module /opt/freeware/lib/httpd/modules/mod_proxy.so
+LoadModule proxy_fcgi_module /opt/freeware/lib/httpd/modules/mod_proxy_fcgi.so
+LoadModule rewrite_module /opt/freeware/lib/httpd/modules/mod_rewrite.so
+
+# PHP-FPM handler
+<FilesMatch \.php$>
+    SetHandler "proxy:fcgi://127.0.0.1:9000"
+</FilesMatch>
+
+# Enable .htaccess for WordPress, Laravel, etc.
+<Directory "/var/www/htdocs">
+    AllowOverride All
+</Directory>
+
+# Timeout for large operations
+ProxyTimeout 300
+
+DirectoryIndex index.php index.html
+```
+
+### PHP Configuration for Web Apps
+
+Add to `/opt/freeware/etc/php.ini`:
+
+```ini
+pdo_mysql.default_socket=/opt/freeware/var/lib/mysql/mysql.sock
+mysqli.default_socket=/opt/freeware/var/lib/mysql/mysql.sock
+max_execution_time = 300
+```
+
+---
+
+## Tested Applications
+
+Validated PHP applications on AIX 7.3 with this stack:
+
+| Application | Type | Database | Status |
+|-------------|------|----------|--------|
+| **WordPress 6.9** | CMS | MariaDB | ✅ Working |
+| **Kanboard** | Project Management | SQLite | ✅ Working |
+| **Lychee 5.5** | Photo Gallery | MariaDB | ✅ Working |
+| **Flarum 2.0** | Forum | MariaDB | ✅ Working |
+| **Nextcloud** | Cloud Storage | MariaDB | ✅ Working |
+
+### WordPress Plugins Tested
+
+- WooCommerce ✅
+- Duplicator ✅
+- Yoast SEO ✅
+
+### Developer Tools
+
+```bash
+# WP-CLI
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+mv wp-cli.phar /opt/freeware/bin/wp-cli.phar
+echo '#!/bin/bash
+exec /opt/freeware/bin/php /opt/freeware/bin/wp-cli.phar "$@"' > /opt/freeware/bin/wp
+chmod +x /opt/freeware/bin/wp
+
+# Composer
+curl -sS https://getcomposer.org/installer | /opt/freeware/bin/php
+mv composer.phar /opt/freeware/bin/composer
+```
+
+---
+
+## Dependencies (All Available)
+
+All dependencies available via IBM AIX Toolbox - no additional porting required:
+
+| Package | Version |
+|---------|---------|
+| OpenSSL | 3.0.16 |
+| CA Certificates | 301 certs |
+| zlib | 1.3.1 |
+| libnghttp2 | 1.62.1 |
+| pcre2 | 10.45 |
+| curl | 8.18.0 |
+| libxml2 | 2.14.6 |
+| ImageMagick | 7.1.2.11 |
