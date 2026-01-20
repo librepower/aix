@@ -2,7 +2,7 @@
 %define php_major 8.3
 %define _prefix /opt/freeware
 
-Name:           librepower-php83
+Name:           php83
 Version:        %{php_version}
 Release:        1%{?dist}
 Summary:        PHP 8.3 scripting language for AIX
@@ -59,7 +59,7 @@ PHP 8.3 for IBM AIX 7.3+ (ppc64) compiled by LibrePower.
 Includes 53 extensions: bcmath, bz2, curl, gd, intl, mbstring, mysqli,
 openssl, pdo, pgsql, soap, sodium, zip, and more.
 
-Built for Zabbix Server and general web applications.
+Tested with WordPress, Nextcloud, Flarum, Lychee, Kanboard.
 
 %package fpm
 Summary:        PHP 8.3 FastCGI Process Manager
