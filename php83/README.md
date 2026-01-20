@@ -29,7 +29,7 @@ IBM AIX Toolbox provides PHP 7.4.33, which reached End-of-Life. This port brings
 - **Fibers support** - Coroutines with native ppc64 assembly
 - **PHP-FPM** - Production-ready process manager
 - **Full database support** - MySQL, PostgreSQL, SQLite
-- **Zabbix ready** - All required extensions included
+- **Production ready** - Tested with WordPress, Nextcloud, Flarum, Lychee, Kanboard
 
 ### Performance on POWER9
 
@@ -154,17 +154,18 @@ All extensions are built-in and loaded by default:
 | intl | `NumberFormatter` | OK |
 | Fibers | `Fiber::suspend()` | OK (ppc64 asm) |
 
-## Zabbix Frontend
 
-PHP 8.3 meets all Zabbix 7.0 requirements. Add to `/opt/freeware/etc/php.ini`:
+## Recommended PHP Configuration
+
+For web applications, add to `/opt/freeware/etc/php.ini`:
 
 ```ini
 memory_limit = 128M
 post_max_size = 16M
-upload_max_filesize = 2M
+upload_max_filesize = 8M
 max_execution_time = 300
 max_input_time = 300
-date.timezone = Europe/Madrid
+date.timezone = Your/Timezone
 ```
 
 ## AIX-Specific Notes

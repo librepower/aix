@@ -6,17 +6,23 @@ stages:
 
 variables:
   PACKAGES_DIR: packages
+  GIT_LFS_SKIP_SMUDGE: "0"
 
 build-repo:
   stage: build
   before_script:
-    - apt-get update && apt-get install -y createrepo-c curl jq
+    - apt-get update && apt-get install -y createrepo-c curl jq git-lfs
+    - git lfs install
+    - git lfs pull
   script:
     - mkdir -p $PACKAGES_DIR
     
     # Copy RPMs from repository directories
     - find . -name "*.rpm" -path "*/RPMS/*" -exec cp {} $PACKAGES_DIR/ \;
     - echo "Packages found:" && ls -la $PACKAGES_DIR/
+    
+    # Verify RPMs are real files (not LFS pointers)
+    - 'for f in $PACKAGES_DIR/*.rpm; do size=$(stat -c%s "$f"); if [ "$size" -lt 1000 ]; then echo "ERROR: $f is LFS pointer ($size bytes)"; exit 1; fi; done'
     
     # Generate repository metadata
     - createrepo_c $PACKAGES_DIR/
