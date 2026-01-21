@@ -252,6 +252,101 @@ Port of [delta](https://github.com/dandavison/delta) to AIX/POWER. A syntax-high
 
 ---
 
+
+### 🔐 age - Modern File Encryption
+*Simple, secure encryption with no config needed*
+
+Port of [age](https://github.com/FiloSottile/age) to AIX. A simple, modern, and secure file encryption tool with small explicit keys, no config options, and UNIX-style composability.
+
+- ✅ **Simple keys** - No complex key management
+- ✅ **Passphrase mode** - Encrypt with just a password
+- ✅ **SSH key support** - Use existing SSH keys for encryption
+- ✅ **Composable** - Works well with pipes and scripts
+- ✅ **Zero dependencies** - Single static binary
+
+📁 **[Documentation & Downloads](age/)**
+
+---
+
+### 💾 duf - Disk Usage/Free Utility
+*A better df alternative with colors and graphs*
+
+Port of [duf](https://github.com/muesli/duf) to AIX. Modern disk usage utility with colorful output, sorting, filtering, and JSON support.
+
+- ✅ **Beautiful output** - Color-coded tables with usage bars
+- ✅ **Smart grouping** - Local, network, fuse, special devices
+- ✅ **Multiple formats** - Table, JSON, CSV output
+- ✅ **Filtering** - Show only specific filesystem types
+- ✅ **Zero dependencies** - Single static binary
+
+📁 **[Documentation & Downloads](duf/)**
+
+---
+
+### 🔧 gron - Make JSON Greppable
+*Transform JSON for easy grep and sed processing*
+
+Port of [gron](https://github.com/tomnomnom/gron) to AIX. Transforms JSON into discrete assignments to make it easier to grep and see the absolute path to each value.
+
+- ✅ **Greppable JSON** - Find paths to values easily
+- ✅ **Reversible** - Convert back to JSON with `gron -u`
+- ✅ **Stream processing** - Works with pipes and large files
+- ✅ **Colorized output** - Easy to read paths
+- ✅ **Zero dependencies** - Single static binary
+
+📁 **[Documentation & Downloads](gron/)**
+
+---
+
+### 🔍 ripgrep - Blazingly Fast Search
+*The fastest grep alternative, now on AIX*
+
+Port of [ripgrep](https://github.com/BurntSushi/ripgrep) to AIX. A line-oriented search tool that recursively searches directories for a regex pattern. **First Rust application compiled for AIX with IBM Open SDK for Rust.**
+
+- ✅ **4x faster than grep** - Written in Rust with SIMD optimization
+- ✅ **Smart defaults** - Respects .gitignore, skips binary files
+- ✅ **Beautiful output** - Colors, line numbers, context
+- ✅ **Full regex** - Powerful Rust regex engine
+- ✅ **Unicode support** - Full UTF-8 handling
+- ✅ **Compiled with Rust 1.90** - IBM Open SDK for Rust on AIX
+
+📁 **[Documentation & Downloads](ripgrep/)**
+
+---
+
+### 💾 stgtui - AIX Storage Explorer
+*Professional TUI for LVM/SAN Management*
+
+A LibrePower original tool, created exclusively for AIX. Terminal User Interface for exploring and monitoring AIX storage: Volume Groups, Logical Volumes, Filesystems, Physical Volumes, and LUNs.
+
+- ✅ **8 interactive views** - Dashboard, VGs, Health, LVs, I/O, Mirrors, bidirectional mapping
+- ✅ **Health monitoring** - Stale PPs, multipath, quorum, errpt disk errors
+- ✅ **Unused disk detection** - Shows clean vs VGDA remnants
+- ✅ **Bidirectional navigation** - FS ↔ LV ↔ VG ↔ PV ↔ LUN
+- ✅ **Search & Export** - Find anything, save reports
+- ✅ **vim keys** - j/k scroll, g/G navigation
+- ✅ **Configurable thresholds** - ~/.stgtuirc for custom alerts
+
+📁 **[Documentation & Downloads](stgtui/)**
+
+---
+
+### 📝 yq - YAML/JSON/XML Processor
+*Like jq, but for YAML and more*
+
+Port of [yq](https://github.com/mikefarah/yq) to AIX. A lightweight and portable command-line processor for YAML, JSON, XML, CSV, and properties files.
+
+- ✅ **Multi-format** - YAML, JSON, XML, CSV, Properties
+- ✅ **Convert between formats** - YAML to JSON, JSON to YAML, etc.
+- ✅ **jq-like syntax** - Familiar expression language
+- ✅ **In-place editing** - Modify files directly
+- ✅ **Merge files** - Combine multiple YAML/JSON files
+- ✅ **Zero dependencies** - Single static binary
+
+📁 **[Documentation & Downloads](yq/)**
+
+---
+
 ## Contribute
 
 **We welcome contributions from the community!**
