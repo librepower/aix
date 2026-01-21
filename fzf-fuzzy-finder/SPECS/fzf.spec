@@ -1,6 +1,6 @@
 Name:           fzf
 Version:        0.46.1
-Release:        1.librepower
+Release:        2.librepower
 Summary:        A command-line fuzzy finder
 License:        MIT
 Group:          Applications/Text
@@ -30,8 +30,29 @@ mkdir -p %{buildroot}/opt/freeware/bin
 mkdir -p %{buildroot}/opt/freeware/share/fzf/shell
 mkdir -p %{buildroot}/opt/freeware/share/man/man1
 
-# Main binary
-cp /tmp/fzf/fzf %{buildroot}/opt/freeware/bin/
+# Main binary - renamed to fzf.bin (wrapper will call this)
+cp /tmp/fzf/fzf %{buildroot}/opt/freeware/bin/fzf.bin
+chmod 755 %{buildroot}/opt/freeware/bin/fzf.bin
+
+# Wrapper script for AIX compatibility (works with ksh and bash)
+cat > %{buildroot}/opt/freeware/bin/fzf << 'WRAPPER'
+#!/bin/sh
+# fzf wrapper for AIX - auto-configures FZF_DEFAULT_COMMAND
+# Part of LibrePower (https://librepower.org)
+#
+# This wrapper ensures fzf works without linux-compat or manual configuration.
+# AIX native find doesn't support GNU options like -mindepth, so we set a
+# compatible default command.
+
+# If FZF_DEFAULT_COMMAND not set, use AIX-compatible find syntax
+if [ -z "$FZF_DEFAULT_COMMAND" ]; then
+    FZF_DEFAULT_COMMAND='find . -type f -print 2>/dev/null'
+    export FZF_DEFAULT_COMMAND
+fi
+
+exec /opt/freeware/bin/fzf.bin "$@"
+WRAPPER
+chmod 755 %{buildroot}/opt/freeware/bin/fzf
 
 # Shell integration scripts (from upstream)
 cp /tmp/fzf/shell/completion.bash %{buildroot}/opt/freeware/share/fzf/shell/
@@ -152,6 +173,7 @@ chmod 755 %{buildroot}/opt/freeware/bin/fzf-hist
 %files
 %defattr(-,root,system,-)
 /opt/freeware/bin/fzf
+/opt/freeware/bin/fzf.bin
 /opt/freeware/bin/fzf-rpm
 /opt/freeware/bin/fzf-proc
 /opt/freeware/bin/fzf-svc
@@ -166,14 +188,11 @@ chmod 755 %{buildroot}/opt/freeware/bin/fzf-hist
 echo "========================================================"
 echo " fzf 0.46.1 installed successfully!"
 echo ""
-echo " IMPORTANT - Add to your ~/.bashrc:"
-echo "   export FZF_DEFAULT_COMMAND='find . -type f -print 2>/dev/null'"
-echo ""
-echo " This is required because AIX find differs from GNU find."
-echo " Without it, use fzf with piped input: ls | fzf"
+echo " fzf now works out of the box on AIX - no configuration needed!"
 echo ""
 echo " Quick test:"
 echo "   echo 'apple banana orange' | tr ' ' '\n' | fzf"
+echo "   fzf    # browse files in current directory"
 echo ""
 echo " AIX helper scripts included:"
 echo "   fzf-rpm   - Browse installed RPM packages"
@@ -181,19 +200,24 @@ echo "   fzf-proc  - Browse running processes"
 echo "   fzf-svc   - Browse AIX services"
 echo "   fzf-hist  - Search command history"
 echo ""
-echo " For full shell integration, also add to ~/.bashrc:"
-echo "   source /opt/freeware/share/fzf/shell/completion.bash"
+echo " Optional: For shell integration (Ctrl-R history, etc.):"
 echo "   source /opt/freeware/share/fzf/shell/key-bindings.bash"
+echo "   source /opt/freeware/share/fzf/shell/completion.bash"
 echo ""
 echo " SIXE - IBM Business Partner (https://sixe.eu)"
 echo " Part of LibrePower (https://librepower.org)"
 echo "========================================================"
 
 %changelog
-* Thu Jan 02 2025 Hugo Blanco <hugo.blanco@sixe.eu> - 0.46.1-1.aix7.3.sixe
+* Tue Jan 21 2025 Hugo Blanco <hugo.blanco@sixe.eu> - 0.46.1-2.librepower
+- Added wrapper script for AIX compatibility (no manual config needed)
+- fzf now works out of the box without linux-compat
+- Wrapper auto-sets FZF_DEFAULT_COMMAND with AIX-compatible find syntax
+- Compatible with ksh, bash, and any POSIX shell
+
+* Thu Jan 02 2025 Hugo Blanco <hugo.blanco@sixe.eu> - 0.46.1-1.librepower
 - Initial AIX port for LibrePower
 - First Go-based tool successfully compiled for AIX
 - Built with Go 1.21.6 official toolchain (not gccgo)
 - Includes AIX-specific helper scripts (fzf-rpm, fzf-proc, fzf-svc, fzf-hist)
 - Shell integration for bash and zsh
-- Note: Requires FZF_DEFAULT_COMMAND for standalone usage
