@@ -139,7 +139,7 @@ sshd    session    required   pam_aix
 
 # 4. Configure SSH - add to /etc/ssh/sshd_config:
 # SSH 2FA for AIX made SIMPLE
-UsePAM yes
+UsePAM yes 
 KbdInteractiveAuthentication yes
 
 # 5. Restart SSH
@@ -148,6 +148,7 @@ startsrc -s sshd
 
 # NOTE: After this step, 2FA is ACTIVE. Users with ~/.google_authenticator
 # need password + code. Users without it only need password (nullok).
+# You also need to make sure /etc/security/login.cfg has auth_type = STD_AUTH
 
 # 6. Setup 2FA for a user
 google-authenticator-setup           # English wizard
