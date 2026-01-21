@@ -1,5 +1,5 @@
 Name:           stgtui
-Version:        1.6.0
+Version:        1.0.1
 Release:        1.librepower.aix7.3
 Summary:        AIX Storage Explorer - Professional TUI for LVM/SAN Management
 License:        Apache-2.0
@@ -24,6 +24,7 @@ KEY FEATURES:
   - Bidirectional navigation: FS<->LV<->VG<->PV<->LUN
   - Visual progress bars with color coding (green/yellow/red)
   - Paging space monitoring
+  - Compatible with linux-compat (GNU coreutils)
   - Single Go binary, no dependencies
 
 Works with any storage: vSCSI, Fiber Channel, SAN arrays (EMC, IBM, NetApp, etc.)
@@ -37,55 +38,39 @@ chmod 755 %{buildroot}/opt/freeware/bin/stgtui
 
 %post
 echo ""
-echo "stgtui 1.6.0 installed - AIX Storage Explorer"
+echo "  ____  _          _____        _"
+echo " / ___|| |_ __ _  |_   _|_   _ (_)"
+echo " \\___ \\| __/ _\` |   | | | | | || |"
+echo "  ___) | || (_| |   | | | |_| || |"
+echo " |____/ \\__\\__, |   |_|  \\__,_||_|"
+echo "           |___/     v1.0.1"
 echo ""
-echo "Run 'stgtui' - Navigation:"
-echo "  1=Dash 2=VGs 3=Health 4=LVs 5=Disk->FS 6=FS->Disk r=Refresh q=Quit"
+echo " AIX Storage Explorer installed!"
+echo ""
+echo " Run 'stgtui' - Keys:"
+echo "   1=Dash 2=VGs 3=Health 4=LVs 5=Disk->FS 6=FS->Disk r=Refresh q=Quit"
+echo ""
+echo " More AIX packages:  https://aix.librepower.org"
+echo " LibrePower Project: https://librepower.org"
 echo ""
 
 %files
 %attr(755, root, system) /opt/freeware/bin/stgtui
 
 %changelog
-* Tue Jan 21 2025 LibrePower <hello@librepower.org> - 1.6.0-1
-- Compatible with both AIX native df and GNU df (linux-compat)
-- Auto-detects df format from header (Available = GNU, Free = AIX)
-- Fixed index out of range bug when parsing empty lines
-
-* Tue Jan 21 2025 LibrePower <hello@librepower.org> - 1.5.0-1
-- Fixed filesystem display on dashboard
-- VG full is now shown as normal (cyan bar, no alerts)
-- FS alerts threshold changed to 85%+ (was 80%)
-- Refactored getFilesystems() for reliable df parsing
-- Changed "VG Usage" to "PP Alloc" for clarity
-
-* Tue Jan 21 2025 LibrePower <hello@librepower.org> - 1.4.0-1
-- Added Health Check view with comprehensive storage diagnostics
-- Stale PP detection (critical for mirrored environments)
-- Multipath/lspath status monitoring (FC and vSCSI)
-- Quorum status display per VG
-- Paging space monitoring with alerts
-- LV Status view showing sync state for all LVs
-- Path status shown in disk detail view
-- Version display in dashboard header
-
-* Tue Jan 21 2025 LibrePower <hello@librepower.org> - 1.3.0-1
-- Fixed df parsing for AIX (correct field index for %Used)
-- Added VG Details view with per-PV usage breakdown
-- Added Alerts view showing items over 80%/90%
-- VG usage bars now show in dashboard and detail views
-- Shows size/free in human-readable format (G/M)
-
-* Tue Jan 21 2025 LibrePower <hello@librepower.org> - 1.2.0-1
-- Renamed from stg-tui to stgtui
-- Complete rewrite with bidirectional navigation
-- ASCII logo banner on dashboard
-- Visual progress bars with color coding
-- Box-style hierarchy display (FS->LV->VG->PV->LUN)
-
-* Tue Jan 21 2025 LibrePower <hello@librepower.org> - 1.1.0-1
-- Dashboard view with executive summary
-- LUN identification (PVID, unique_id, MPIO vendor/product)
+* Tue Jan 21 2025 LibrePower <hello@librepower.org> - 1.0.1-1
+- Compatible with linux-compat (auto-detects AIX vs GNU df format)
+- Health Check now includes errpt disk errors
+- VG at 100% shown as normal (cyan bars, no alerts)
+- FS alerts at 85%+ warning, 90%+ critical
+- Improved menu spacing
 
 * Tue Jan 21 2025 LibrePower <hello@librepower.org> - 1.0.0-1
 - Initial release
+- Dashboard with VG/FS usage bars and health status
+- VG Details with PV breakdown and quorum status
+- Health Check: stale PPs, multipath, paging, capacity
+- LV Status with sync state
+- Bidirectional mapping: FS<->LV<->VG<->PV<->LUN
+- LUN identification (PVID, unique_id, MPIO vendor/product)
+- Works with vSCSI, FC, any SAN array

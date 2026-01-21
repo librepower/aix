@@ -112,7 +112,7 @@ func getDashboard() string {
   ╚════██║   ██║   ██║   ██║   ██║   ██║   ██║██║
   ███████║   ██║   ╚██████╔╝   ██║   ╚██████╔╝██║
   ╚══════╝   ╚═╝    ╚═════╝    ╚═╝    ╚═════╝ ╚═╝
-[white]        [gray]AIX Storage Explorer v1.6 - LibrePower[white]
+[white]        [gray]AIX Storage Explorer v1.0 - LibrePower[white]
 
 `
 	// Count FS alerts only (VG full is normal)
@@ -328,6 +328,29 @@ func getHealthCheck() string {
 	if fsIssues == 0 { text += "  [green]✓ All filesystems below 85%[white]\n" }
 	
 	// Summary
+	// Check errpt for disk errors (last 24h)
+	text += "\n[cyan]● Recent Disk Errors (24h)[white]\n"
+	errptOut := runCmd("errpt", "-d", "H")
+	diskErrors := 0
+	for _, line := range strings.Split(errptOut, "\n") {
+		if strings.Contains(strings.ToLower(line), "hdisk") {
+			diskErrors++
+			if diskErrors <= 3 {
+				fields := strings.Fields(line)
+				if len(fields) >= 6 {
+					text += fmt.Sprintf("  [red]✖ %s %s %s[white]\n", fields[0], fields[4], strings.Join(fields[5:], " "))
+				}
+			}
+		}
+	}
+	if diskErrors > 3 {
+		text += fmt.Sprintf("  [red]  ... and %d more disk errors[white]\n", diskErrors-3)
+		issues += diskErrors
+	} else if diskErrors > 0 {
+		issues += diskErrors
+	} else {
+		text += "  [green]✓ No disk errors in errpt[white]\n"
+	}
 	text += "\n" + strings.Repeat("─", 50) + "\n"
 	if issues == 0 {
 		text += "[green::b]✓ SYSTEM HEALTHY - No issues detected[white]\n"
@@ -597,7 +620,7 @@ func main() {
 	fsList.SetBorder(true).SetTitle(" FS → Disk [6] ")
 	
 	help := tview.NewTextView().
-		SetText(" [yellow]1[white]Dash [yellow]2[white]VGs [yellow]3[white]Health [yellow]4[white]LVs [yellow]5[white]Disk→FS [yellow]6[white]FS→Disk [yellow]r[white]Refresh [yellow]q[white]Quit").
+		SetText(" [yellow]1[white] Dash  [yellow]2[white] VGs  [yellow]3[white] Health  [yellow]4[white] LVs  [yellow]5[white] Disk→FS  [yellow]6[white] FS→Disk  [yellow]r[white] Refresh  [yellow]q[white] Quit").
 		SetDynamicColors(true)
 	
 	refresh := func() {
