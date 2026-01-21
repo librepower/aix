@@ -1,6 +1,6 @@
 # PHP 8.3 - Modern PHP for AIX
 
-**LibrePower - Unlocking Power Systems through open source. Unmatched RAS and TCO. Minimal footprint**
+**LibrePower - Unlocking Power Systems through open source. Unmatched RAS and TCO. Minimal footprint 🌍**
 
 ![AIX 7.3](https://img.shields.io/badge/AIX-7.3+-blue)
 ![PHP](https://img.shields.io/badge/PHP-8.3.16-777BB4)
@@ -272,38 +272,44 @@ All dependencies available via `dnf` from AIX Toolbox.
 
 ## SRC Integration (AIX System Resource Controller)
 
-Manage PHP-FPM and web services with native AIX SRC commands:
+Manage PHP-FPM and web services with native AIX SRC commands.
 
-### PHP-FPM via SRC
+### Easy Setup (Recommended)
 
 ```bash
-# Register PHP-FPM with SRC (run once)
-mkssys -s php-fpm \
-       -p /opt/freeware/sbin/php-fpm \
-       -a "-F" \
-       -u 0 -S -n 15 -f 9
+# Install SRC integration package - auto-registers all services
+dnf install librepower-web-src
 
-# Start/Stop/Status
+# Start services
+startsrc -s httpd
 startsrc -s php-fpm
-stopsrc -s php-fpm
+
+# Check status
+lssrc -s httpd
 lssrc -s php-fpm
 
-# Auto-start at boot
-mkitab 'php-fpm:2:once:/usr/bin/startsrc -s php-fpm'
+# Enable auto-start at boot
+/opt/freeware/libexec/librepower/web-src-install.sh boot
 ```
 
-### Apache httpd via SRC
+See [web-src](../web-src/) for full documentation.
+
+### Manual Registration (Advanced)
+
+If you prefer to register services manually:
 
 ```bash
-mkssys -s httpd \
-       -p /opt/freeware/sbin/httpd \
-       -a "-DFOREGROUND" \
-       -u 0 -S -n 15 -f 9
+# PHP-FPM
+mkssys -s php-fpm -p /opt/freeware/sbin/php-fpm -a "-F" -u 0 -S -n 15 -f 9
 
-startsrc -s httpd
+# Apache httpd
+mkssys -s httpd -p /opt/freeware/sbin/httpd -a "-DFOREGROUND" -u 0 -S -n 15 -f 9
+
+# nginx
+mkssys -s nginx -p /opt/freeware/sbin/nginx -a "-g 'daemon off;'" -u 0 -S -n 15 -f 9
 ```
 
-**Note**: SRC requires foreground mode flags (`-F` for php-fpm, `-DFOREGROUND` for httpd).
+**Note**: SRC requires foreground mode flags (`-F` for php-fpm, `-DFOREGROUND` for httpd, `-g 'daemon off;'` for nginx).
 
 ---
 
