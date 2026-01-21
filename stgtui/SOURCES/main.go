@@ -52,18 +52,51 @@ func humanSize(mb float64) string {
 	return fmt.Sprintf("%.0fM", mb)
 }
 
+// getFilesystems - compatible with both AIX native df and GNU df (linux-compat)
+// AIX df -m: Filesystem  MB_blocks  Free  %Used  Iused  %Iused  Mounted (7 fields)
+// GNU df -m: Filesystem  1M-blocks  Used  Available  Use%  Mounted (6 fields)
 func getFilesystems() []map[string]string {
 	var result []map[string]string
-	for _, line := range strings.Split(runCmd("df", "-m"), "\n") {
+	dfOutput := runCmd("df", "-m")
+	lines := strings.Split(dfOutput, "\n")
+	
+	// Detect format from header
+	isGNU := false
+	if len(lines) > 0 && strings.Contains(lines[0], "Available") {
+		isGNU = true
+	}
+	
+	for _, line := range lines {
 		fields := strings.Fields(line)
-		if len(fields) >= 7 && strings.HasPrefix(fields[0], "/dev/") {
-			fs := map[string]string{
+		if len(fields) == 0 || !strings.HasPrefix(fields[0], "/dev/") {
+			continue
+		}
+		
+		var fs map[string]string
+		if isGNU && len(fields) >= 6 {
+			// GNU: Filesystem 1M-blocks Used Available Use% Mounted
+			sizeMB, _ := strconv.ParseFloat(fields[1], 64)
+			usedMB, _ := strconv.ParseFloat(fields[2], 64)
+			freeMB := sizeMB - usedMB
+			fs = map[string]string{
+				"device": fields[0],
+				"size":   fmt.Sprintf("%.2f", sizeMB),
+				"free":   fmt.Sprintf("%.2f", freeMB),
+				"pct":    fields[4],
+				"mount":  fields[5],
+			}
+		} else if len(fields) >= 7 {
+			// AIX: Filesystem MB_blocks Free %Used Iused %Iused Mounted
+			fs = map[string]string{
 				"device": fields[0],
 				"size":   fields[1],
 				"free":   fields[2],
 				"pct":    fields[3],
-				"mount":  fields[len(fields)-1],
+				"mount":  fields[6],
 			}
+		}
+		
+		if fs != nil {
 			result = append(result, fs)
 		}
 	}
@@ -79,7 +112,7 @@ func getDashboard() string {
   ╚════██║   ██║   ██║   ██║   ██║   ██║   ██║██║
   ███████║   ██║   ╚██████╔╝   ██║   ╚██████╔╝██║
   ╚══════╝   ╚═╝    ╚═════╝    ╚═╝    ╚═════╝ ╚═╝
-[white]        [gray]AIX Storage Explorer v1.5 - LibrePower[white]
+[white]        [gray]AIX Storage Explorer v1.6 - LibrePower[white]
 
 `
 	// Count FS alerts only (VG full is normal)
@@ -118,7 +151,6 @@ func getDashboard() string {
 		if totalPPs > 0 { pct = (usedPPs * 100) / totalPPs }
 		stateIcon := "[green]●[white]"
 		if state != "active" { stateIcon = "[red]●[white]" }
-		// VG bar always green/cyan (full VG is normal)
 		bar := "[cyan]" + strings.Repeat("█", (pct*18)/100) + "[gray]" + strings.Repeat("░", 18-(pct*18)/100) + fmt.Sprintf("[white] %3d%%", pct)
 		text += fmt.Sprintf("  %s %-10s %-7s %8s %8s %s\n", stateIcon, vg, state, 
 			humanSize(float64(totalPPs*ppSize)), humanSize(float64(freePPs*ppSize)), bar)
@@ -211,7 +243,7 @@ func getHealthCheck() string {
 	text := "[yellow::b]═══ STORAGE HEALTH CHECK ═══[white]\n\n"
 	issues := 0
 	
-	// Check Stale PPs
+	// Stale PPs
 	text += "[cyan]● Stale Physical Partitions[white]\n"
 	hasStale := false
 	for _, vg := range strings.Split(strings.TrimSpace(runCmd("lsvg")), "\n") {
@@ -226,7 +258,7 @@ func getHealthCheck() string {
 	}
 	if !hasStale { text += "  [green]✓ No stale partitions[white]\n" }
 	
-	// Check Quorum
+	// Quorum
 	text += "\n[cyan]● Volume Group Quorum[white]\n"
 	for _, vg := range strings.Split(strings.TrimSpace(runCmd("lsvg")), "\n") {
 		if vg == "" { continue }
@@ -241,7 +273,7 @@ func getHealthCheck() string {
 		}
 	}
 	
-	// Check Multipath
+	// Multipath
 	text += "\n[cyan]● Multipath Status[white]\n"
 	pathOut := runCmd("lspath")
 	pathCount := 0
@@ -263,7 +295,7 @@ func getHealthCheck() string {
 		text += "  [gray]- No multipath configured[white]\n"
 	}
 	
-	// Check Paging
+	// Paging
 	text += "\n[cyan]● Paging Space[white]\n"
 	for _, line := range strings.Split(runCmd("lsps", "-a"), "\n") {
 		fields := strings.Fields(line)
@@ -280,7 +312,7 @@ func getHealthCheck() string {
 		}
 	}
 	
-	// Check FS Usage (NOT VG - VG full is normal)
+	// FS Usage
 	text += "\n[cyan]● Filesystem Capacity[white]\n"
 	fsIssues := 0
 	for _, fs := range getFilesystems() {
@@ -302,8 +334,8 @@ func getHealthCheck() string {
 	} else {
 		text += fmt.Sprintf("[red::b]✖ %d ISSUE(S) REQUIRE ATTENTION[white]\n", issues)
 	}
-	text += "\n[gray]Legend: [green]✓[gray]=OK  [yellow]⚠[gray]=Warning(85-89%%)  [red]✖[gray]=Critical(90%%+)[white]\n"
-	text += "[gray]Note: VG at 100%% is normal (PPs allocated to LVs)[white]\n"
+	text += "\n[gray]Legend: [green]✓[gray]=OK  [yellow]⚠[gray]=85-89%%  [red]✖[gray]=90%%+[white]\n"
+	text += "[gray]Note: VG at 100%% is normal (PPs allocated)[white]\n"
 	
 	return text
 }
