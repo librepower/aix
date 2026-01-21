@@ -196,7 +196,7 @@ Full port of MariaDB 11.8.0 to AIX 7.3. Community-developed fork of MySQL with P
 
 **Run WordPress, Nextcloud, Flarum, Lychee, Kanboard and more on AIX!**
 
-Between LibrePower and IBM AIX Toolbox, you now have a complete LAMP/LEMP stack:
+Between LibrePower and IBM AIX Toolbox, you now have a complete LAMP/LEMP stack with AI/vector search capabilities:
 
 | Component | Version | Source | Install |
 |-----------|---------|--------|---------|
@@ -204,7 +204,8 @@ Between LibrePower and IBM AIX Toolbox, you now have a complete LAMP/LEMP stack:
 | **nginx** | 1.27.4 | IBM AIX Toolbox | `dnf install nginx` |
 | **PHP** | 8.3.16 | LibrePower | `dnf install php83 php83-fpm` |
 | **MariaDB** | 11.8.0 | LibrePower | `dnf install mariadb11` |
-| **PostgreSQL** | 16.x | IBM AIX Toolbox | `dnf install postgresql16-server` |
+| **PostgreSQL** | 18.0 | IBM AIX Toolbox | `dnf install postgresql18-server` |
+| **pgvector** | 0.8.1 | IBM AIX Toolbox | `dnf install postgresql18-pgvector` |
 
 **Quick LAMP setup:**
 ```bash
@@ -218,6 +219,8 @@ dnf install httpd php83 mariadb11
 startsrc -s httpd
 startsrc -s mariadb11
 ```
+
+📁 **[Full Documentation: LAMP/LEMP, PHP-FPM, pgvector for AI/RAG](webstack/)**
 
 ---
 
