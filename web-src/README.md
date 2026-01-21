@@ -15,16 +15,20 @@ Works with [php83](../php83/) and [mariadb11](../mariadb11/) to provide a comple
 # Install
 dnf install librepower-web-src
 
-# Start your web stack
+# Start your web stack (Apache)
 startsrc -s httpd
 startsrc -s php-fpm
 
+# Or use nginx instead of Apache
+startsrc -s nginx
+startsrc -s php-fpm
+
 # Check status
-lssrc -s httpd
+lssrc -s httpd      # or nginx
 lssrc -s php-fpm
 ```
 
-That's it. Services are registered automatically on install.
+That's it. Services (httpd, nginx, php-fpm) are registered automatically on install.
 
 ---
 
@@ -45,6 +49,22 @@ AIX SRC provides unified service management:
 - Check status with `lssrc`
 - Auto-start at boot via `/etc/inittab`
 - Consistent management across all web services
+
+## Prerequisites
+
+Install the web services from IBM AIX Toolbox and LibrePower:
+
+```bash
+# Web servers (from IBM AIX Toolbox)
+dnf install httpd      # Apache
+dnf install nginx      # nginx (alternative to Apache)
+
+# PHP (from LibrePower)
+dnf install php83 php83-fpm
+
+# Database (optional, from LibrePower)
+dnf install mariadb11
+```
 
 ## Installation
 
@@ -77,7 +97,12 @@ The package automatically registers httpd, nginx, and php-fpm with SRC on instal
 
 Or manually add to `/etc/inittab`:
 ```bash
+# For LAMP (Apache)
 mkitab 'httpd:2:once:/usr/bin/startsrc -s httpd'
+mkitab 'php-fpm:2:once:/usr/bin/startsrc -s php-fpm'
+
+# For LEMP (nginx) - use instead of httpd
+mkitab 'nginx:2:once:/usr/bin/startsrc -s nginx'
 mkitab 'php-fpm:2:once:/usr/bin/startsrc -s php-fpm'
 ```
 
