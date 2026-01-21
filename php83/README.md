@@ -259,7 +259,6 @@ All dependencies available via `dnf` from AIX Toolbox.
 
 - PHP by [The PHP Group](https://www.php.net)
 - AIX port and packaging by [LibrePower](https://librepower.org)
-- Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source
 
 ## Support
 
@@ -277,15 +276,19 @@ Manage PHP-FPM and web services with native AIX SRC commands.
 ### Easy Setup (Recommended)
 
 ```bash
-# Install SRC integration package - auto-registers all services
+# Install SRC integration package - auto-registers httpd, nginx, php-fpm
 dnf install librepower-web-src
 
-# Start services
+# Start services (LAMP with Apache)
 startsrc -s httpd
 startsrc -s php-fpm
 
+# Or LEMP with nginx
+startsrc -s nginx
+startsrc -s php-fpm
+
 # Check status
-lssrc -s httpd
+lssrc -s httpd      # or nginx
 lssrc -s php-fpm
 
 # Enable auto-start at boot
