@@ -1,55 +1,56 @@
 Name:           ripgrep
-Version:        14.1.1
-Release:        1.librepower
-Summary:        Fast regex-based search tool
-License:        MIT
+Version:        15.1.0
+Release:        1.librepower.aix7.3
+Summary:        Fast regex-based search tool (like grep but faster)
+License:        MIT/Unlicense
 URL:            https://github.com/BurntSushi/ripgrep
-Group:          Applications/Text
 
 %description
-ripgrep is a line-oriented search tool that recursively searches the current
-directory for a regex pattern. By default, ripgrep will respect gitignore
-rules and automatically skip hidden files/directories and binary files.
+ripgrep (rg) is a line-oriented search tool that recursively searches
+the current directory for a regex pattern. By default, ripgrep will
+respect gitignore rules and automatically skip hidden files/directories
+and binary files.
 
-ripgrep has first-class support on Windows, macOS and Linux, with binary
-downloads available for every release.
+ripgrep has first class support on Windows, macOS and Linux, with binary
+downloads available for every release. ripgrep is similar to other popular
+search tools like The Silver Searcher, ack and grep.
 
-Built with Rust for AIX by LibrePower.
+Features:
+- Automatically respects .gitignore
+- Faster than grep, ag, ack, and most other tools
+- Smart case search by default
+- Search compressed files
+- Unicode support
+
+Compiled with IBM Open SDK for Rust on AIX.
 
 %install
-rm -rf %{buildroot}
 mkdir -p %{buildroot}/opt/freeware/bin
-mkdir -p %{buildroot}/opt/freeware/share/doc/%{name}
+mkdir -p %{buildroot}/opt/freeware/share/man/man1
+mkdir -p %{buildroot}/opt/freeware/share/bash-completion/completions
+mkdir -p %{buildroot}/opt/freeware/share/zsh/site-functions
+mkdir -p %{buildroot}/opt/freeware/share/fish/vendor_completions.d
 
-cp /tmp/rg-build/rg %{buildroot}/opt/freeware/bin/
+cp %{_sourcedir}/rg %{buildroot}/opt/freeware/bin/
 chmod 755 %{buildroot}/opt/freeware/bin/rg
 
-cp /tmp/rg-build/README.md %{buildroot}/opt/freeware/share/doc/%{name}/
-cp /tmp/rg-build/COPYING %{buildroot}/opt/freeware/share/doc/%{name}/
-cp /tmp/rg-build/LICENSE-MIT %{buildroot}/opt/freeware/share/doc/%{name}/
-chmod 644 %{buildroot}/opt/freeware/share/doc/%{name}/*
+# Man page
+cp %{_sourcedir}/rg.1 %{buildroot}/opt/freeware/share/man/man1/
 
-%post
-echo ""
-echo "ripgrep installed successfully!"
-echo ""
-echo "Usage: rg PATTERN [PATH]"
-echo ""
-echo "Examples:"
-echo "  rg 'error' /var/log     # Search for 'error' in logs"
-echo "  rg -i 'todo'            # Case-insensitive search"
-echo "  rg -l 'function'        # List files with matches"
-echo ""
+# Shell completions
+cp %{_sourcedir}/rg.bash %{buildroot}/opt/freeware/share/bash-completion/completions/rg
+cp %{_sourcedir}/_rg %{buildroot}/opt/freeware/share/zsh/site-functions/
+cp %{_sourcedir}/rg.fish %{buildroot}/opt/freeware/share/fish/vendor_completions.d/
 
 %files
-%defattr(-,root,system,-)
-/opt/freeware/bin/rg
-/opt/freeware/share/doc/%{name}/README.md
-/opt/freeware/share/doc/%{name}/COPYING
-/opt/freeware/share/doc/%{name}/LICENSE-MIT
+%attr(755, root, system) /opt/freeware/bin/rg
+/opt/freeware/share/man/man1/rg.1
+/opt/freeware/share/bash-completion/completions/rg
+/opt/freeware/share/zsh/site-functions/_rg
+/opt/freeware/share/fish/vendor_completions.d/rg.fish
 
 %changelog
-* Wed Jan 08 2025 LibrePower <hello@librepower.org> - 14.1.1-1.librepower
-- Initial AIX port
+* Tue Jan 21 2025 LibrePower <hello@librepower.org> - 15.1.0-1
+- Initial release for AIX
 - Compiled with IBM Open SDK for Rust 1.90
-- 64-bit XCOFF binary
+- First modern grep alternative available natively on AIX
