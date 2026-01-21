@@ -223,7 +223,6 @@ results = cur.fetchall()
 
 ### Use Cases
 
-- **Redbook Explorer**: Search IBM Redbooks using natural language queries
 - **Document Q&A**: Build chatbots that answer questions from your documents
 - **Semantic Search**: Find similar content across large document collections
 - **Recommendation Systems**: Suggest related items based on embeddings
