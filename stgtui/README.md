@@ -8,6 +8,10 @@ A LibrePower original tool, created exclusively for AIX.
 ![AIX](https://img.shields.io/badge/AIX-7.2%2B-green)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue)
 
+## Demo
+
+![stgtui Demo](demo/stgtui-demo.svg)
+
 ## Features
 
 ### Views (press number keys)
@@ -73,34 +77,6 @@ warn_threshold=85
 
 # Critical threshold (red) - default 90%
 crit_threshold=90
-```
-
-## Screenshots
-
-```
-  ███████╗████████╗ ██████╗ ████████╗██╗   ██╗██╗
-  ██╔════╝╚══██╔══╝██╔════╝ ╚══██╔══╝██║   ██║██║
-  ███████╗   ██║   ██║  ███╗   ██║   ██║   ██║██║
-  ╚════██║   ██║   ██║   ██║   ██║   ██║   ██║██║
-  ███████║   ██║   ╚██████╔╝   ██║   ╚██████╔╝██║
-  ╚══════╝   ╚═╝    ╚═════╝    ╚═╝    ╚═════╝ ╚═╝
-       AIX Storage Explorer v1.1 - LibrePower
-
-═══ VOLUME GROUPS ═══
-  VG           STATE      SIZE     FREE PP USAGE
-  ──────────────────────────────────────────────
-  ● rootvg     active    150G      20G ████████████████░░  87%
-
-═══ UNUSED DISKS ═══
-  DISK       STATUS     SIZE  LUN INFO
-  ───────────────────────────────────────
-  ◐ hdisk0   vgda        50G  IBM 2145
-
-═══ FILESYSTEMS ═══
-  MOUNT                TYPE     SIZE     FREE USAGE
-  ──────────────────────────────────────────────────
-  /                    jfs2    4.0G    1.2G ████████████░░░░  70%
-  /usr                 jfs2    8.0G    2.1G ██████████████░░  74%
 ```
 
 ## Compatibility
