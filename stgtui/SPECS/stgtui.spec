@@ -1,5 +1,5 @@
 Name:           stgtui
-Version:        1.4.0
+Version:        1.5.0
 Release:        1.librepower.aix7.3
 Summary:        AIX Storage Explorer - Professional TUI for LVM/SAN Management
 License:        Apache-2.0
@@ -37,7 +37,7 @@ chmod 755 %{buildroot}/opt/freeware/bin/stgtui
 
 %post
 echo ""
-echo "stgtui 1.4.0 installed - AIX Storage Explorer"
+echo "stgtui 1.5.0 installed - AIX Storage Explorer"
 echo ""
 echo "Run 'stgtui' - Navigation:"
 echo "  1=Dash 2=VGs 3=Health 4=LVs 5=Disk->FS 6=FS->Disk r=Refresh q=Quit"
@@ -47,6 +47,13 @@ echo ""
 %attr(755, root, system) /opt/freeware/bin/stgtui
 
 %changelog
+* Tue Jan 21 2025 LibrePower <hello@librepower.org> - 1.5.0-1
+- Fixed filesystem display on dashboard
+- VG full is now shown as normal (cyan bar, no alerts)
+- FS alerts threshold changed to 85%+ (was 80%)
+- Refactored getFilesystems() for reliable df parsing
+- Changed "VG Usage" to "PP Alloc" for clarity
+
 * Tue Jan 21 2025 LibrePower <hello@librepower.org> - 1.4.0-1
 - Added Health Check view with comprehensive storage diagnostics
 - Stale PP detection (critical for mirrored environments)

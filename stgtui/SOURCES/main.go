@@ -21,7 +21,7 @@ func progressBar(percent int, width int) string {
 	filled := (percent * width) / 100
 	empty := width - filled
 	color := "[green]"
-	if percent >= 90 { color = "[red]" } else if percent >= 80 { color = "[yellow]" }
+	if percent >= 90 { color = "[red]" } else if percent >= 85 { color = "[yellow]" }
 	return color + strings.Repeat("█", filled) + "[gray]" + strings.Repeat("░", empty) + "[white]" + fmt.Sprintf(" %3d%%", percent)
 }
 
@@ -32,16 +32,14 @@ func parsePercent(s string) int {
 }
 
 func getPVLunInfo(pv string) (pvid, lunID, vendor, product string) {
-	attrOut := runCmd("lsattr", "-El", pv)
-	for _, line := range strings.Split(attrOut, "\n") {
+	for _, line := range strings.Split(runCmd("lsattr", "-El", pv), "\n") {
 		fields := strings.Fields(line)
 		if len(fields) >= 2 {
 			if fields[0] == "pvid" { pvid = fields[1] }
 			if fields[0] == "unique_id" { lunID = fields[1] }
 		}
 	}
-	mpioOut := runCmd("lsmpio", "-ql", pv)
-	for _, line := range strings.Split(mpioOut, "\n") {
+	for _, line := range strings.Split(runCmd("lsmpio", "-ql", pv), "\n") {
 		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "Vendor Id:") { vendor = strings.TrimSpace(strings.TrimPrefix(line, "Vendor Id:")) }
 		if strings.HasPrefix(line, "Product Id:") { product = strings.TrimSpace(strings.TrimPrefix(line, "Product Id:")) }
@@ -54,6 +52,24 @@ func humanSize(mb float64) string {
 	return fmt.Sprintf("%.0fM", mb)
 }
 
+func getFilesystems() []map[string]string {
+	var result []map[string]string
+	for _, line := range strings.Split(runCmd("df", "-m"), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) >= 7 && strings.HasPrefix(fields[0], "/dev/") {
+			fs := map[string]string{
+				"device": fields[0],
+				"size":   fields[1],
+				"free":   fields[2],
+				"pct":    fields[3],
+				"mount":  fields[len(fields)-1],
+			}
+			result = append(result, fs)
+		}
+	}
+	return result
+}
+
 // ============ DASHBOARD ============
 func getDashboard() string {
 	text := `[yellow::b]
@@ -63,37 +79,24 @@ func getDashboard() string {
   ╚════██║   ██║   ██║   ██║   ██║   ██║   ██║██║
   ███████║   ██║   ╚██████╔╝   ██║   ╚██████╔╝██║
   ╚══════╝   ╚═╝    ╚═════╝    ╚═╝    ╚═════╝ ╚═╝
-[white]        [gray]AIX Storage Explorer v1.4 - LibrePower[white]
+[white]        [gray]AIX Storage Explorer v1.5 - LibrePower[white]
 
 `
-	// Quick Health Check
-	alerts := 0
-	for _, vg := range strings.Split(strings.TrimSpace(runCmd("lsvg")), "\n") {
-		if vg == "" { continue }
-		vgInfo := runCmd("lsvg", vg)
-		var totalPPs, usedPPs int
-		for _, line := range strings.Split(vgInfo, "\n") {
-			if strings.Contains(line, "TOTAL PPs:") { fmt.Sscanf(strings.Fields(strings.Split(line, "TOTAL PPs:")[1])[0], "%d", &totalPPs) }
-			if strings.Contains(line, "USED PPs:") { fmt.Sscanf(strings.Fields(strings.Split(line, "USED PPs:")[1])[0], "%d", &usedPPs) }
-		}
-		if totalPPs > 0 && (usedPPs*100)/totalPPs >= 90 { alerts++ }
-	}
-	dfOut := runCmd("df", "-m")
-	for _, line := range strings.Split(dfOut, "\n") {
-		fields := strings.Fields(line)
-		if len(fields) >= 7 && strings.HasPrefix(fields[0], "/dev/") {
-			if parsePercent(fields[3]) >= 90 { alerts++ }
-		}
+	// Count FS alerts only (VG full is normal)
+	fsAlerts := 0
+	filesystems := getFilesystems()
+	for _, fs := range filesystems {
+		if parsePercent(fs["pct"]) >= 85 { fsAlerts++ }
 	}
 	
 	healthIcon := "[green]● HEALTHY[white]"
-	if alerts > 0 { healthIcon = fmt.Sprintf("[red]● %d ALERTS[white]", alerts) }
-	text += fmt.Sprintf("  System Status: %s    [gray]Press 3 for details[white]\n\n", healthIcon)
+	if fsAlerts > 0 { healthIcon = fmt.Sprintf("[red]● %d FS ALERT(S)[white]", fsAlerts) }
+	text += fmt.Sprintf("  Status: %s    [gray]Press 3 for details[white]\n\n", healthIcon)
 
 	// VGs
 	text += "[yellow::b]═══ VOLUME GROUPS ═══[white]\n"
-	text += fmt.Sprintf("  %-12s %-7s %7s %7s %s\n", "VG", "STATE", "SIZE", "FREE", "USAGE")
-	text += "  " + strings.Repeat("─", 58) + "\n"
+	text += fmt.Sprintf("  %-12s %-7s %8s %8s %s\n", "VG", "STATE", "SIZE", "FREE", "PP USAGE")
+	text += "  " + strings.Repeat("─", 60) + "\n"
 	
 	for _, vg := range strings.Split(strings.TrimSpace(runCmd("lsvg")), "\n") {
 		if vg == "" { continue }
@@ -115,37 +118,35 @@ func getDashboard() string {
 		if totalPPs > 0 { pct = (usedPPs * 100) / totalPPs }
 		stateIcon := "[green]●[white]"
 		if state != "active" { stateIcon = "[red]●[white]" }
-		text += fmt.Sprintf("  %s %-10s %-7s %7s %7s %s\n", stateIcon, vg, state, 
-			humanSize(float64(totalPPs*ppSize)), humanSize(float64(freePPs*ppSize)), progressBar(pct, 18))
+		// VG bar always green/cyan (full VG is normal)
+		bar := "[cyan]" + strings.Repeat("█", (pct*18)/100) + "[gray]" + strings.Repeat("░", 18-(pct*18)/100) + fmt.Sprintf("[white] %3d%%", pct)
+		text += fmt.Sprintf("  %s %-10s %-7s %8s %8s %s\n", stateIcon, vg, state, 
+			humanSize(float64(totalPPs*ppSize)), humanSize(float64(freePPs*ppSize)), bar)
 	}
 
 	// Paging Space
 	text += "\n[yellow::b]═══ PAGING SPACE ═══[white]\n"
-	psOut := runCmd("lsps", "-a")
-	for _, line := range strings.Split(psOut, "\n") {
+	for _, line := range strings.Split(runCmd("lsps", "-a"), "\n") {
 		fields := strings.Fields(line)
 		if len(fields) >= 5 && strings.HasPrefix(fields[0], "hd") {
 			pct := parsePercent(fields[4])
-			text += fmt.Sprintf("  %-12s %-10s %7s %s\n", fields[0], fields[2], fields[3], progressBar(pct, 18))
+			text += fmt.Sprintf("  %-12s %-10s %8s %s\n", fields[0], fields[2], fields[3], progressBar(pct, 18))
 		}
 	}
 
 	// Filesystems
 	text += "\n[yellow::b]═══ FILESYSTEMS ═══[white]\n"
-	text += fmt.Sprintf("  %-18s %7s %7s %s\n", "MOUNT", "SIZE", "FREE", "USAGE")
-	text += "  " + strings.Repeat("─", 58) + "\n"
+	text += fmt.Sprintf("  %-20s %8s %8s %s\n", "MOUNT", "SIZE", "FREE", "USAGE")
+	text += "  " + strings.Repeat("─", 60) + "\n"
 	
-	for _, line := range strings.Split(dfOut, "\n") {
-		fields := strings.Fields(line)
-		if len(fields) >= 7 && strings.HasPrefix(fields[0], "/dev/") {
-			mount := fields[len(fields)-1]
-			sizeMB, _ := strconv.ParseFloat(fields[1], 64)
-			freeMB, _ := strconv.ParseFloat(fields[2], 64)
-			pct := parsePercent(fields[3])
-			displayMount := mount
-			if len(displayMount) > 18 { displayMount = "..." + displayMount[len(displayMount)-15:] }
-			text += fmt.Sprintf("  %-18s %7s %7s %s\n", displayMount, humanSize(sizeMB), humanSize(freeMB), progressBar(pct, 18))
-		}
+	for _, fs := range filesystems {
+		mount := fs["mount"]
+		sizeMB, _ := strconv.ParseFloat(fs["size"], 64)
+		freeMB, _ := strconv.ParseFloat(fs["free"], 64)
+		pct := parsePercent(fs["pct"])
+		displayMount := mount
+		if len(displayMount) > 20 { displayMount = "..." + displayMount[len(displayMount)-17:] }
+		text += fmt.Sprintf("  %-20s %8s %8s %s\n", displayMount, humanSize(sizeMB), humanSize(freeMB), progressBar(pct, 18))
 	}
 	
 	return text
@@ -181,11 +182,11 @@ func getVGDetails() string {
 		
 		text += fmt.Sprintf("[cyan::b]%s[white]  %s%s[white]  PP: %s  Quorum: %s\n", vg, stateColor, state, ppSize, quorum)
 		text += fmt.Sprintf("  PPs: %d total, %d used, %d free\n", totalPPs, usedPPs, freePPs)
-		text += fmt.Sprintf("  %s\n\n", progressBar(pct, 40))
+		bar := "[cyan]" + strings.Repeat("█", (pct*40)/100) + "[gray]" + strings.Repeat("░", 40-(pct*40)/100) + fmt.Sprintf("[white] %3d%%", pct)
+		text += fmt.Sprintf("  %s\n\n", bar)
 		
 		text += "  [gray]Physical Volumes:[white]\n"
-		pvOut := runCmd("lsvg", "-p", vg)
-		for i, line := range strings.Split(pvOut, "\n") {
+		for i, line := range strings.Split(runCmd("lsvg", "-p", vg), "\n") {
 			if i < 2 { continue }
 			fields := strings.Fields(line)
 			if len(fields) >= 5 && strings.HasPrefix(fields[0], "hdisk") {
@@ -196,7 +197,8 @@ func getVGDetails() string {
 				if pvTotal > 0 { pvPct = (pvUsed * 100) / pvTotal }
 				pvStateIcon := "[green]●[white]"
 				if fields[1] != "active" { pvStateIcon = "[red]●[white]" }
-				text += fmt.Sprintf("    %s %-10s %4d/%4d PPs %s\n", pvStateIcon, fields[0], pvUsed, pvTotal, progressBar(pvPct, 15))
+				pvBar := "[cyan]" + strings.Repeat("█", (pvPct*15)/100) + "[gray]" + strings.Repeat("░", 15-(pvPct*15)/100) + fmt.Sprintf("[white] %3d%%", pvPct)
+				text += fmt.Sprintf("    %s %-10s %4d/%4d PPs %s\n", pvStateIcon, fields[0], pvUsed, pvTotal, pvBar)
 			}
 		}
 		text += "\n"
@@ -204,7 +206,7 @@ func getVGDetails() string {
 	return text
 }
 
-// ============ HEALTH / ALERTS ============
+// ============ HEALTH CHECK ============
 func getHealthCheck() string {
 	text := "[yellow::b]═══ STORAGE HEALTH CHECK ═══[white]\n\n"
 	issues := 0
@@ -214,8 +216,7 @@ func getHealthCheck() string {
 	hasStale := false
 	for _, vg := range strings.Split(strings.TrimSpace(runCmd("lsvg")), "\n") {
 		if vg == "" { continue }
-		lvOut := runCmd("lsvg", "-l", vg)
-		for _, line := range strings.Split(lvOut, "\n") {
+		for _, line := range strings.Split(runCmd("lsvg", "-l", vg), "\n") {
 			if strings.Contains(strings.ToLower(line), "stale") {
 				hasStale = true
 				issues++
@@ -229,8 +230,7 @@ func getHealthCheck() string {
 	text += "\n[cyan]● Volume Group Quorum[white]\n"
 	for _, vg := range strings.Split(strings.TrimSpace(runCmd("lsvg")), "\n") {
 		if vg == "" { continue }
-		vgInfo := runCmd("lsvg", vg)
-		for _, line := range strings.Split(vgInfo, "\n") {
+		for _, line := range strings.Split(runCmd("lsvg", vg), "\n") {
 			if strings.Contains(line, "QUORUM:") {
 				if strings.Contains(line, "Enabled") {
 					text += fmt.Sprintf("  [green]✓ %s: Quorum Enabled[white]\n", vg)
@@ -260,17 +260,16 @@ func getHealthCheck() string {
 	if failedPaths == 0 && pathCount > 0 {
 		text += fmt.Sprintf("  [green]✓ All %d paths healthy[white]\n", pathCount)
 	} else if pathCount == 0 {
-		text += "  [gray]No multipath configured[white]\n"
+		text += "  [gray]- No multipath configured[white]\n"
 	}
 	
 	// Check Paging
 	text += "\n[cyan]● Paging Space[white]\n"
-	psOut := runCmd("lsps", "-a")
-	for _, line := range strings.Split(psOut, "\n") {
+	for _, line := range strings.Split(runCmd("lsps", "-a"), "\n") {
 		fields := strings.Fields(line)
 		if len(fields) >= 5 && strings.HasPrefix(fields[0], "hd") {
 			pct := parsePercent(fields[4])
-			if pct >= 80 {
+			if pct >= 85 {
 				issues++
 				icon := "[yellow]⚠[white]"
 				if pct >= 90 { icon = "[red]✖[white]" }
@@ -281,47 +280,20 @@ func getHealthCheck() string {
 		}
 	}
 	
-	// Check VG Usage
-	text += "\n[cyan]● Volume Group Capacity[white]\n"
-	for _, vg := range strings.Split(strings.TrimSpace(runCmd("lsvg")), "\n") {
-		if vg == "" { continue }
-		vgInfo := runCmd("lsvg", vg)
-		var totalPPs, usedPPs int
-		for _, line := range strings.Split(vgInfo, "\n") {
-			if strings.Contains(line, "TOTAL PPs:") { fmt.Sscanf(strings.Fields(strings.Split(line, "TOTAL PPs:")[1])[0], "%d", &totalPPs) }
-			if strings.Contains(line, "USED PPs:") { fmt.Sscanf(strings.Fields(strings.Split(line, "USED PPs:")[1])[0], "%d", &usedPPs) }
-		}
-		pct := 0
-		if totalPPs > 0 { pct = (usedPPs * 100) / totalPPs }
-		if pct >= 80 {
+	// Check FS Usage (NOT VG - VG full is normal)
+	text += "\n[cyan]● Filesystem Capacity[white]\n"
+	fsIssues := 0
+	for _, fs := range getFilesystems() {
+		pct := parsePercent(fs["pct"])
+		if pct >= 85 {
+			fsIssues++
 			issues++
 			icon := "[yellow]⚠[white]"
 			if pct >= 90 { icon = "[red]✖[white]" }
-			text += fmt.Sprintf("  %s %s: %d%% full[white]\n", icon, vg, pct)
-		} else {
-			text += fmt.Sprintf("  [green]✓ %s: %d%% full[white]\n", vg, pct)
+			text += fmt.Sprintf("  %s %s: %d%% full[white]\n", icon, fs["mount"], pct)
 		}
 	}
-	
-	// Check FS Usage
-	text += "\n[cyan]● Filesystem Capacity[white]\n"
-	dfOut := runCmd("df", "-m")
-	fsIssues := 0
-	for _, line := range strings.Split(dfOut, "\n") {
-		fields := strings.Fields(line)
-		if len(fields) >= 7 && strings.HasPrefix(fields[0], "/dev/") {
-			mount := fields[len(fields)-1]
-			pct := parsePercent(fields[3])
-			if pct >= 80 {
-				fsIssues++
-				issues++
-				icon := "[yellow]⚠[white]"
-				if pct >= 90 { icon = "[red]✖[white]" }
-				text += fmt.Sprintf("  %s %s: %d%% full[white]\n", icon, mount, pct)
-			}
-		}
-	}
-	if fsIssues == 0 { text += "  [green]✓ All filesystems below 80%[white]\n" }
+	if fsIssues == 0 { text += "  [green]✓ All filesystems below 85%[white]\n" }
 	
 	// Summary
 	text += "\n" + strings.Repeat("─", 50) + "\n"
@@ -330,12 +302,13 @@ func getHealthCheck() string {
 	} else {
 		text += fmt.Sprintf("[red::b]✖ %d ISSUE(S) REQUIRE ATTENTION[white]\n", issues)
 	}
-	text += "\n[gray]Legend: [green]✓[gray]=OK  [yellow]⚠[gray]=Warning(80-89%%)  [red]✖[gray]=Critical(90%%+)[white]\n"
+	text += "\n[gray]Legend: [green]✓[gray]=OK  [yellow]⚠[gray]=Warning(85-89%%)  [red]✖[gray]=Critical(90%%+)[white]\n"
+	text += "[gray]Note: VG at 100%% is normal (PPs allocated to LVs)[white]\n"
 	
 	return text
 }
 
-// ============ LV DETAILS ============
+// ============ LV STATUS ============
 func getLVDetails() string {
 	text := "[yellow::b]═══ LOGICAL VOLUME STATUS ═══[white]\n\n"
 	text += fmt.Sprintf("  %-15s %-10s %-8s %5s  %-12s %s\n", "LV", "VG", "TYPE", "LPs", "STATE", "MOUNT")
@@ -343,18 +316,12 @@ func getLVDetails() string {
 	
 	for _, vg := range strings.Split(strings.TrimSpace(runCmd("lsvg")), "\n") {
 		if vg == "" { continue }
-		lvOut := runCmd("lsvg", "-l", vg)
-		for i, line := range strings.Split(lvOut, "\n") {
+		for i, line := range strings.Split(runCmd("lsvg", "-l", vg), "\n") {
 			if i < 2 { continue }
 			fields := strings.Fields(line)
 			if len(fields) >= 6 {
-				lvName := fields[0]
-				lvType := fields[1]
-				lps := fields[2]
-				lvState := fields[4]
-				mount := fields[5]
+				lvName, lvType, lps, lvState, mount := fields[0], fields[1], fields[2], fields[4], fields[5]
 				if mount == "N/A" { mount = "[gray]N/A[white]" }
-				
 				stateIcon := "[green]●[white]"
 				stateText := lvState
 				if strings.Contains(strings.ToLower(lvState), "stale") {
@@ -363,7 +330,6 @@ func getLVDetails() string {
 				} else if strings.Contains(lvState, "syncd") {
 					stateText = "[green]" + lvState + "[white]"
 				}
-				
 				text += fmt.Sprintf("  %s %-13s %-10s %-8s %5s  %-12s %s\n", stateIcon, lvName, vg, lvType, lps, stateText, mount)
 			}
 		}
@@ -373,35 +339,31 @@ func getLVDetails() string {
 
 // ============ FS → LUN Mapping ============
 func mapFStoLUN(mount string) string {
-	dfOut := runCmd("df", "-m", mount)
 	var device, sizeMB, freeMB string
 	var pct int
-	for _, line := range strings.Split(dfOut, "\n") {
-		fields := strings.Fields(line)
-		if len(fields) >= 7 && strings.HasPrefix(fields[0], "/dev/") {
-			device = fields[0]
-			sizeMB = fields[1]
-			freeMB = fields[2]
-			pct = parsePercent(fields[3])
+	for _, fs := range getFilesystems() {
+		if fs["mount"] == mount {
+			device = fs["device"]
+			sizeMB = fs["size"]
+			freeMB = fs["free"]
+			pct = parsePercent(fs["pct"])
 			break
 		}
 	}
 	if device == "" { return "[red]Cannot find device for " + mount + "[white]" }
 	
 	lv := strings.TrimPrefix(device, "/dev/")
-	lvInfo := runCmd("lslv", lv)
 	var vg, lvType, lvState, lps string
-	for _, line := range strings.Split(lvInfo, "\n") {
+	for _, line := range strings.Split(runCmd("lslv", lv), "\n") {
 		if strings.Contains(line, "VOLUME GROUP:") { vg = strings.TrimSpace(strings.Fields(strings.Split(line, "VOLUME GROUP:")[1])[0]) }
 		if strings.Contains(line, "TYPE:") && !strings.Contains(line, "BB POLICY") { lvType = strings.TrimSpace(strings.Fields(strings.Split(line, "TYPE:")[1])[0]) }
 		if strings.Contains(line, "LV STATE:") { lvState = strings.TrimSpace(strings.Split(line, "LV STATE:")[1]) }
 		if strings.Contains(line, "LPs:") { lps = strings.TrimSpace(strings.Fields(strings.Split(line, "LPs:")[1])[0]) }
 	}
 	
-	vgInfo := runCmd("lsvg", vg)
 	var vgState, ppSize string
 	var vgTotalPPs, vgUsedPPs int
-	for _, line := range strings.Split(vgInfo, "\n") {
+	for _, line := range strings.Split(runCmd("lsvg", vg), "\n") {
 		if strings.Contains(line, "VG STATE:") { vgState = strings.TrimSpace(strings.Fields(strings.Split(line, "VG STATE:")[1])[0]) }
 		if strings.Contains(line, "PP SIZE:") { ppSize = strings.TrimSpace(strings.Split(line, "PP SIZE:")[1]) }
 		if strings.Contains(line, "TOTAL PPs:") { fmt.Sscanf(strings.Fields(strings.Split(line, "TOTAL PPs:")[1])[0], "%d", &vgTotalPPs) }
@@ -410,10 +372,9 @@ func mapFStoLUN(mount string) string {
 	vgPct := 0
 	if vgTotalPPs > 0 { vgPct = (vgUsedPPs * 100) / vgTotalPPs }
 	
-	lslvmOut := runCmd("lslv", "-m", lv)
 	pvSet := make(map[string]bool)
 	var pvList []string
-	for _, line := range strings.Split(lslvmOut, "\n") {
+	for _, line := range strings.Split(runCmd("lslv", "-m", lv), "\n") {
 		fields := strings.Fields(line)
 		if len(fields) >= 3 && strings.HasPrefix(fields[2], "hdisk") {
 			pv := fields[2]
@@ -423,6 +384,7 @@ func mapFStoLUN(mount string) string {
 	
 	sizef, _ := strconv.ParseFloat(sizeMB, 64)
 	freef, _ := strconv.ParseFloat(freeMB, 64)
+	vgBar := "[cyan]" + strings.Repeat("█", (vgPct*30)/100) + "[gray]" + strings.Repeat("░", 30-(vgPct*30)/100) + fmt.Sprintf("[white] %3d%%", vgPct)
 	
 	text := fmt.Sprintf(`[yellow::b]═══ FILESYSTEM → STORAGE MAPPING ═══[white]
 
@@ -449,13 +411,13 @@ func mapFStoLUN(mount string) string {
   │  VG Name:  [cyan]%-35s[white]  │
   │  State:    %-35s  │
   │  PP Size:  %-35s  │
-  │  VG Usage: %s  │
+  │  PP Alloc: %s  │
   └─────────────────────────────────────────────────┘
            │
            ▼
 [green]▼ PHYSICAL VOLUMES (%d disk(s))[white]
 `, mount, device, humanSize(sizef), humanSize(freef), progressBar(pct, 30),
-		lv, lvType, lvState, lps, vg, vgState, ppSize, progressBar(vgPct, 30), len(pvList))
+		lv, lvType, lvState, lps, vg, vgState, ppSize, vgBar, len(pvList))
 
 	for _, pv := range pvList {
 		pvid, lunID, vendor, product := getPVLunInfo(pv)
@@ -482,10 +444,9 @@ func mapLUNtoFS(pv string) string {
 	if lunInfo == "" { lunInfo = vendor + " " + product }
 	if lunInfo == "" || lunInfo == " " { lunInfo = "(virtual disk)" }
 	
-	pvOut := runCmd("lspv", pv)
 	var totalPPs, freePPs, usedPPs int
 	var vgName string
-	for _, line := range strings.Split(pvOut, "\n") {
+	for _, line := range strings.Split(runCmd("lspv", pv), "\n") {
 		if strings.Contains(line, "VOLUME GROUP:") { 
 			f := strings.Fields(strings.Split(line, "VOLUME GROUP:")[1])
 			if len(f) > 0 { vgName = f[0] }
@@ -497,10 +458,8 @@ func mapLUNtoFS(pv string) string {
 	pct := 0
 	if totalPPs > 0 { pct = (usedPPs * 100) / totalPPs }
 	
-	// Path info
 	pathInfo := ""
-	pathOut := runCmd("lspath", "-l", pv)
-	for _, line := range strings.Split(pathOut, "\n") {
+	for _, line := range strings.Split(runCmd("lspath", "-l", pv), "\n") {
 		fields := strings.Fields(line)
 		if len(fields) >= 3 {
 			pathColor := "[green]"
@@ -509,6 +468,8 @@ func mapLUNtoFS(pv string) string {
 		}
 	}
 	if pathInfo == "" { pathInfo = "[gray]single path[white]" }
+	
+	pvBar := "[cyan]" + strings.Repeat("█", (pct*30)/100) + "[gray]" + strings.Repeat("░", 30-(pct*30)/100) + fmt.Sprintf("[white] %3d%%", pct)
 	
 	text := fmt.Sprintf(`[yellow::b]═══ STORAGE → FILESYSTEM MAPPING ═══[white]
 
@@ -519,21 +480,20 @@ func mapLUNtoFS(pv string) string {
   │  LUN ID:   %-35s  │
   │  PPs:      %-4d total, %-4d used, %-4d free      │
   │  Paths:    %-35s  │
-  │  Usage:    %s  │
+  │  PP Alloc: %s  │
   └─────────────────────────────────────────────────┘
            │
            ▼
-`, pv, pvid, lunInfo, totalPPs, usedPPs, freePPs, pathInfo, progressBar(pct, 30))
+`, pv, pvid, lunInfo, totalPPs, usedPPs, freePPs, pathInfo, pvBar)
 
 	if vgName == "" || vgName == "None" {
 		text += "  [yellow]Disk not assigned to any Volume Group[white]\n"
 		return text
 	}
 	
-	vgInfo := runCmd("lsvg", vgName)
 	var vgState, ppSize string
 	var vgTotalPPs, vgUsedPPs int
-	for _, line := range strings.Split(vgInfo, "\n") {
+	for _, line := range strings.Split(runCmd("lsvg", vgName), "\n") {
 		if strings.Contains(line, "VG STATE:") { vgState = strings.TrimSpace(strings.Fields(strings.Split(line, "VG STATE:")[1])[0]) }
 		if strings.Contains(line, "PP SIZE:") { ppSize = strings.TrimSpace(strings.Split(line, "PP SIZE:")[1]) }
 		if strings.Contains(line, "TOTAL PPs:") { fmt.Sscanf(strings.Fields(strings.Split(line, "TOTAL PPs:")[1])[0], "%d", &vgTotalPPs) }
@@ -541,32 +501,30 @@ func mapLUNtoFS(pv string) string {
 	}
 	vgPct := 0
 	if vgTotalPPs > 0 { vgPct = (vgUsedPPs * 100) / vgTotalPPs }
+	vgBar := "[cyan]" + strings.Repeat("█", (vgPct*30)/100) + "[gray]" + strings.Repeat("░", 30-(vgPct*30)/100) + fmt.Sprintf("[white] %3d%%", vgPct)
 	
 	text += fmt.Sprintf(`[green]▼ VOLUME GROUP[white]
   ┌─────────────────────────────────────────────────┐
   │  VG Name:  [cyan]%-35s[white]  │
   │  State:    %-35s  │
   │  PP Size:  %-35s  │
-  │  VG Usage: %s  │
+  │  PP Alloc: %s  │
   └─────────────────────────────────────────────────┘
            │
            ▼
 [green]▼ LVs & FILESYSTEMS on this disk[white]
-`, vgName, vgState, ppSize, progressBar(vgPct, 30))
+`, vgName, vgState, ppSize, vgBar)
 
 	text += fmt.Sprintf("  %-15s %-8s %6s  %-12s %s\n", "LV", "TYPE", "LPs", "STATE", "MOUNT")
 	text += "  " + strings.Repeat("─", 60) + "\n"
 	
-	lspvlOut := runCmd("lspv", "-l", pv)
-	for i, line := range strings.Split(lspvlOut, "\n") {
+	for i, line := range strings.Split(runCmd("lspv", "-l", pv), "\n") {
 		if i < 2 || strings.TrimSpace(line) == "" { continue }
 		fields := strings.Fields(line)
 		if len(fields) >= 2 {
-			lvName := fields[0]
-			lps := fields[1]
-			lvInfo := runCmd("lslv", lvName)
+			lvName, lps := fields[0], fields[1]
 			var lvType, mount, lvState string
-			for _, l := range strings.Split(lvInfo, "\n") {
+			for _, l := range strings.Split(runCmd("lslv", lvName), "\n") {
 				if strings.Contains(l, "TYPE:") && !strings.Contains(l, "BB") { lvType = strings.TrimSpace(strings.Fields(strings.Split(l, "TYPE:")[1])[0]) }
 				if strings.Contains(l, "MOUNT POINT:") { mount = strings.TrimSpace(strings.Split(l, "MOUNT POINT:")[1]) }
 				if strings.Contains(l, "LV STATE:") { lvState = strings.TrimSpace(strings.Split(l, "LV STATE:")[1]) }
@@ -629,16 +587,12 @@ func main() {
 		}
 		
 		fsList.Clear()
-		for _, line := range strings.Split(runCmd("df", "-m"), "\n") {
-			fields := strings.Fields(line)
-			if len(fields) >= 7 && strings.HasPrefix(fields[0], "/dev/") {
-				mount := fields[len(fields)-1]
-				pct := parsePercent(fields[3])
-				bar := "[green]"
-				if pct >= 90 { bar = "[red]" } else if pct >= 80 { bar = "[yellow]" }
-				bar += fmt.Sprintf("%3d%%", pct) + "[white]"
-				fsList.AddItem(fmt.Sprintf("%-26s %s", mount, bar), "", 0, nil)
-			}
+		for _, fs := range getFilesystems() {
+			pct := parsePercent(fs["pct"])
+			bar := "[green]"
+			if pct >= 90 { bar = "[red]" } else if pct >= 85 { bar = "[yellow]" }
+			bar += fmt.Sprintf("%3d%%", pct) + "[white]"
+			fsList.AddItem(fmt.Sprintf("%-26s %s", fs["mount"], bar), "", 0, nil)
 		}
 	}
 	
