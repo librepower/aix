@@ -4,7 +4,7 @@
 # LibrePower (https://librepower.org)
 #
 
-VERSION="1.1"
+VERSION="1.2"
 GA_BIN="/opt/freeware/bin/google-authenticator"
 
 # Colores
@@ -26,26 +26,36 @@ banner() {
 
 check_ntp() {
     echo -e "${BLUE}[1/4] Verificando sincronización de hora...${NC}"
-    
-    NTP_OK=0
-    
-    # Método 1: lssrc (solo funciona como root)
+
+    NTP_RUNNING=0
+    NTP_SYNCED=0
+    OFFSET=""
+    OFFSET_MS=0
+
+    # Verificar si xntpd está corriendo
     if lssrc -s xntpd 2>/dev/null | grep -q "active"; then
-        NTP_OK=1
+        NTP_RUNNING=1
+    elif ps -ef 2>/dev/null | grep -v grep | grep -q "xntpd"; then
+        NTP_RUNNING=1
     fi
-    
-    # Método 2: verificar proceso xntpd (funciona sin root)
-    if [[ $NTP_OK -eq 0 ]] && ps -ef 2>/dev/null | grep -v grep | grep -q "xntpd"; then
-        NTP_OK=1
+
+    # Verificar si realmente está sincronizado (tiene peer seleccionado con * o +)
+    if [[ $NTP_RUNNING -eq 1 ]]; then
+        NTP_OUTPUT=$(ntpq -p 2>/dev/null)
+        if echo "$NTP_OUTPUT" | grep -q "^[\*\+]"; then
+            NTP_SYNCED=1
+            # Obtener offset del peer seleccionado (línea que empieza con *)
+            OFFSET=$(echo "$NTP_OUTPUT" | grep "^\*" | awk '{print $9}' | tr -d '-')
+            if [[ -z "$OFFSET" ]]; then
+                # Intentar peer de respaldo (línea que empieza con +)
+                OFFSET=$(echo "$NTP_OUTPUT" | grep "^\+" | head -1 | awk '{print $9}' | tr -d '-')
+            fi
+        fi
     fi
-    
-    # Método 3: ntpq puede conectar (funciona sin root)
-    if [[ $NTP_OK -eq 0 ]] && ntpq -p 127.0.0.1 >/dev/null 2>&1; then
-        NTP_OK=1
-    fi
-    
-    if [[ $NTP_OK -eq 0 ]]; then
-        echo -e "${YELLOW}⚠ ADVERTENCIA: El servicio NTP (xntpd) no parece estar activo!${NC}"
+
+    # Evaluar estado
+    if [[ $NTP_RUNNING -eq 0 ]]; then
+        echo -e "${YELLOW}⚠ ADVERTENCIA: El servicio NTP (xntpd) no está corriendo!${NC}"
         echo "  Los códigos TOTP requieren hora sincronizada."
         echo "  Ejecuta: startsrc -s xntpd"
         echo ""
@@ -55,12 +65,48 @@ check_ntp() {
             [sS]) ;;
             *) exit 1 ;;
         esac
+    elif [[ $NTP_SYNCED -eq 0 ]]; then
+        echo -e "${YELLOW}⚠ ADVERTENCIA: xntpd está corriendo pero NO sincronizado!${NC}"
+        echo "  No hay servidor NTP configurado o alcanzable."
+        echo "  Revisa /etc/ntp.conf y verifica conectividad de red."
+        echo "  Los códigos TOTP pueden fallar si la hora no es precisa."
+        echo ""
+        echo -n "¿Continuar de todos modos? (s/n): "
+        read -r resp
+        case "$resp" in
+            [sS]) ;;
+            *) exit 1 ;;
+        esac
     else
-        OFFSET=$(ntpq -p 2>/dev/null | tail -1 | awk '{print $9}' | tr -d '-')
+        # NTP corriendo y sincronizado - verificar offset
         if [[ -n "$OFFSET" ]] && [[ "$OFFSET" =~ ^[0-9]+\.?[0-9]*$ ]]; then
-            echo -e "${GREEN}✓ NTP OK (desfase: ${OFFSET}ms)${NC}"
+            # Convertir a entero para comparación (quitar parte decimal)
+            OFFSET_MS=${OFFSET%.*}
+            OFFSET_MS=${OFFSET_MS:-0}
+
+            if [[ $OFFSET_MS -gt 30000 ]]; then
+                # Offset > 30 segundos - crítico para TOTP
+                echo -e "${RED}✗ CRÍTICO: El desfase de tiempo es ${OFFSET}ms (>30 segundos)!${NC}"
+                echo "  TOTP usa ventanas de 30 segundos. Los códigos FALLARÁN."
+                echo "  Espera a que NTP sincronice o revisa tu configuración."
+                echo ""
+                echo -n "¿Continuar de todos modos? (s/n): "
+                read -r resp
+                case "$resp" in
+                    [sS]) ;;
+                    *) exit 1 ;;
+                esac
+            elif [[ $OFFSET_MS -gt 5000 ]]; then
+                # Offset > 5 segundos - advertencia
+                echo -e "${YELLOW}⚠ NTP sincronizado pero desfase de ${OFFSET}ms (>5 segundos)${NC}"
+                echo "  Esto puede causar fallos ocasionales de TOTP."
+                echo -e "${GREEN}✓ Continuando (el desfase debería mejorar con el tiempo)${NC}"
+            else
+                # Offset OK
+                echo -e "${GREEN}✓ NTP sincronizado (desfase: ${OFFSET}ms)${NC}"
+            fi
         else
-            echo -e "${GREEN}✓ Servicio NTP activo${NC}"
+            echo -e "${GREEN}✓ NTP sincronizado${NC}"
         fi
     fi
     echo ""

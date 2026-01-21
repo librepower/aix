@@ -4,7 +4,7 @@
 # LibrePower (https://librepower.org)
 #
 
-VERSION="1.1"
+VERSION="1.2"
 GA_BIN="/opt/freeware/bin/google-authenticator"
 
 # Colors
@@ -26,26 +26,36 @@ banner() {
 
 check_ntp() {
     echo -e "${BLUE}[1/4] Checking time synchronization...${NC}"
-    
-    NTP_OK=0
-    
-    # Method 1: lssrc (only works as root)
+
+    NTP_RUNNING=0
+    NTP_SYNCED=0
+    OFFSET=""
+    OFFSET_MS=0
+
+    # Check if xntpd is running
     if lssrc -s xntpd 2>/dev/null | grep -q "active"; then
-        NTP_OK=1
+        NTP_RUNNING=1
+    elif ps -ef 2>/dev/null | grep -v grep | grep -q "xntpd"; then
+        NTP_RUNNING=1
     fi
-    
-    # Method 2: check xntpd process (works without root)
-    if [[ $NTP_OK -eq 0 ]] && ps -ef 2>/dev/null | grep -v grep | grep -q "xntpd"; then
-        NTP_OK=1
+
+    # Check if actually synchronized (has a selected peer marked with * or +)
+    if [[ $NTP_RUNNING -eq 1 ]]; then
+        NTP_OUTPUT=$(ntpq -p 2>/dev/null)
+        if echo "$NTP_OUTPUT" | grep -q "^[\*\+]"; then
+            NTP_SYNCED=1
+            # Get offset from the selected peer (line starting with *)
+            OFFSET=$(echo "$NTP_OUTPUT" | grep "^\*" | awk '{print $9}' | tr -d '-')
+            if [[ -z "$OFFSET" ]]; then
+                # Try backup peer (line starting with +)
+                OFFSET=$(echo "$NTP_OUTPUT" | grep "^\+" | head -1 | awk '{print $9}' | tr -d '-')
+            fi
+        fi
     fi
-    
-    # Method 3: ntpq can connect (works without root)
-    if [[ $NTP_OK -eq 0 ]] && ntpq -p 127.0.0.1 >/dev/null 2>&1; then
-        NTP_OK=1
-    fi
-    
-    if [[ $NTP_OK -eq 0 ]]; then
-        echo -e "${YELLOW}⚠ WARNING: NTP service (xntpd) does not appear to be active!${NC}"
+
+    # Evaluate status
+    if [[ $NTP_RUNNING -eq 0 ]]; then
+        echo -e "${YELLOW}⚠ WARNING: NTP service (xntpd) is not running!${NC}"
         echo "  TOTP codes require synchronized time."
         echo "  Run: startsrc -s xntpd"
         echo ""
@@ -55,12 +65,48 @@ check_ntp() {
             [yY]) ;;
             *) exit 1 ;;
         esac
+    elif [[ $NTP_SYNCED -eq 0 ]]; then
+        echo -e "${YELLOW}⚠ WARNING: xntpd is running but NOT synchronized!${NC}"
+        echo "  No NTP server configured or reachable."
+        echo "  Check /etc/ntp.conf and verify network connectivity."
+        echo "  TOTP codes may fail if time is not accurate."
+        echo ""
+        echo -n "Continue anyway? (y/n): "
+        read -r resp
+        case "$resp" in
+            [yY]) ;;
+            *) exit 1 ;;
+        esac
     else
-        OFFSET=$(ntpq -p 2>/dev/null | tail -1 | awk '{print $9}' | tr -d '-')
+        # NTP is running and synchronized - check offset
         if [[ -n "$OFFSET" ]] && [[ "$OFFSET" =~ ^[0-9]+\.?[0-9]*$ ]]; then
-            echo -e "${GREEN}✓ NTP OK (offset: ${OFFSET}ms)${NC}"
+            # Convert to integer for comparison (remove decimal part)
+            OFFSET_MS=${OFFSET%.*}
+            OFFSET_MS=${OFFSET_MS:-0}
+
+            if [[ $OFFSET_MS -gt 30000 ]]; then
+                # Offset > 30 seconds - critical for TOTP
+                echo -e "${RED}✗ CRITICAL: Time offset is ${OFFSET}ms (>30 seconds)!${NC}"
+                echo "  TOTP uses 30-second windows. Codes WILL fail."
+                echo "  Wait for NTP to synchronize or check your NTP config."
+                echo ""
+                echo -n "Continue anyway? (y/n): "
+                read -r resp
+                case "$resp" in
+                    [yY]) ;;
+                    *) exit 1 ;;
+                esac
+            elif [[ $OFFSET_MS -gt 5000 ]]; then
+                # Offset > 5 seconds - warning
+                echo -e "${YELLOW}⚠ NTP synchronized but offset is ${OFFSET}ms (>5 seconds)${NC}"
+                echo "  This may cause occasional TOTP failures."
+                echo -e "${GREEN}✓ Continuing (offset should improve over time)${NC}"
+            else
+                # Offset OK
+                echo -e "${GREEN}✓ NTP synchronized (offset: ${OFFSET}ms)${NC}"
+            fi
         else
-            echo -e "${GREEN}✓ NTP service is running${NC}"
+            echo -e "${GREEN}✓ NTP synchronized${NC}"
         fi
     fi
     echo ""
