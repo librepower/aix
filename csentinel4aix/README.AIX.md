@@ -454,3 +454,25 @@ MIT License - Ver archivo LICENSE para detalles
 **Auditoría AIX:** ✅ Soportada (requiere `audit start`)
 **Integridad Completa:** ✅ 171 archivos críticos con `-F`
 **Dashboard:** ✅ Completamente funcional
+
+---
+
+## Rotación de Audit Trail (Opcional)
+
+El audit trail de AIX (`/audit/trail`) puede crecer indefinidamente y llenar el disco. C-Sentinel incluye un script de rotación opcional:
+
+```bash
+# Configurar rotación (interactivo, requiere confirmación)
+/opt/freeware/libexec/sentinel/setup-audit-rotation.sh
+```
+
+**Comportamiento:**
+- Rota cuando trail supera 100MB
+- Ejecuta diariamente a las 3am
+- Mantiene 4 backups
+- No modifica la configuración de audit existente
+
+**Rotación manual:**
+```bash
+/opt/freeware/libexec/sentinel/audit-rotate.sh
+```
