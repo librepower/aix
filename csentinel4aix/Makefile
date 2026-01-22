@@ -54,7 +54,8 @@ SENTINEL_SRCS = $(SRC_DIR)/main.c \
 # Platform-specific audit sources
 ifeq ($(UNAME_S),AIX)
     SENTINEL_SRCS += $(SRC_DIR)/aix_audit.c \
-                     $(SRC_DIR)/aix_files.c
+                     $(SRC_DIR)/aix_files.c \
+                     $(SRC_DIR)/siem_events.c
 else
     SENTINEL_SRCS += $(SRC_DIR)/audit.c \
                      $(SRC_DIR)/audit_json.c
@@ -150,8 +151,25 @@ test: all
 	@python3 -c "import json; json.load(open('/tmp/sentinel_test.json'))" 2>/dev/null && echo "   PASS: Valid JSON" || echo "   FAIL: Invalid JSON"
 	@echo ""
 	@echo "5. Network probe test..."
-	@./$(SENTINEL) -n -q 2>/dev/null && echo "   PASS: Network probe" || echo "   WARN: Network probe"
+	@./$(SENTINEL) -n -q >/dev/null 2>&1; if [ $$? -le 2 ]; then echo "   PASS: Network probe"; else echo "   FAIL: Network probe"; fi
 	@echo ""
+ifeq ($(UNAME_S),AIX)
+	@echo "6. AIX audit test..."
+	@./$(SENTINEL) -q -a 2>/dev/null && echo "   PASS: AIX audit" || echo "   WARN: AIX audit (may need: audit start)"
+	@echo ""
+	@echo "7. Full file integrity test (-F)..."
+	@./$(SENTINEL) -F -q 2>/dev/null && echo "   PASS: Full integrity" || echo "   WARN: Full integrity"
+	@echo ""
+	@echo "8. SIEM logfile test..."
+	@rm -f /tmp/sentinel_siem_test.log
+	@./$(SENTINEL) -q -n -L /tmp/sentinel_siem_test.log >/dev/null 2>&1 || true
+	@test -s /tmp/sentinel_siem_test.log && echo "   PASS: SIEM logfile created" || echo "   FAIL: SIEM logfile"
+	@echo ""
+	@echo "9. SIEM JSON format test..."
+	@python3 -c "import json; json.loads(open('/tmp/sentinel_siem_test.log').readline())" 2>/dev/null && echo "   PASS: SIEM JSON valid" || echo "   FAIL: SIEM JSON invalid"
+	@rm -f /tmp/sentinel_siem_test.log
+	@echo ""
+endif
 	@echo "=== All tests complete ==="
 	@rm -f /tmp/sentinel_test.json /tmp/fp1.json /tmp/fp2.json
 

@@ -329,4 +329,38 @@ int get_aix_critical_files(const char **out_files, int max_files);
 
 #endif /* _AIX */
 
+/* ============================================================
+ * SIEM Integration - Syslog, Log File, Alerts
+ * ============================================================ */
+
+/* Event types for SIEM */
+typedef enum {
+    SIEM_EVT_NONE = 0,
+    SIEM_EVT_AUTH_FAILURE,
+    SIEM_EVT_BRUTE_FORCE,
+    SIEM_EVT_PRIV_ESCALATION,
+    SIEM_EVT_NEW_LISTENER,
+    SIEM_EVT_LISTENER_GONE,
+    SIEM_EVT_CONFIG_CHANGE,
+    SIEM_EVT_PROCESS_ANOMALY,
+    SIEM_EVT_HIGH_RISK,
+    SIEM_EVT_FINGERPRINT
+} siem_event_type_t;
+
+/* Initialize SIEM module */
+int siem_init(const char *syslog_host, int syslog_port, const char *format,
+              const char *logfile, const char *alert_email, int threshold);
+
+/* Cleanup SIEM module */
+void siem_cleanup(void);
+
+/* Process fingerprint and generate events */
+int siem_process_fingerprint(const fingerprint_t *fp);
+
+/* Check if SIEM is enabled */
+int siem_is_enabled(void);
+
+/* Print current SIEM configuration */
+void siem_print_config(void);
+
 #endif /* SENTINEL_H */

@@ -73,6 +73,11 @@ sentinel -h
 | `-b` | Comparar contra baseline |
 | `-l` | Aprender baseline actual |
 | `-c` | Mostrar configuración |
+| `-S HOST:PORT` | Enviar eventos via syslog (UDP) a SIEM |
+| `-R FORMAT` | Formato syslog: cef (default) o json |
+| `-L FILE` | Escribir eventos a archivo (JSON lines) |
+| `-M EMAIL` | Alertas por email para eventos críticos |
+| `-T SCORE` | Umbral de alerta (1-100, default: 50) |
 
 ## Funcionalidades
 
@@ -271,6 +276,52 @@ $ sentinel -F -j > full-integrity.json
 # - Y 15 categorías más...
 ```
 
+### Ejemplo 7: Integración SIEM (QRadar, XSIAM, Wazuh)
+
+C-Sentinel puede enviar eventos en tiempo real a sistemas SIEM:
+
+```bash
+# Enviar a QRadar via syslog (formato CEF)
+$ sentinel -w -i 60 -n -a -S 10.0.0.50:514
+SIEM Integration:
+  Syslog: 10.0.0.50:514 (cef format)
+
+# Enviar a Palo Alto XSIAM (formato JSON)
+$ sentinel -w -i 60 -n -a -S 10.0.0.50:514 -R json
+
+# Archivo de log para Wazuh/Filebeat
+$ sentinel -w -i 60 -n -a -L /var/log/sentinel/events.log
+# Configurar Wazuh para leer /var/log/sentinel/events.log
+
+# Alertas por email para eventos críticos
+$ sentinel -w -i 60 -n -a -M admin@empresa.com -T 70
+
+# Combinación completa: syslog + archivo + email
+$ sentinel -w -i 60 -n -a \
+    -S 10.0.0.50:514 -R json \
+    -L /var/log/sentinel/events.log \
+    -M admin@empresa.com -T 70
+```
+
+**Eventos generados:**
+- `auth_failure` - Fallos de autenticación
+- `brute_force` - Detección de ataque de fuerza bruta
+- `priv_escalation` - Escalada de privilegios (su/sudo)
+- `new_listener` - Nuevo puerto abierto
+- `config_change` - Modificación de archivo de configuración
+- `high_risk` - Evento de alto riesgo
+- `fingerprint` - Resumen periódico del sistema
+
+**Formato CEF (QRadar):**
+```
+CEF:0|LibrePower|C-Sentinel|0.6.0|2|BruteForce|9|rt=2026-01-22T16:30:00Z dhost=LP_AIX734 msg=Brute force attack detected cn1Label=risk_score cn1=90
+```
+
+**Formato JSON (XSIAM/Wazuh):**
+```json
+{"timestamp":"2026-01-22T16:30:00Z","source":"csentinel","host":"LP_AIX734","event":"brute_force","severity":9,"risk_score":90,"message":"Brute force attack detected"}
+```
+
 ## Troubleshooting
 
 ### Error: "command not found"
@@ -454,25 +505,3 @@ MIT License - Ver archivo LICENSE para detalles
 **Auditoría AIX:** ✅ Soportada (requiere `audit start`)
 **Integridad Completa:** ✅ 171 archivos críticos con `-F`
 **Dashboard:** ✅ Completamente funcional
-
----
-
-## Rotación de Audit Trail (Opcional)
-
-El audit trail de AIX (`/audit/trail`) puede crecer indefinidamente y llenar el disco. C-Sentinel incluye un script de rotación opcional:
-
-```bash
-# Configurar rotación (interactivo, requiere confirmación)
-/opt/freeware/libexec/sentinel/setup-audit-rotation.sh
-```
-
-**Comportamiento:**
-- Rota cuando trail supera 100MB
-- Ejecuta diariamente a las 3am
-- Mantiene 4 backups
-- No modifica la configuración de audit existente
-
-**Rotación manual:**
-```bash
-/opt/freeware/libexec/sentinel/audit-rotate.sh
-```

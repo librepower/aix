@@ -100,6 +100,12 @@ static void print_usage(const char *prog) {
     fprintf(stderr, "  -A          Learn audit baseline (Linux only)\n");
     fprintf(stderr, "  -K          Force coloured output\n");
     fprintf(stderr, "  -N          Disable coloured output\n");
+    fprintf(stderr, "\nSIEM Integration:\n");
+    fprintf(stderr, "  -S HOST:PORT  Send events via syslog (UDP) to SIEM\n");
+    fprintf(stderr, "  -R FORMAT     Syslog format: cef (default) or json\n");
+    fprintf(stderr, "  -L FILE       Write events to log file (JSON lines)\n");
+    fprintf(stderr, "  -M EMAIL      Send email alerts for critical events\n");
+    fprintf(stderr, "  -T SCORE      Alert threshold (1-100, default: 50)\n");
 #else
     fprintf(stderr, "  -h, --help           Show this help message\n");
     fprintf(stderr, "  -q, --quick          Only show quick analysis summary\n");
@@ -160,6 +166,11 @@ static void print_usage(const char *prog) {
     fprintf(stderr, "  %s -j > fingerprint.json Save full JSON output\n", prog);
     fprintf(stderr, "  %s -l -n                 Learn current state as baseline\n", prog);
     fprintf(stderr, "  %s -b -n                 Compare against baseline\n", prog);
+    fprintf(stderr, "\nSIEM Examples:\n");
+    fprintf(stderr, "  %s -w -i 60 -n -a -S 10.0.0.50:514      Syslog to QRadar (CEF)\n", prog);
+    fprintf(stderr, "  %s -w -i 60 -n -a -S 10.0.0.50:514 -R json    Syslog JSON format\n", prog);
+    fprintf(stderr, "  %s -w -i 60 -n -a -L /var/log/sentinel.log   Log file for Wazuh\n", prog);
+    fprintf(stderr, "  %s -w -i 60 -n -a -M admin@x.com -T 70       Email on high risk\n", prog);
 #else
     fprintf(stderr, "  %s --quick                    One-shot quick analysis\n", prog);
     fprintf(stderr, "  %s --quick --network          Include network probe\n", prog);
@@ -505,6 +516,11 @@ static int run_analysis(const char **configs, int config_count,
             exit_code = EXIT_WARNINGS;
         }
     }
+
+    /* Process SIEM events if enabled */
+    if (siem_is_enabled()) {
+        siem_process_fingerprint(&fp);
+    }
 #else
     if (audit && audit->enabled) {
         if (audit->risk_score >= 16) {  /* high or critical */
@@ -539,6 +555,13 @@ int main(int argc, char *argv[]) {
     int force_color = 0;  /* 0=auto, 1=force on, -1=force off */
     int opt;
 
+    /* SIEM integration options */
+    char siem_syslog[256] = {0};
+    char siem_format[16] = "cef";
+    char siem_logfile[512] = {0};
+    char siem_email[256] = {0};
+    int siem_threshold = 50;
+
 #ifndef _AIX
     /* Long options only supported on systems with getopt_long */
     static struct option long_options[] = {
@@ -565,7 +588,8 @@ int main(int argc, char *argv[]) {
     while ((opt = getopt_long(argc, argv, "hqvjwi:nablcCAKN", long_options, NULL)) != -1) {
 #else
     /* AIX: Use basic getopt (short options only) */
-    while ((opt = getopt(argc, argv, "hqvjwi:nablcCAFKN")) != -1) {
+    /* SIEM options: S=syslog, R=format, L=logfile, M=mail, T=threshold */
+    while ((opt = getopt(argc, argv, "hqvjwi:nablcCAFKNS:R:L:M:T:")) != -1) {
 #endif
         switch (opt) {
             case 'h':
@@ -622,6 +646,28 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "Warning: -F (full mode) only available on AIX\n");
 #endif
                 break;
+            case 'S':
+                /* SIEM syslog server (host:port) */
+                strncpy(siem_syslog, optarg, sizeof(siem_syslog) - 1);
+                break;
+            case 'R':
+                /* SIEM syslog format (cef or json) */
+                strncpy(siem_format, optarg, sizeof(siem_format) - 1);
+                break;
+            case 'L':
+                /* SIEM log file path */
+                strncpy(siem_logfile, optarg, sizeof(siem_logfile) - 1);
+                break;
+            case 'M':
+                /* SIEM email alerts */
+                strncpy(siem_email, optarg, sizeof(siem_email) - 1);
+                break;
+            case 'T':
+                /* SIEM alert threshold */
+                siem_threshold = atoi(optarg);
+                if (siem_threshold < 1) siem_threshold = 1;
+                if (siem_threshold > 100) siem_threshold = 100;
+                break;
             default:
                 print_usage(argv[0]);
                 return EXIT_ERROR;
@@ -630,6 +676,35 @@ int main(int argc, char *argv[]) {
     
     /* Initialize colour output */
     color_init(force_color);
+
+#ifdef _AIX
+    /* Initialize SIEM integration if any SIEM options specified */
+    if (siem_syslog[0] || siem_logfile[0] || siem_email[0]) {
+        char syslog_host[256] = {0};
+        int syslog_port = 514;
+
+        /* Parse syslog option (host:port) */
+        if (siem_syslog[0]) {
+            char *colon = strchr(siem_syslog, ':');
+            if (colon) {
+                *colon = '\0';
+                strncpy(syslog_host, siem_syslog, sizeof(syslog_host) - 1);
+                syslog_port = atoi(colon + 1);
+                if (syslog_port <= 0 || syslog_port > 65535) syslog_port = 514;
+            } else {
+                strncpy(syslog_host, siem_syslog, sizeof(syslog_host) - 1);
+            }
+        }
+
+        siem_init(syslog_host, syslog_port, siem_format,
+                  siem_logfile, siem_email, siem_threshold);
+
+        if (siem_is_enabled()) {
+            siem_print_config();
+            fprintf(stderr, "\n");
+        }
+    }
+#endif
     
     /* Handle --init-config */
     if (init_config) {
@@ -836,7 +911,14 @@ int main(int argc, char *argv[]) {
                 sleep(interval);
             }
         }
-        
+
+#ifdef _AIX
+        /* Cleanup SIEM resources */
+        if (siem_is_enabled()) {
+            siem_cleanup();
+        }
+#endif
+
         return worst_exit;
     }
     
