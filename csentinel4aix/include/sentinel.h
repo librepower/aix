@@ -24,7 +24,7 @@
 #define MAX_PATH_LEN 4096
 #define MAX_PROCS 1024
 #define MAX_FDS_PER_PROC 256
-#define MAX_CONFIG_FILES 64
+#define MAX_CONFIG_FILES 256
 #define MAX_LISTENERS 128
 #define MAX_CONNECTIONS 256
 
@@ -282,5 +282,51 @@ void config_print(void);
 
 int sha256_file(const char *path, char *out, size_t out_size);
 int sha256_string(const char *str, char *out, size_t out_size);
+
+/* ============================================================
+ * AIX Audit Integration
+ * ============================================================ */
+
+#ifdef _AIX
+typedef struct {
+    int enabled;
+    int total_events;
+    /* Authentication */
+    int auth_success;
+    int auth_failures;
+    int brute_force_detected;
+    char last_failed_user[64];
+    /* Privilege escalation */
+    int su_success;
+    int su_failures;
+    int sudo_count;
+    /* File access */
+    int sensitive_reads;
+    int sensitive_writes;
+    int file_access_denied;
+    /* Process execution */
+    int process_execs;
+    /* Risk assessment */
+    int risk_score;
+    char risk_level[16];
+} aix_audit_summary_t;
+
+/* Probe AIX audit subsystem - defined in aix_audit.c */
+int probe_aix_audit(aix_audit_summary_t *summary, time_t since);
+int aix_audit_to_json(const aix_audit_summary_t *summary, char *buf, size_t buf_size);
+aix_audit_summary_t* get_aix_audit_summary(void);
+int check_auth_audit_config(void);
+
+/* AIX critical files - defined in aix_files.c */
+typedef struct {
+    const char *category_name;
+    const char **files;
+} aix_file_category_t;
+
+int get_aix_critical_file_count(void);
+const aix_file_category_t* get_aix_file_categories(void);
+int get_aix_critical_files(const char **out_files, int max_files);
+
+#endif /* _AIX */
 
 #endif /* SENTINEL_H */

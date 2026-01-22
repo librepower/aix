@@ -21,10 +21,36 @@
 #include <time.h>
 
 #include "sentinel.h"
+#ifndef _AIX
 #include "audit.h"
+#endif
 #include "color.h"
 
+#ifdef _AIX
+/* AIX audit summary - from aix_audit.c */
+extern int probe_aix_audit(aix_audit_summary_t *summary, time_t since);
+extern int aix_audit_to_json(const aix_audit_summary_t *summary, char *buf, size_t buf_size);
+#endif
+
 /* Default config files to probe if none specified */
+#ifdef _AIX
+/* AIX: Use minimal default, full list available via get_aix_critical_files() */
+static const char *default_configs[] = {
+    "/etc/passwd",
+    "/etc/group",
+    "/etc/hosts",
+    "/etc/ssh/sshd_config",
+    "/etc/resolv.conf",
+    "/etc/security/passwd",
+    "/etc/security/user",
+    "/etc/security/login.cfg",
+    "/etc/security/audit/config",
+    "/etc/inittab",
+    "/etc/inetd.conf",
+    "/etc/sudoers",
+    NULL
+};
+#else
 static const char *default_configs[] = {
     "/etc/hosts",
     "/etc/passwd",
@@ -33,12 +59,18 @@ static const char *default_configs[] = {
     "/etc/resolv.conf",
     NULL
 };
+#endif
 
 /* Global flag for clean shutdown in watch mode */
 static volatile int keep_running = 1;
 
+#ifdef _AIX
+/* AIX audit summary for JSON output integration */
+static aix_audit_summary_t g_aix_audit;
+#else
 /* Global audit summary for JSON output integration */
 static audit_summary_t *g_audit_summary = NULL;
+#endif
 
 static void signal_handler(int signum) {
     (void)signum;
@@ -59,7 +91,8 @@ static void print_usage(const char *prog) {
     fprintf(stderr, "  -w          Continuous monitoring mode\n");
     fprintf(stderr, "  -i SEC      Interval between probes in watch mode (default: 60)\n");
     fprintf(stderr, "  -n          Include network probe (listeners, connections)\n");
-    fprintf(stderr, "  -a          Include security events (Linux auditd - not available on AIX)\n");
+    fprintf(stderr, "  -a          Include security events (AIX audit - requires: audit start)\n");
+    fprintf(stderr, "  -F          Full AIX file integrity check (~150 critical files)\n");
     fprintf(stderr, "  -b          Compare against learned baseline\n");
     fprintf(stderr, "  -l          Learn current state as baseline\n");
     fprintf(stderr, "  -c          Show current configuration\n");
@@ -146,15 +179,16 @@ static void print_timestamp(void) {
     printf("[%s] ", buf);
 }
 
+#ifndef _AIX
 static void print_audit_summary_quick(const audit_summary_t *audit) {
     if (!audit || !audit->enabled) {
-        printf("\n%sAudit:%s unavailable (auditd not running or not readable)\n", 
+        printf("\n%sAudit:%s unavailable (auditd not running or not readable)\n",
                col_header(), col_reset());
         return;
     }
-    
+
     printf("\n%sSecurity (audit):%s\n", col_header(), col_reset());
-    printf("  Auth failures: %s%d%s", 
+    printf("  Auth failures: %s%d%s",
            audit->auth_failures > 0 ? col_warn() : col_ok(),
            audit->auth_failures,
            col_reset());
@@ -162,21 +196,21 @@ static void print_audit_summary_quick(const audit_summary_t *audit) {
         printf(" %s(%.0f%% above baseline) ⚠%s", col_warn(), audit->auth_deviation_pct, col_reset());
     }
     printf("\n");
-    
+
     if (audit->brute_force_detected) {
         printf("  %s⚠ BRUTE FORCE PATTERN DETECTED%s\n", col_critical(), col_reset());
     }
-    
+
     printf("  Sudo commands: %d", audit->sudo_count);
     if (audit->sudo_deviation_pct > 200.0f) {
         printf(" %s(%.0f%% above baseline) ⚠%s", col_warn(), audit->sudo_deviation_pct, col_reset());
     }
     printf("\n");
-    
+
     if (audit->sensitive_file_count > 0) {
         printf("  Sensitive file access: %s%d%s\n", col_warn(), audit->sensitive_file_count, col_reset());
         for (int i = 0; i < audit->sensitive_file_count && i < 5; i++) {
-            printf("    - %s by %s%s%s\n", 
+            printf("    - %s by %s%s%s\n",
                    audit->sensitive_files[i].path,
                    audit->sensitive_files[i].process,
                    audit->sensitive_files[i].suspicious ? col_warn() : "",
@@ -184,33 +218,34 @@ static void print_audit_summary_quick(const audit_summary_t *audit) {
             if (audit->sensitive_files[i].suspicious) printf("%s", col_reset());
         }
     }
-    
+
     if (audit->tmp_executions > 0) {
         printf("  %s⚠ Executions from /tmp: %d%s\n", col_critical(), audit->tmp_executions, col_reset());
     }
     if (audit->devshm_executions > 0) {
         printf("  %s⚠ Executions from /dev/shm: %d%s\n", col_critical(), audit->devshm_executions, col_reset());
     }
-    
+
     if (audit->selinux_avc_denials > 0) {
         printf("  SELinux denials: %s%d%s\n", col_warn(), audit->selinux_avc_denials, col_reset());
     }
     if (audit->apparmor_denials > 0) {
         printf("  AppArmor denials: %s%d%s\n", col_warn(), audit->apparmor_denials, col_reset());
     }
-    
+
     /* Show anomalies */
     if (audit->anomaly_count > 0) {
         printf("\n  %sAnomalies detected:%s\n", col_warn(), col_reset());
         for (int i = 0; i < audit->anomaly_count; i++) {
-            printf("    [%s] %s\n", 
+            printf("    [%s] %s\n",
                    audit->anomalies[i].severity,
                    audit->anomalies[i].description);
         }
     }
-    
+
     printf("\n  Risk: %s (score: %d)\n", audit->risk_level, audit->risk_score);
 }
+#endif /* !_AIX */
 
 static int run_analysis(const char **configs, int config_count, 
                         int quick_mode, int json_mode, int network_mode, int audit_mode) {
@@ -227,11 +262,20 @@ static int run_analysis(const char **configs, int config_count,
     }
     
     /* Probe audit if requested */
+#ifdef _AIX
+    aix_audit_summary_t *aix_audit = NULL;
+    if (audit_mode) {
+        memset(&g_aix_audit, 0, sizeof(g_aix_audit));
+        time_t since = time(NULL) - 300;  /* Last 5 minutes */
+        probe_aix_audit(&g_aix_audit, since);
+        aix_audit = &g_aix_audit;
+    }
+#else
     audit_summary_t *audit = NULL;
     if (audit_mode) {
         audit = probe_audit(300);  /* Last 5 minutes */
         g_audit_summary = audit;
-        
+
         /* Auto-update baseline on each probe */
         if (audit && audit->enabled) {
             audit_baseline_t baseline = {0};
@@ -242,6 +286,7 @@ static int run_analysis(const char **configs, int config_count,
             audit->baseline_sample_count = baseline.sample_count;
         }
     }
+#endif
     
     /* Always do quick analysis for exit code calculation */
     quick_analysis_t analysis;
@@ -252,11 +297,40 @@ static int run_analysis(const char **configs, int config_count,
         char *json = fingerprint_to_json(&fp);
         if (!json) {
             fprintf(stderr, "Error: Failed to serialize fingerprint to JSON\n");
+#ifndef _AIX
             if (audit) free_audit_summary(audit);
+#endif
             return EXIT_ERROR;
         }
-        
-        /* If audit mode, we need to inject audit JSON before the closing brace */
+
+#ifdef _AIX
+        /* AIX: Inject AIX audit JSON if audit mode is on */
+        if (audit_mode && aix_audit) {
+            char *last_brace = strrchr(json, '}');
+            if (last_brace && last_brace > json) {
+                char audit_json[8192];
+                if (aix_audit->enabled) {
+                    aix_audit_to_json(aix_audit, audit_json, sizeof(audit_json));
+                } else {
+                    /* Audit not enabled - show instructions */
+                    snprintf(audit_json, sizeof(audit_json),
+                        "  \"audit_summary\": {\n"
+                        "    \"enabled\": false,\n"
+                        "    \"platform\": \"AIX\",\n"
+                        "    \"message\": \"AIX audit subsystem not enabled\",\n"
+                        "    \"enable_instructions\": \"/usr/sbin/audit start\"\n"
+                        "  }");
+                }
+                *last_brace = '\0';
+                printf("%s,\n%s\n}\n", json, audit_json);
+            } else {
+                printf("%s", json);
+            }
+        } else {
+            printf("%s", json);
+        }
+#else
+        /* Linux: If audit mode, we need to inject audit JSON before the closing brace */
         if (audit && audit->enabled) {
             /* Find the last closing brace */
             char *last_brace = strrchr(json, '}');
@@ -264,7 +338,7 @@ static int run_analysis(const char **configs, int config_count,
                 /* Build combined output */
                 char audit_json[16384];
                 audit_to_json(audit, audit_json, sizeof(audit_json));
-                
+
                 /* Print everything before the last }, then audit, then } */
                 *last_brace = '\0';
                 printf("%s,\n%s\n}\n", json, audit_json);
@@ -274,6 +348,7 @@ static int run_analysis(const char **configs, int config_count,
         } else {
             printf("%s", json);
         }
+#endif
         free(json);
     } else if (quick_mode) {
         /* Quick analysis only */
@@ -331,17 +406,66 @@ static int run_analysis(const char **configs, int config_count,
         
         /* Audit summary */
         if (audit_mode) {
+#ifdef _AIX
+            /* AIX audit quick summary */
+            if (aix_audit && aix_audit->enabled) {
+                printf("\n%sSecurity (AIX audit):%s\n", col_header(), col_reset());
+                printf("  Auth failures: %s%d%s\n",
+                       aix_audit->auth_failures > 0 ? col_warn() : col_ok(),
+                       aix_audit->auth_failures, col_reset());
+                if (aix_audit->brute_force_detected) {
+                    printf("  %sBRUTE FORCE DETECTED%s\n", col_critical(), col_reset());
+                }
+                printf("  su success: %d, failures: %d\n", aix_audit->su_success, aix_audit->su_failures);
+                printf("  sudo commands: %d\n", aix_audit->sudo_count);
+                printf("  Sensitive reads: %d, writes: %d\n", aix_audit->sensitive_reads, aix_audit->sensitive_writes);
+                printf("\n  Risk: %s (score: %d)\n", aix_audit->risk_level, aix_audit->risk_score);
+            } else {
+                printf("\n%sSecurity (AIX audit):%s\n", col_header(), col_reset());
+                printf("  %sAudit not enabled%s\n", col_warn(), col_reset());
+                printf("  To enable: /usr/sbin/audit start\n");
+            }
+#else
             print_audit_summary_quick(audit);
+#endif
         }
     } else {
         /* Full JSON output (default) */
         char *json = fingerprint_to_json(&fp);
         if (!json) {
             fprintf(stderr, "Error: Failed to serialize fingerprint to JSON\n");
+#ifndef _AIX
             if (audit) free_audit_summary(audit);
+#endif
             return EXIT_ERROR;
         }
-        
+
+#ifdef _AIX
+        /* AIX: Inject AIX audit JSON if audit mode is on */
+        if (audit_mode && aix_audit) {
+            char *last_brace = strrchr(json, '}');
+            if (last_brace && last_brace > json) {
+                char audit_json[8192];
+                if (aix_audit->enabled) {
+                    aix_audit_to_json(aix_audit, audit_json, sizeof(audit_json));
+                } else {
+                    snprintf(audit_json, sizeof(audit_json),
+                        "  \"audit_summary\": {\n"
+                        "    \"enabled\": false,\n"
+                        "    \"platform\": \"AIX\",\n"
+                        "    \"message\": \"AIX audit subsystem not enabled\",\n"
+                        "    \"enable_instructions\": \"/usr/sbin/audit start\"\n"
+                        "  }");
+                }
+                *last_brace = '\0';
+                printf("%s,\n%s\n}\n", json, audit_json);
+            } else {
+                printf("%s", json);
+            }
+        } else {
+            printf("%s", json);
+        }
+#else
         /* Same audit injection logic */
         if (audit && audit->enabled) {
             char *last_brace = strrchr(json, '}');
@@ -356,6 +480,7 @@ static int run_analysis(const char **configs, int config_count,
         } else {
             printf("%s", json);
         }
+#endif
         free(json);
     }
     
@@ -372,6 +497,15 @@ static int run_analysis(const char **configs, int config_count,
     }
     
     /* Audit can also trigger critical */
+#ifdef _AIX
+    if (aix_audit && aix_audit->enabled) {
+        if (aix_audit->risk_score >= 70) {  /* critical */
+            exit_code = EXIT_CRITICAL;
+        } else if (aix_audit->risk_score >= 20 && exit_code < EXIT_WARNINGS) {
+            exit_code = EXIT_WARNINGS;
+        }
+    }
+#else
     if (audit && audit->enabled) {
         if (audit->risk_score >= 16) {  /* high or critical */
             exit_code = EXIT_CRITICAL;
@@ -379,12 +513,13 @@ static int run_analysis(const char **configs, int config_count,
             exit_code = EXIT_WARNINGS;
         }
     }
-    
+
     if (audit) {
         free_audit_summary(audit);
         g_audit_summary = NULL;
     }
-    
+#endif
+
     return exit_code;
 }
 
@@ -399,6 +534,7 @@ int main(int argc, char *argv[]) {
     int learn_mode = 0;
     int show_config = 0;
     int init_config = 0;
+    int full_mode = 0;    /* AIX: use full critical files list */
     int interval = 60;
     int force_color = 0;  /* 0=auto, 1=force on, -1=force off */
     int opt;
@@ -429,7 +565,7 @@ int main(int argc, char *argv[]) {
     while ((opt = getopt_long(argc, argv, "hqvjwi:nablcCAKN", long_options, NULL)) != -1) {
 #else
     /* AIX: Use basic getopt (short options only) */
-    while ((opt = getopt(argc, argv, "hqvjwi:nablcCAKN")) != -1) {
+    while ((opt = getopt(argc, argv, "hqvjwi:nablcCAFKN")) != -1) {
 #endif
         switch (opt) {
             case 'h':
@@ -479,6 +615,13 @@ int main(int argc, char *argv[]) {
             case 'N':
                 force_color = -1;
                 break;
+            case 'F':
+#ifdef _AIX
+                full_mode = 1;
+#else
+                fprintf(stderr, "Warning: -F (full mode) only available on AIX\n");
+#endif
+                break;
             default:
                 print_usage(argv[0]);
                 return EXIT_ERROR;
@@ -507,6 +650,11 @@ int main(int argc, char *argv[]) {
     
     /* Handle --audit-learn */
     if (audit_learn) {
+#ifdef _AIX
+        fprintf(stderr, "Audit baseline learning not yet implemented for AIX.\n");
+        fprintf(stderr, "AIX audit uses direct trail analysis without baseline.\n");
+        return EXIT_OK;
+#else
         printf("Learning audit baseline...\n");
         audit_summary_t *audit = probe_audit(300);
         if (!audit || !audit->enabled) {
@@ -514,11 +662,11 @@ int main(int argc, char *argv[]) {
             if (audit) free_audit_summary(audit);
             return EXIT_ERROR;
         }
-        
+
         audit_baseline_t baseline = {0};
         load_audit_baseline(&baseline);  /* Load existing if any */
         update_audit_baseline(&baseline, audit);
-        
+
         if (save_audit_baseline(&baseline)) {
             printf("Audit baseline saved.\n");
             printf("  Samples: %u\n", baseline.sample_count);
@@ -532,17 +680,32 @@ int main(int argc, char *argv[]) {
             free_audit_summary(audit);
             return EXIT_ERROR;
         }
+#endif
     }
     
     /* Determine config files to probe */
     const char **configs;
     int config_count;
-    
+
+#ifdef _AIX
+    /* AIX: Static buffer for full critical files list */
+    static const char *aix_full_files[MAX_CONFIG_FILES];
+#endif
+
     if (optind < argc) {
         /* Use command line specified configs */
         configs = (const char **)&argv[optind];
         config_count = argc - optind;
-    } else {
+    }
+#ifdef _AIX
+    else if (full_mode) {
+        /* AIX full mode: use comprehensive critical files list */
+        config_count = get_aix_critical_files(aix_full_files, MAX_CONFIG_FILES);
+        configs = aix_full_files;
+        fprintf(stderr, "Full AIX file integrity mode: checking %d critical files\n", config_count);
+    }
+#endif
+    else {
         /* Use defaults */
         configs = default_configs;
         config_count = 0;
@@ -615,9 +778,22 @@ int main(int argc, char *argv[]) {
         
         /* Also show audit if requested */
         if (audit_mode) {
+#ifdef _AIX
+            aix_audit_summary_t aix_bl_audit;
+            time_t since = time(NULL) - 300;
+            probe_aix_audit(&aix_bl_audit, since);
+            if (aix_bl_audit.enabled) {
+                printf("\n%sSecurity (AIX audit):%s\n", col_header(), col_reset());
+                printf("  Auth failures: %d\n", aix_bl_audit.auth_failures);
+                printf("  Risk: %s (score: %d)\n", aix_bl_audit.risk_level, aix_bl_audit.risk_score);
+            } else {
+                printf("\n%sSecurity (AIX audit):%s Not enabled\n", col_header(), col_reset());
+            }
+#else
             audit_summary_t *audit = probe_audit(300);
             print_audit_summary_quick(audit);
             if (audit) free_audit_summary(audit);
+#endif
         }
         
         if (deviations > 0) {
