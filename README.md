@@ -350,6 +350,70 @@ Port of [yq](https://github.com/mikefarah/yq) to AIX. A lightweight and portable
 
 ---
 
+### 🔎 fd - Fast Find Alternative
+*A simple, fast and user-friendly alternative to find*
+
+Port of [fd](https://github.com/sharkdp/fd) to AIX. An intuitive alternative to `find` with colorized output, smart case, and parallel search.
+
+- ✅ **Intuitive syntax** - `fd pattern` instead of `find -iname '*pattern*'`
+- ✅ **Blazing fast** - Parallelized directory traversal
+- ✅ **Smart case** - Case-insensitive by default, smart switch
+- ✅ **Colorized output** - Easy to read results
+- ✅ **Regex support** - Full regular expression patterns
+- ✅ **Compiled with Rust 1.90** - IBM Open SDK for Rust on AIX
+
+📁 **[Documentation & Downloads](fd/)**
+
+---
+
+### 📂 eza - Modern ls Replacement
+*A modern, maintained replacement for ls*
+
+Port of [eza](https://github.com/eza-community/eza) to AIX. Beautiful file listings with colors, icons, Git integration, and tree view.
+
+- ✅ **Colors & Icons** - Beautiful terminal output (icons require Nerd Font)
+- ✅ **Git integration** - Shows file status in repositories
+- ✅ **Tree view** - `eza --tree` for directory trees
+- ✅ **Extended attributes** - Shows permissions, sizes, dates
+- ✅ **Human-readable sizes** - Easy to understand file sizes
+- ✅ **Compiled with Rust 1.90** - IBM Open SDK for Rust on AIX
+
+📁 **[Documentation & Downloads](eza/)**
+
+---
+
+### 📊 gping - Ping with Graph
+*Ping, but with a real-time graph*
+
+Port of [gping](https://github.com/orf/gping) to AIX. Visualize ping latency in real-time with a beautiful terminal graph.
+
+- ✅ **Real-time graph** - See latency trends instantly
+- ✅ **Multiple hosts** - Ping several hosts simultaneously
+- ✅ **Color-coded** - Different colors per host
+- ✅ **Custom AIX pinger** - Native AIX ping integration
+- ✅ **TUI interface** - Beautiful terminal UI (requires PTY)
+- ✅ **Compiled with Rust 1.90** - IBM Open SDK for Rust on AIX
+
+📁 **[Documentation & Downloads](gping/)**
+
+---
+
+### ✨ starship - Cross-Shell Prompt
+*The minimal, blazing-fast, and infinitely customizable prompt*
+
+Port of [starship](https://github.com/starship/starship) to AIX. A beautiful, fast prompt that works with any shell and shows git status, directory, and more.
+
+- ✅ **Any shell** - Works with bash, ksh, zsh
+- ✅ **Blazing fast** - Written in Rust for speed
+- ✅ **Git integration** - Branch, status, ahead/behind
+- ✅ **Highly customizable** - TOML configuration
+- ✅ **Battery/time/hostname** - All the info you need
+- ✅ **Compiled with Rust 1.90** - IBM Open SDK for Rust on AIX
+
+📁 **[Documentation & Downloads](starship/)**
+
+---
+
 ## Contribute
 
 **We welcome contributions from the community!**
