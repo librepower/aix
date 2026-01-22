@@ -17,7 +17,7 @@ DASHBOARD_URL="${DASHBOARD_URL:-http://localhost:5000/api/ingest}"
 API_KEY="${SENTINEL_API_KEY:-}"
 
 # Default sentinel arguments (AIX short options)
-SENTINEL_ARGS="-j -n"
+SENTINEL_ARGS="-j -n -a"
 
 usage() {
     echo "Usage: $0 [options]"
