@@ -66,6 +66,8 @@ sentinel -h
 | `-v` | Verbose (incluir todos los procesos) |
 | `-j` | Salida JSON |
 | `-n` | Incluir información de red |
+| `-a` | Incluir eventos de auditoría AIX |
+| `-F` | Modo completo de integridad (~171 archivos críticos) |
 | `-w` | Modo watch (monitoreo continuo) |
 | `-i SEC` | Intervalo en segundos (default: 60) |
 | `-b` | Comparar contra baseline |
@@ -95,6 +97,19 @@ sentinel -h
    - Aprendizaje de estado normal del sistema
    - Detección de desviaciones
 
+5. **Auditoría AIX** (nuevo en v0.6.0)
+   - ✅ Integración nativa con subsistema de auditoría AIX
+   - ✅ Detección de autenticación (éxitos/fallos)
+   - ✅ Detección de escalada de privilegios (su/sudo)
+   - ✅ Detección de fuerza bruta (5+ fallos consecutivos)
+   - ✅ Puntuación de riesgo y evaluación de postura de seguridad
+
+6. **Integridad de Archivos Completa** (nuevo en v0.6.0)
+   - ✅ 171 archivos críticos AIX con flag `-F`
+   - ✅ Comparable a IBM PowerSC RTC
+   - ✅ Basado en CIS AIX Benchmark, DoD STIG
+   - ✅ 20 categorías: autenticación, audit, red, SSH, boot, cron, etc.
+
 ### ⚠️ Limitaciones Conocidas
 
 1. **Network Monitoring**
@@ -103,10 +118,9 @@ sentinel -h
    - ✅ Soporta: SSH, bases de datos (PostgreSQL, MySQL, Oracle, DB2), IBM middleware, SAP, etc.
    - ⚠️ Puertos no estándar muestran `[unknown]` (comportamiento esperado)
 
-2. **Audit Subsystem**
-   - ❌ NO soportado actualmente
-   - Requiere adaptación al sistema de auditoría de AIX
-   - En desarrollo para versión futura
+2. **Auditoría AIX**
+   - ✅ Soportado completamente
+   - Requiere que auditoría esté habilitada: `/usr/sbin/audit start`
 
 3. **Opciones Largas**
    - ❌ Opciones `--xxx` no funcionan
@@ -211,6 +225,50 @@ Baseline Comparison:
   Missing listeners: 0
   Config changes: 0
   Process count anomaly: no
+```
+
+### Ejemplo 5: Auditoría de Seguridad AIX
+
+```bash
+# Habilitar auditoría (si no está activa)
+$ /usr/sbin/audit start
+
+# Análisis con eventos de seguridad
+$ sentinel -q -n -a
+C-Sentinel Quick Analysis
+========================
+Hostname: LP_AIX734
+Uptime: 22.7 days
+...
+
+Security (AIX audit):
+  Auth successes: 45
+  Auth failures: 3
+  su/sudo events: 12
+  Risk score: 15 (low)
+```
+
+### Ejemplo 6: Integridad Completa de Archivos
+
+```bash
+# Verificar ~171 archivos críticos (comparable a PowerSC RTC)
+$ sentinel -F -q
+Full AIX file integrity mode: checking 171 critical files
+C-Sentinel Quick Analysis
+========================
+Hostname: LP_AIX734
+...
+
+# JSON con todos los checksums
+$ sentinel -F -j > full-integrity.json
+
+# Categorías monitoreadas:
+# - /etc/security/* (autenticación, usuarios, grupos)
+# - /etc/ssh/* (configuración SSH)
+# - /etc/security/audit/* (configuración de auditoría)
+# - /usr/bin/passwd, /usr/bin/su, etc. (binarios SUID)
+# - /unix, /usr/lib/boot/* (kernel)
+# - Y 15 categorías más...
 ```
 
 ## Troubleshooting
@@ -373,7 +431,8 @@ curl http://localhost:5000/api/stats
 | Process info | /proc/[pid]/stat (texto) | /proc/[pid]/psinfo (binario) |
 | Network info | /proc/net/tcp | netstat -an |
 | Network PIDs | Directo desde /proc/net/tcp | ✅ **Heurísticas (70+ puertos)** |
-| Audit | auditd/ausearch | Sistema propio (no soportado) |
+| Audit | auditd/ausearch | ✅ AIX audit nativo (auditpr) |
+| File integrity | Manual | ✅ 171 archivos con `-F` |
 | Long options | Soportado | No soportado |
 | Dashboard | Funciona | ✅ Funciona (requiere PostgreSQL) |
 
@@ -389,7 +448,9 @@ MIT License - Ver archivo LICENSE para detalles
 
 ---
 
-**Versión:** 1.0.0-aix
-**Última actualización:** 2026-01-05
+**Versión:** 0.6.0-aix
+**Última actualización:** 2026-01-22
 **Compatibilidad:** AIX 7.1, 7.2, 7.3
+**Auditoría AIX:** ✅ Soportada (requiere `audit start`)
+**Integridad Completa:** ✅ 171 archivos críticos con `-F`
 **Dashboard:** ✅ Completamente funcional

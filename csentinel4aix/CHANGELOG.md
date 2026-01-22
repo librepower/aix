@@ -5,6 +5,31 @@ All notable changes to C-Sentinel will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-01-22
+
+### Added
+- **AIX native audit integration** - Full support for AIX audit subsystem via `-a` flag
+  - Parses `/audit/bin1`, `/audit/bin2`, and `/audit/trail` using `auditpr`
+  - Detects authentication events (success/failure), privilege escalation (su/sudo)
+  - Brute force detection (5+ consecutive auth failures)
+  - Risk scoring and security posture assessment
+- **Full file integrity mode** (`-F` flag) - PowerSC RTC-comparable monitoring
+  - 171 critical AIX files across 20 security categories
+  - Based on CIS AIX Benchmark, DoD STIG, and PowerSC RTC file lists
+  - Categories: authentication, audit, network, SSH, boot, cron, filesystem,
+    logging, tunables, sudo, LDAP, NTP, services, SUID binaries, libraries,
+    kernel, certificates, ODM
+- **Expanded default configs for AIX** - 12 key files monitored by default
+- **AIX-specific file categories module** (`aix_files.c`)
+
+### Changed
+- MAX_CONFIG_FILES increased from 64 to 256 for full mode support
+- Default config file list expanded for AIX (was 5, now 12)
+- Help text updated with new `-F` and `-a` options
+
+### Fixed
+- JSON serialization for AIX kernel processes with special characters
+
 ## [0.5.8] - 2026-01-03
 
 ### Added

@@ -11,7 +11,7 @@ This is a port of the excellent C-Sentinel system monitoring tool to IBM AIX. Al
 **About C-Sentinel:** A lightweight, portable system prober written in C that captures "system fingerprints" for AI-assisted analysis of non-obvious risks.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Version](https://img.shields.io/badge/version-1.0.0--aix-blue)
+![Version](https://img.shields.io/badge/version-0.6.0--aix-blue)
 ![Platform](https://img.shields.io/badge/platform-AIX%207.1%2B-blue)
 
 ---
@@ -77,6 +77,12 @@ See [RPM-BUILD.md](RPM-BUILD.md) for detailed build instructions.
 # Quick system analysis
 sentinel -q -n
 
+# Include security audit events (AIX)
+sentinel -q -n -a
+
+# Full file integrity check (~171 critical files, AIX only)
+sentinel -F -q
+
 # Learn baseline (first time)
 sentinel -l -n
 
@@ -84,7 +90,7 @@ sentinel -l -n
 sentinel -b -q -n
 
 # Generate JSON for AI analysis
-sentinel -j -n > system-fingerprint.json
+sentinel -j -n -a > system-fingerprint.json
 ```
 
 For the optional web dashboard installation, see [dashboard/README.md](dashboard/README.md).
@@ -103,10 +109,11 @@ For the optional web dashboard installation, see [dashboard/README.md](dashboard
 - **Config Drift Detection** - SHA256 checksums with baseline comparison
 - **Process Chain Analysis** - Detect suspicious parent-child relationships
 - **Baseline Learning** - Anomaly detection and deviation alerts
+- **AIX Audit Integration** - Native audit subsystem support with brute-force detection
+- **Full File Integrity Mode** - 171 critical files (PowerSC RTC-comparable) with `-F` flag
 
 ### ⏳ Planned
 
-- AIX audit subsystem integration
 - Production hardening
 - Extensive enterprise testing
 
@@ -136,7 +143,8 @@ See [dashboard/README.md](dashboard/README.md) for installation instructions.
 | Process Monitoring | ✅ | ✅ | Full support |
 | Config File Monitoring | ✅ | ✅ | Full support |
 | Network Monitoring | ✅ | ✅ | AIX: **PID attribution (70+ ports)** |
-| Audit Integration | ✅ | ❌ | AIX: Planned for future |
+| Audit Integration | ✅ | ✅ | AIX: Native audit via `-a` flag |
+| Full File Integrity | ⚠️ | ✅ | AIX: 171 files via `-F` flag |
 | Baseline Learning | ✅ | ✅ | Full support |
 | Web Dashboard | ✅ | ✅ | Full support (requires PostgreSQL) |
 | Long Options (--xxx) | ✅ | ❌ | AIX: Use short (-x) |
@@ -170,13 +178,13 @@ If you use C-Sentinel in your research or production environment, please cite:
   author = {William Murray and LibrePower Team},
   year = {2025},
   url = {https://github.com/librepower/c-sentinel4aix},
-  version = {1.0.0-aix}
+  version = {0.6.0-aix}
 }
 ```
 
 ---
 
-**Version:** 1.0.0-aix
-**Last Updated:** 2026-01-05
+**Version:** 0.6.0-aix
+**Last Updated:** 2026-01-22
 **Supported Platforms:** Linux (all), AIX 7.1, AIX 7.2, AIX 7.3
 **License:** MIT

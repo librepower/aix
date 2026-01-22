@@ -49,9 +49,16 @@ SENTINEL_SRCS = $(SRC_DIR)/main.c \
                 $(SRC_DIR)/config.c \
                 $(SRC_DIR)/alert.c \
                 $(SRC_DIR)/sha256.c \
-                $(SRC_DIR)/audit.c \
-                $(SRC_DIR)/audit_json.c \
                 $(SRC_DIR)/process_chain.c
+
+# Platform-specific audit sources
+ifeq ($(UNAME_S),AIX)
+    SENTINEL_SRCS += $(SRC_DIR)/aix_audit.c \
+                     $(SRC_DIR)/aix_files.c
+else
+    SENTINEL_SRCS += $(SRC_DIR)/audit.c \
+                     $(SRC_DIR)/audit_json.c
+endif
 
 SENTINEL_OBJS = $(SENTINEL_SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
