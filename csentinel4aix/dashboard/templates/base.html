@@ -103,7 +103,7 @@
     {% if session.demo_mode %}
     <div class="bg-amber-600 text-black px-4 py-2 text-center text-sm font-medium">
         <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
-        Demo Mode — Read-only access. <a href="https://github.com/williamofai/c-sentinel" class="underline hover:no-underline">Get C-Sentinel</a> for your own infrastructure.
+        Demo Mode — Read-only access. <a href="https://gitlab.com/librepower/aix" class="underline hover:no-underline">Get C-Sentinel for AIX</a> for your own infrastructure.
     </div>
     {% endif %}
     
@@ -127,8 +127,14 @@
         <nav class="flex-1 p-4 space-y-2" id="mobile-menu-items">
             <!-- Populated by JavaScript -->
         </nav>
-        <div class="p-4 border-t border-gray-700 text-sm text-gray-500">
-            C-Sentinel v{{ config.VERSION }}
+        <div class="p-4 border-t border-gray-700 text-xs text-gray-500 space-y-1">
+            <div>C-Sentinel for AIX v{{ config.VERSION }}</div>
+            <div>
+                <a href="https://github.com/williamofai/c-sentinel" class="hover:text-gray-300 underline">Original</a> by @williamofai
+            </div>
+            <div>
+                <a href="https://gitlab.com/librepower/aix" class="hover:text-gray-300 underline">AIX port</a> by LibrePower
+            </div>
         </div>
     </div>
     
@@ -137,7 +143,14 @@
     
     {% block footer %}
     <footer class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500 border-t border-gray-800 mt-8 space-y-2 sm:space-y-0">
-        <span>C-Sentinel v{{ config.VERSION }}</span>
+        <div class="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 text-center sm:text-left">
+            <span>C-Sentinel for AIX v{{ config.VERSION }}</span>
+            <span class="hidden sm:inline text-gray-600">|</span>
+            <span>
+                Based on <a href="https://github.com/williamofai/c-sentinel" class="hover:text-gray-300 underline">c-sentinel</a> by
+                <a href="https://github.com/williamofai" class="hover:text-gray-300">@williamofai</a>
+            </span>
+        </div>
         <span class="hide-mobile">Last updated: <span id="last-updated">-</span></span>
         <div class="flex items-center space-x-4">
             {% if session.demo_mode %}
@@ -146,9 +159,13 @@
                 Admin
             </a>
             {% endif %}
-            <a href="https://github.com/williamofai/c-sentinel" class="hover:text-gray-300 flex items-center">
+            <a href="https://gitlab.com/librepower/aix" class="hover:text-gray-300 flex items-center" title="AIX port by LibrePower">
+                <i data-lucide="gitlab" class="w-4 h-4 mr-1"></i>
+                LibrePower
+            </a>
+            <a href="https://github.com/williamofai/c-sentinel" class="hover:text-gray-300 flex items-center" title="Original project">
                 <i data-lucide="github" class="w-4 h-4 mr-1"></i>
-                GitHub
+                Original
             </a>
         </div>
     </footer>
