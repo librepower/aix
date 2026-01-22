@@ -1,6 +1,6 @@
 Name:           csentinel4aix
 Version:        0.6.0
-Release:        2.librepower
+Release:        3.librepower
 Summary:        Semantic Observability for AIX Systems with Audit Integration
 
 License:        MIT
@@ -165,6 +165,11 @@ rm -rf $RPM_BUILD_ROOT
 %license /usr/share/doc/csentinel/LICENSE
 
 %changelog
+* Wed Jan 22 2026 LibrePower Team <hello@librepower.org> - 0.6.0-3.librepower
+- Dashboard: Proper fork attribution in footer
+- Credits original author @williamofai with links
+- Links to both original repo and LibrePower AIX port
+
 * Wed Jan 22 2026 LibrePower Team <hello@librepower.org> - 0.6.0-2.librepower
 - SIEM integration for QRadar, Palo Alto XSIAM, Wazuh, Splunk
 - Syslog output (CEF/JSON format) via -S flag
