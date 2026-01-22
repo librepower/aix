@@ -73,7 +73,7 @@ sudo -u postgres psql -d sentinel -f /opt/sentinel-dashboard/migrate.sql
 ### 2. Install Python Dependencies
 
 ```bash
-pip3 install flask psycopg2-binary gunicorn
+/opt/freeware/bin/pip3 install flask psycopg2-binary gunicorn
 ```
 
 ### 3. Configure Environment
@@ -249,17 +249,17 @@ crontab -e
 netstat -an | grep 5000
 
 # Check PostgreSQL connection
-psql -h localhost -U sentinel -d sentinel -c "SELECT 1"
+/opt/freeware/bin/psql -h localhost -U sentinel -d sentinel -c "SELECT 1"
 
 # Check logs
-tail -f /var/log/gunicorn.log
+tail -f /var/log/sentinel-dashboard.log
 ```
 
 ### Agents not reporting
 
 ```bash
 # Test API endpoint
-curl -X POST -H "Content-Type: application/json" \
+/opt/freeware/bin/curl -X POST -H "Content-Type: application/json" \
   -H "X-API-Key: YOUR_KEY" \
   -d '{"hostname":"test"}' \
   http://dashboard:5000/api/ingest
