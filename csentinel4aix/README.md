@@ -111,6 +111,7 @@ For the optional web dashboard installation, see [dashboard/README.md](dashboard
 - **Baseline Learning** - Anomaly detection and deviation alerts
 - **AIX Audit Integration** - Native audit subsystem support with brute-force detection
 - **Full File Integrity Mode** - 171 critical files (PowerSC RTC-comparable) with `-F` flag
+- **SIEM Integration** - Real-time events to QRadar, XSIAM, Wazuh via syslog (CEF/JSON) or log file
 
 ### ⏳ Planned
 
@@ -145,6 +146,7 @@ See [dashboard/README.md](dashboard/README.md) for installation instructions.
 | Network Monitoring | ✅ | ✅ | AIX: **PID attribution (70+ ports)** |
 | Audit Integration | ✅ | ✅ | AIX: Native audit via `-a` flag |
 | Full File Integrity | ⚠️ | ✅ | AIX: 171 files via `-F` flag |
+| SIEM Integration | ⚠️ | ✅ | AIX: Syslog/logfile via `-S`/`-L` |
 | Baseline Learning | ✅ | ✅ | Full support |
 | Web Dashboard | ✅ | ✅ | Full support (requires PostgreSQL) |
 | Long Options (--xxx) | ✅ | ❌ | AIX: Use short (-x) |
