@@ -1036,7 +1036,7 @@ def change_password():
     
     # Can't change password in single-password mode via UI
     return render_template('profile.html', user=get_current_user(), 
-                          error='Password change not available in single-password mode. Update SENTINEL_ADMIN_PASSWORD_HASH in systemd config.')
+                          error='Password change not available in single-password mode. Update SENTINEL_ADMIN_PASSWORD_HASH in env.sh or environment.')
 
 
 def get_current_user():

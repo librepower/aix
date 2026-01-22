@@ -1,6 +1,9 @@
 #!/bin/bash
 #
-# C-Sentinel Dashboard Installation Script
+# C-Sentinel Dashboard Installation Script for AIX
+#
+# This script helps set up the dashboard after installing
+# the csentinel-dashboard RPM package.
 #
 
 set -e
@@ -10,13 +13,13 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-echo -e "${GREEN}C-Sentinel Dashboard Installer${NC}"
-echo "================================="
+echo -e "${GREEN}C-Sentinel Dashboard Setup for AIX${NC}"
+echo "====================================="
 echo
 
 # Check if running as root
-if [ "$EUID" -ne 0 ]; then
-    echo -e "${RED}Please run as root (sudo ./install-dashboard.sh)${NC}"
+if [ "$(id -u)" -ne 0 ]; then
+    echo -e "${RED}Please run as root${NC}"
     exit 1
 fi
 
@@ -25,143 +28,145 @@ INSTALL_DIR="/opt/sentinel-dashboard"
 DB_NAME="${DB_NAME:-sentinel}"
 DB_USER="${DB_USER:-sentinel}"
 DB_PASSWORD="${DB_PASSWORD:-$(openssl rand -base64 24)}"
-API_KEY="${API_KEY:-$(openssl rand -hex 16)}"
-FLASK_SECRET="${FLASK_SECRET:-$(openssl rand -hex 32)}"
+API_KEY="${SENTINEL_API_KEY:-$(openssl rand -hex 16)}"
+FLASK_SECRET="${FLASK_SECRET_KEY:-$(openssl rand -hex 32)}"
 
-echo -e "${YELLOW}Installing to: ${INSTALL_DIR}${NC}"
+echo -e "${YELLOW}Dashboard directory: ${INSTALL_DIR}${NC}"
 echo -e "${YELLOW}Database: ${DB_NAME}${NC}"
 echo
 echo "Save the credentials below - you'll need them!"
 echo
 
-# Create installation directory
-echo -e "${YELLOW}Creating installation directory...${NC}"
-mkdir -p "$INSTALL_DIR"
-cp -r . "$INSTALL_DIR/"
-cd "$INSTALL_DIR"
+# Check prerequisites
+echo -e "${YELLOW}Checking prerequisites...${NC}"
 
-# Create virtual environment
-echo -e "${YELLOW}Creating Python virtual environment...${NC}"
-python3 -m venv venv
-./venv/bin/pip install --upgrade pip
-./venv/bin/pip install -r requirements.txt
+# Check PostgreSQL
+if ! /opt/freeware/bin/psql --version >/dev/null 2>&1; then
+    echo -e "${RED}PostgreSQL not found. Install with:${NC}"
+    echo "  dnf install postgresql18-server"
+    exit 1
+fi
+echo "  - PostgreSQL: OK"
 
-# Create .env file
+# Check Python pip packages
+if ! /opt/freeware/bin/python3 -c "import flask" 2>/dev/null; then
+    echo -e "${YELLOW}Installing Python dependencies...${NC}"
+    /opt/freeware/bin/pip3 install flask psycopg2-binary gunicorn
+fi
+echo "  - Python packages: OK"
+
+# Check if PostgreSQL is running
+if ! pgrep -f postgres >/dev/null; then
+    echo -e "${YELLOW}PostgreSQL not running. Starting...${NC}"
+
+    # Check if data directory exists
+    if [ ! -d /var/lib/pgsql/data/base ]; then
+        echo "  - Initializing PostgreSQL data directory..."
+        mkdir -p /var/lib/pgsql/data
+        chown postgres:postgres /var/lib/pgsql/data
+        su - postgres -c "/opt/freeware/bin/initdb -D /var/lib/pgsql/data"
+    fi
+
+    # Start PostgreSQL
+    su - postgres -c "/opt/freeware/bin/pg_ctl -D /var/lib/pgsql/data -l /var/lib/pgsql/logfile start"
+    sleep 3
+fi
+echo "  - PostgreSQL running: OK"
+
+# Create database and user
+echo -e "${YELLOW}Setting up database...${NC}"
+
+# Check if database exists
+if ! su - postgres -c "/opt/freeware/bin/psql -lqt" | cut -d \| -f 1 | grep -qw "$DB_NAME"; then
+    echo "  - Creating database ${DB_NAME}..."
+    su - postgres -c "/opt/freeware/bin/psql -c \"CREATE DATABASE ${DB_NAME};\""
+fi
+
+# Check if user exists
+if ! su - postgres -c "/opt/freeware/bin/psql -c \"SELECT 1 FROM pg_roles WHERE rolname='${DB_USER}'\"" | grep -q 1; then
+    echo "  - Creating user ${DB_USER}..."
+    su - postgres -c "/opt/freeware/bin/psql -c \"CREATE USER ${DB_USER} WITH ENCRYPTED PASSWORD '${DB_PASSWORD}';\""
+fi
+
+# Grant privileges
+su - postgres -c "/opt/freeware/bin/psql -c \"GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_USER};\"" 2>/dev/null || true
+su - postgres -c "/opt/freeware/bin/psql -d ${DB_NAME} -c \"GRANT ALL ON SCHEMA public TO ${DB_USER};\"" 2>/dev/null || true
+
+echo "  - Database setup: OK"
+
+# Run migrations
+echo -e "${YELLOW}Running database migrations...${NC}"
+if [ -f "$INSTALL_DIR/migrate.sql" ]; then
+    su - postgres -c "/opt/freeware/bin/psql -d ${DB_NAME} -f ${INSTALL_DIR}/migrate.sql" 2>/dev/null || true
+    echo "  - Schema migration: OK"
+fi
+
+# Create environment file
 echo -e "${YELLOW}Creating environment configuration...${NC}"
-cat > "$INSTALL_DIR/.env" << EOF
-# C-Sentinel Dashboard Configuration
+cat > "$INSTALL_DIR/env.sh" << EOF
+#!/bin/bash
+# C-Sentinel Dashboard Environment
 # Generated on $(date)
 
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=${DB_NAME}
-DB_USER=${DB_USER}
-DB_PASSWORD=${DB_PASSWORD}
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_NAME=${DB_NAME}
+export DB_USER=${DB_USER}
+export DB_PASSWORD='${DB_PASSWORD}'
+export SENTINEL_API_KEY='${API_KEY}'
+export FLASK_SECRET_KEY='${FLASK_SECRET}'
 
-# API Authentication (for sentinel agents)
-SENTINEL_API_KEY=${API_KEY}
-
-# Flask Session Security
-FLASK_SECRET_KEY=${FLASK_SECRET}
-
-# Dashboard Authentication
-# Generate hash with: echo -n 'yourpassword' | sha256sum | cut -d' ' -f1
-# Then uncomment and set:
-# SENTINEL_ADMIN_PASSWORD_HASH=your-sha256-hash-here
-
-# Email Alerts (optional - set ALERT_EMAIL_ENABLED=true to enable)
-ALERT_EMAIL_ENABLED=false
-# ALERT_SMTP_HOST=smtp.gmail.com
-# ALERT_SMTP_PORT=587
-# ALERT_SMTP_USER=your-email@gmail.com
-# ALERT_SMTP_PASS=your-app-password
-# ALERT_FROM=your-email@gmail.com
-# ALERT_TO=alerts@your-domain.com
-# ALERT_COOLDOWN_MINS=60
+# Optional: Dashboard password (SHA256 hash)
+# Generate with: echo -n 'yourpassword' | openssl dgst -sha256 | awk '{print \$2}'
+# export SENTINEL_ADMIN_PASSWORD_HASH=your-hash-here
 EOF
 
-chmod 600 "$INSTALL_DIR/.env"
+chmod 600 "$INSTALL_DIR/env.sh"
+echo "  - Environment file: $INSTALL_DIR/env.sh"
 
-# Update service file with generated secrets
-echo -e "${YELLOW}Configuring systemd service...${NC}"
-sed -i "s/CHANGE_ME_generate_with_secrets_token_hex_32/${FLASK_SECRET}/g" sentinel-dashboard.service
+# Create start script
+echo -e "${YELLOW}Creating start script...${NC}"
+cat > "$INSTALL_DIR/start.sh" << 'EOF'
+#!/bin/bash
+cd /opt/sentinel-dashboard
+source env.sh
+exec /opt/freeware/bin/gunicorn -b 0.0.0.0:5000 -w 2 app:app
+EOF
 
-# Install systemd service
-cp sentinel-dashboard.service /etc/systemd/system/
-systemctl daemon-reload
-
-# Install nginx config if present
-echo -e "${YELLOW}Checking for nginx configuration...${NC}"
-if [ -f nginx-sentinel.conf ]; then
-    echo "  - Installing nginx config..."
-    cp nginx-sentinel.conf /etc/nginx/sites-available/sentinel
-    ln -sf /etc/nginx/sites-available/sentinel /etc/nginx/sites-enabled/
-    nginx -t && echo -e "${GREEN}  - nginx config valid${NC}"
-else
-    echo "  - No nginx config found (nginx-sentinel.conf)"
-    echo "  - You'll need to configure your web server manually"
-fi
-
-# Initialize database schema
-echo -e "${YELLOW}Initializing database schema...${NC}"
-cd "$INSTALL_DIR"
-DB_HOST=localhost DB_PORT=5432 DB_NAME="$DB_NAME" DB_USER="$DB_USER" DB_PASSWORD="$DB_PASSWORD" \
-    ./venv/bin/python -c "from app import init_db; init_db()"
-
-# Run database migrations
-echo -e "${YELLOW}Running database migrations...${NC}"
-
-if [ -f migrate_audit_totals.sql ]; then
-    echo "  - Applying audit totals migration..."
-    sudo -u postgres psql -d "$DB_NAME" -f "$INSTALL_DIR/migrate_audit_totals.sql" 2>/dev/null || true
-fi
-
-if [ -f migrate_phase2.sql ]; then
-    echo "  - Applying phase 2 migration (event history, sessions)..."
-    sudo -u postgres psql -d "$DB_NAME" -f "$INSTALL_DIR/migrate_phase2.sql" 2>/dev/null || true
-fi
-
-echo -e "${GREEN}Database migrations complete!${NC}"
+chmod 755 "$INSTALL_DIR/start.sh"
+echo "  - Start script: $INSTALL_DIR/start.sh"
 
 echo
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}Installation complete!${NC}"
+echo -e "${GREEN}Setup complete!${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo
 echo -e "${YELLOW}IMPORTANT - Save these credentials:${NC}"
 echo
 echo "  API Key:      ${API_KEY}"
-echo "  Flask Secret: ${FLASK_SECRET}"
 echo "  DB Password:  ${DB_PASSWORD}"
 echo
 echo -e "${YELLOW}Next steps:${NC}"
 echo
-echo "  1. Set dashboard password:"
-echo "     echo -n 'yourpassword' | sha256sum | cut -d' ' -f1"
-echo "     Edit /etc/systemd/system/sentinel-dashboard.service"
-echo "     Set SENTINEL_ADMIN_PASSWORD_HASH to the hash"
+echo "  1. Start the dashboard:"
+echo "     cd /opt/sentinel-dashboard"
+echo "     ./start.sh &"
 echo
-echo "  2. Start the dashboard:"
-echo "     sudo systemctl daemon-reload"
-echo "     sudo systemctl enable sentinel-dashboard"
-echo "     sudo systemctl start sentinel-dashboard"
+echo "  2. Or add to /etc/inittab for auto-start:"
+echo "     sentinel:2:respawn:/opt/sentinel-dashboard/start.sh"
+echo "     telinit q"
 echo
-echo "  3. Configure web server (nginx/apache) with SSL"
-echo "     sudo certbot --nginx -d your-domain.com"
+echo "  3. Configure nginx (optional):"
+echo "     Edit /opt/freeware/etc/nginx/conf.d/sentinel.conf"
+echo "     startsrc -s nginx"
 echo
-echo "  4. Configure sentinel agent to report:"
-echo "     Add to crontab (crontab -e):"
+echo "  4. Configure sentinel agents to report (crontab -e):"
 echo
-echo "     */5 * * * * sudo sentinel --json --network --audit | \\"
-echo "       curl -s -X POST -H 'Content-Type: application/json' \\"
+echo "     */5 * * * * /opt/freeware/bin/sentinel -j -n | \\"
+echo "       /opt/freeware/bin/curl -s -X POST \\"
+echo "       -H 'Content-Type: application/json' \\"
 echo "       -H 'X-API-Key: ${API_KEY}' \\"
-echo "       -d @- https://your-domain.com/api/ingest"
+echo "       -d @- http://$(hostname):5000/api/ingest >/dev/null 2>&1"
 echo
-echo "  5. (Optional) Configure email alerts:"
-echo "     Edit /etc/systemd/system/sentinel-dashboard.service"
-echo "     Set ALERT_EMAIL_ENABLED=true and configure SMTP settings"
-echo "     sudo systemctl daemon-reload && sudo systemctl restart sentinel-dashboard"
-echo
-echo -e "${GREEN}Documentation: https://github.com/williamofai/c-sentinel${NC}"
+echo -e "${GREEN}Documentation: https://gitlab.com/librepower/aix/-/tree/main/csentinel4aix/dashboard${NC}"
 echo
