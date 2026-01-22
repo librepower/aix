@@ -6,7 +6,7 @@ A LibrePower original tool, created exclusively for AIX.
 
 ![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![AIX](https://img.shields.io/badge/AIX-7.2%2B-green)
-![License](https://img.shields.io/badge/license-Apache--2.0-blue)
+![License](https://img.shields.io/badge/license-GPL--3.0-green)
 
 ## Demo
 
@@ -102,7 +102,7 @@ go build -o stgtui main.go
 
 ## License
 
-Apache-2.0
+GPL-3.0
 
 ---
 
