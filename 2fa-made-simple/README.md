@@ -2,7 +2,7 @@
 
 ![AIX 7.3](https://img.shields.io/badge/AIX-7.1+-blue)
 ![TOTP](https://img.shields.io/badge/TOTP-RFC%206238-orange)
-![License](https://img.shields.io/badge/license-Apache--2.0-green)
+![License](https://img.shields.io/badge/license-GPL--3.0-green)
 
 Google Authenticator two-factor authentication for AIX/VIOS, with working QR codes, safe configuration, and easy bilingual setup wizards.
 
@@ -196,9 +196,9 @@ google-authenticator-configura       # Spanish wizard
 ## License
 
 - libqrencode: LGPL-2.1 (compiled for AIX by LibrePower)
-- google-authenticator: Apache-2.0 (official IBM package)
-- google-authenticator-setup/configura: Apache-2.0 (LibrePower)
-- Documentation and scripts: Apache-2.0
+- google-authenticator: GPL-3.0 (official IBM package)
+- google-authenticator-setup/configura: GPL-3.0 (LibrePower)
+- Documentation and scripts: GPL-3.0
 
 ## Credits
 

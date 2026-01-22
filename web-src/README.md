@@ -3,7 +3,7 @@
 **LibrePower - Unlocking Power Systems through open source**
 
 ![AIX 7.3](https://img.shields.io/badge/AIX-7.3+-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+![License](https://img.shields.io/badge/license-GPL--3.0-green)
 
 Part of the LibrePower web stack for AIX. This package integrates Apache httpd, nginx, and PHP-FPM with AIX System Resource Controller (SRC), enabling native service management with `startsrc`/`stopsrc`/`lssrc`.
 
@@ -155,7 +155,7 @@ web-src/
 
 ## License
 
-MIT License - LibrePower
+GPL-3.0 - LibrePower
 
 ## Credits
 
