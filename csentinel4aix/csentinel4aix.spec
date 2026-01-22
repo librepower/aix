@@ -1,6 +1,6 @@
 Name:           csentinel4aix
 Version:        1.0.0
-Release:        2.librepower
+Release:        4.librepower
 Summary:        Semantic Observability for AIX Systems
 
 License:        MIT

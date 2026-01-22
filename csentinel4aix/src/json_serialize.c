@@ -211,8 +211,15 @@ char* fingerprint_to_json(const fingerprint_t *fp) {
             buf_append(&buf, "        \"name\": ");
             buf_append_json_string(&buf, p->name);
             buf_append(&buf, ",\n");
-            /* Handle unprintable state characters */
-            char state_char = (p->state >= 32 && p->state <= 126) ? p->state : '?';
+            /* Handle unprintable state characters - only allow A-Z for process states */
+            char state_char;
+            if (p->state >= 'A' && p->state <= 'Z') {
+                state_char = p->state;
+            } else if (p->state == '?') {
+                state_char = '?';
+            } else {
+                state_char = '?';  /* Force unknown for any other value */
+            }
             buf_appendf(&buf, "        \"state\": \"%c\",\n", state_char);
             buf_appendf(&buf, "        \"age_days\": %.2f,\n", p->age_seconds / 86400.0);
             buf_appendf(&buf, "        \"memory_mb\": %.1f,\n", p->rss_bytes / (1024.0 * 1024.0));

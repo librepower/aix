@@ -59,12 +59,12 @@ static void print_usage(const char *prog) {
     fprintf(stderr, "  -w          Continuous monitoring mode\n");
     fprintf(stderr, "  -i SEC      Interval between probes in watch mode (default: 60)\n");
     fprintf(stderr, "  -n          Include network probe (listeners, connections)\n");
-    fprintf(stderr, "  -a          Include auditd security events\n");
+    fprintf(stderr, "  -a          Include security events (Linux auditd - not available on AIX)\n");
     fprintf(stderr, "  -b          Compare against learned baseline\n");
     fprintf(stderr, "  -l          Learn current state as baseline\n");
     fprintf(stderr, "  -c          Show current configuration\n");
     fprintf(stderr, "  -C          Create default config file\n");
-    fprintf(stderr, "  -A          Learn audit baseline\n");
+    fprintf(stderr, "  -A          Learn audit baseline (Linux only)\n");
     fprintf(stderr, "  -K          Force coloured output\n");
     fprintf(stderr, "  -N          Disable coloured output\n");
 #else

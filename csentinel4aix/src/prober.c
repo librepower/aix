@@ -141,6 +141,9 @@ static int parse_proc_stat(pid_t pid, process_info_t *proc) {
     struct psinfo psi;
     int fd;
 
+    /* Initialize psinfo to zero to avoid garbage data */
+    memset(&psi, 0, sizeof(psi));
+
     snprintf(path, sizeof(path), "/proc/%d/psinfo", (int)pid);
     fd = open(path, O_RDONLY);
     if (fd < 0) return -1;
@@ -155,7 +158,18 @@ static int parse_proc_stat(pid_t pid, process_info_t *proc) {
     proc->pid = pid;
     proc->ppid = psi.pr_ppid;
     safe_strcpy(proc->name, psi.pr_fname, sizeof(proc->name));
-    proc->state = psi.pr_lwp.pr_sname;  /* S, R, Z, T, etc. from representative thread */
+
+    /* AIX: Validate state character - must be printable ASCII */
+    /* pr_lwp.pr_sname can be invalid for kernel processes without LWPs */
+    char state = psi.pr_lwp.pr_sname;
+    if (state >= 'A' && state <= 'Z') {
+        proc->state = state;  /* Valid state: S, R, Z, T, O, I, etc. */
+    } else if (psi.pr_nlwp == 0) {
+        proc->state = 'I';  /* Idle/kernel process with no LWPs */
+    } else {
+        proc->state = '?';  /* Unknown state */
+    }
+
     proc->thread_count = psi.pr_nlwp;  /* Number of LWPs (threads) */
     proc->vsize_bytes = psi.pr_size * 1024;  /* Size in KB -> bytes */
     proc->rss_bytes = psi.pr_rssize * 1024;  /* RSS in KB -> bytes */
@@ -163,7 +177,13 @@ static int parse_proc_stat(pid_t pid, process_info_t *proc) {
     /* Calculate process age from start time */
     time_t now = time(NULL);
     proc->start_time = psi.pr_start.tv_sec;
-    proc->age_seconds = now - proc->start_time;
+
+    /* Validate start time - kernel processes may have epoch or invalid times */
+    if (proc->start_time > 0 && proc->start_time < now) {
+        proc->age_seconds = now - proc->start_time;
+    } else {
+        proc->age_seconds = 0;  /* Invalid or future start time */
+    }
 
 #else
     /* Linux: Read text stat file */
