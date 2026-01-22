@@ -8,9 +8,9 @@ A LibrePower original tool, created exclusively for AIX.
 ![AIX](https://img.shields.io/badge/AIX-7.2%2B-green)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 
-## Demo
+## Screenshot
 
-![stgtui Demo](demo/stgtui-demo.svg)
+![stgtui Dashboard](stgtui-screenshot.png)
 
 ## Features
 
