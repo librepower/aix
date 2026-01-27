@@ -1,18 +1,20 @@
-# MariaDB 11.8.0 AIX Patches - Technical Details
+# MariaDB 11.8.5 AIX Patches - Technical Details
 
-This document provides detailed technical information about the patches required to compile and run MariaDB 11.8.0 on AIX.
+This document provides detailed technical information about the patches required to compile, run, and optimize MariaDB 11.8.5 on AIX 7.3 POWER.
 
 ---
 
 ## Overview
 
-MariaDB 11.8.0 requires **2 source code patches** and **1 runtime configuration** to work correctly on AIX 7.3 POWER:
+MariaDB 11.8.5 requires **4 source code patches** and **1 runtime configuration** to work correctly and optimally on AIX 7.3 POWER:
 
 | Patch | File | Type | Lines Changed |
 |-------|------|------|---------------|
 | BUG 1 | `storage/perfschema/CMakeLists.txt` | Source | +14 |
 | BUG 2 | `storage/perfschema/CMakeLists.txt` | Source | +14 |
-| Config | LIBPATH | Runtime | N/A |
+| FEATURE 3 | `sql/threadpool_generic.*`, `sql/CMakeLists.txt` | Source | +191 |
+| Config | LIBPATH + LDR_CNTRL | Runtime | N/A |
+| FEATURE 4 | `mysys/my_largepage.c` | Source | +26 |
 
 ---
 
@@ -184,17 +186,97 @@ std::thread::_State::~_State() T   270374368          64
 
 ---
 
-## Unified Patch File
+## Patch 4: AIX Large Page Support (`MAP_ANON_64K`)
 
-The source code changes are available as a unified diff:
+### Problem
 
-**File**: `mariadb-aix-perfschema.patch`
-**Format**: Git unified diff
-**Size**: ~50 lines
+MariaDB's `--large-pages` option has no AIX implementation. The existing code supports Linux (`MAP_HUGETLB`), FreeBSD/macOS (`MAP_ALIGNED`), and Windows, but AIX is treated as a no-op. This means `mmap()` allocations use 4K pages, causing excessive TLB misses on POWER processors for workloads with large memory-mapped regions and random access patterns.
+
+This is particularly impactful for **MHNSW vector index graph traversal**, which performs pointer-chasing across a ~300MB graph structure -- worst case for TLB misses with 4K pages.
+
+### Root Cause
+
+AIX provides `MAP_ANON_64K` (value `0x400`) as an `mmap()` flag to request 64K anonymous pages, compared to the default 4K page size. However, `my_largepage.c` has no `_AIX` code paths.
+
+### Solution
+
+Add three AIX-specific code sections to `mysys/my_largepage.c`:
+
+1. **Define `MAP_ANON_64K`** (if not already defined):
+```c
+#ifdef _AIX
+#ifndef MAP_ANON_64K
+#define MAP_ANON_64K 0x400
+#endif
+#endif
+```
+
+2. **Page size detection** (`my_get_large_page_sizes`):
+```c
+#elif defined(_AIX)
+#define my_large_page_sizes_length 2
+static size_t my_large_page_sizes[my_large_page_sizes_length];
+static void my_get_large_page_sizes(size_t sizes[])
+{
+  /* AIX supports 64K anonymous pages via MAP_ANON_64K mmap flag */
+  sizes[0]= 65536;
+  sizes[1]= 0;
+}
+```
+
+3. **mmap flag injection** in both `my_large_malloc()` and `my_large_virtual_alloc()`:
+```c
+#elif defined(_AIX) && defined(MAP_ANON_64K)
+        /* AIX: use 64K pages for anonymous mappings */
+        mapflag|= MAP_ANON_64K;
+```
+
+### Impact
+
+**Files affected**: 1 (`mysys/my_largepage.c`)
+**Lines added**: 26
+**Runtime behavior**: With `--large-pages`, all `mmap` regions use 64K pages on AIX
+**Performance**: Reduces TLB misses for memory-intensive workloads on POWER
+**Compatibility**: No effect on non-AIX platforms; guarded by `#ifdef _AIX`
+
+### Patch File
+
+**File**: `SOURCES/0004-AIX-large-pages-MAP_ANON_64K.patch`
+**Format**: Git-style patch
 **Apply with**:
 ```bash
-cd mariadb-11.8.0
+cd mariadb-11.8.5
+patch -p1 < 0004-AIX-large-pages-MAP_ANON_64K.patch
+```
+
+### Note on LDR_CNTRL
+
+`MAP_ANON_64K` controls page sizes for `mmap()` allocations only. For the process's text, data, stack, and shared memory segments, AIX uses the `LDR_CNTRL` environment variable:
+
+```bash
+export LDR_CNTRL=DATAPSIZE=64K@TEXTPSIZE=64K@STACKPSIZE=64K@SHMPSIZE=64K
+```
+
+The RPM wrapper script (`mariadbd`) sets both: `LDR_CNTRL` for process segments and `--large-pages` for mmap regions.
+
+---
+
+## Patch Files
+
+All source code changes are available as unified diffs in `SOURCES/`:
+
+| Patch File | Description |
+|-----------|-------------|
+| `mariadb-aix-perfschema.patch` | CMake bug fixes (patches 1 & 2) |
+| `threadpool_aix_pollset.patch` | AIX pollset thread pool (patch 3) |
+| `0004-AIX-large-pages-MAP_ANON_64K.patch` | AIX large pages (patch 4) |
+
+**Apply all**:
+```bash
+cd mariadb-11.8.5
 patch -p1 < mariadb-aix-perfschema.patch
+patch -p1 < threadpool_aix_pollset.patch
+patch -p1 < 0004-AIX-large-pages-MAP_ANON_64K.patch
 ```
 
 ---
@@ -307,11 +389,11 @@ See [UPSTREAM_PR_GUIDE.md](./UPSTREAM_PR_GUIDE.md) for the submission process.
 
 **Author**: LibrePower <hello@librepower.org>
 
-**Last Updated**: 2026-01-13
+**Last Updated**: 2026-01-27
 
-**MariaDB Version**: 11.8.0
+**MariaDB Version**: 11.8.5
 
-**AIX Version**: 7.3 TL5 SP2
+**AIX Version**: 7.3 TL4
 
 **Compiler**: GCC 13.3.0
 

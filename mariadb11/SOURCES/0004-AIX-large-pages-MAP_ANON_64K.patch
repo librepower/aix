@@ -1,0 +1,81 @@
+From: LibrePower <hello@librepower.org>
+Date: Mon, 27 Jan 2026 00:00:00 +0000
+Subject: [PATCH] MDEV-XXXXX: Add AIX large page support using MAP_ANON_64K
+
+AIX does not support MAP_HUGETLB or MAP_ALIGNED for large pages.
+Instead, it provides the MAP_ANON_64K flag (0x400) for mmap() to
+request 64K anonymous pages, compared to the default 4K page size.
+
+This is important for workloads with large memory-mapped regions
+and random access patterns (e.g., MHNSW vector index graph
+traversal), where 4K pages cause excessive TLB misses on POWER.
+
+Changes:
+- Define MAP_ANON_64K (0x400) if not already defined on AIX
+- Add AIX implementation of my_get_large_page_sizes() reporting
+  64K as the available large page size
+- Use MAP_ANON_64K in my_large_malloc() and my_large_virtual_alloc()
+  when --large-pages is enabled on AIX
+
+With --large-pages on AIX, all mmap regions use 64K pages,
+reducing TLB pressure for memory-intensive workloads.
+
+Tested on IBM Power S924 (POWER9), AIX 7.3 TL4.
+---
+ mysys/my_largepage.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/mysys/my_largepage.c b/mysys/my_largepage.c
+--- a/mysys/my_largepage.c
++++ b/mysys/my_largepage.c
+@@ -20,6 +20,12 @@
+ #ifdef __linux__
+ #include <dirent.h>
+ #endif
++#ifdef _AIX
++#ifndef MAP_ANON_64K
++#define MAP_ANON_64K 0x400
++#endif
++#endif
++
+ #if defined(__linux__) || defined(MAP_ALIGNED)
+ #include "my_bit.h"
+ #endif
+@@ -116,6 +122,16 @@
+ #elif defined(_WIN32)
+ #define my_large_page_sizes_length 0
+ #define my_get_large_page_sizes(A) do {} while(0)
++
++#elif defined(_AIX)
++#define my_large_page_sizes_length 2
++static size_t my_large_page_sizes[my_large_page_sizes_length];
++static void my_get_large_page_sizes(size_t sizes[])
++{
++  /* AIX supports 64K anonymous pages via MAP_ANON_64K mmap flag */
++  sizes[0]= 65536;
++  sizes[1]= 0;
++}
+ #else
+ #define my_large_page_sizes_length 1
+ static size_t my_large_page_sizes[my_large_page_sizes_length];
+@@ -295,6 +311,9 @@
+ #elif defined(MAP_ALIGNED)
+         mapflag|= MAP_ALIGNED(my_bit_log2_size_t(large_page_size));
+ #if defined(MAP_ALIGNED_SUPER)
+         mapflag|= MAP_ALIGNED_SUPER;
++#endif
++#elif defined(_AIX) && defined(MAP_ANON_64K)
++        /* AIX: use 64K pages for anonymous mappings */
++        mapflag|= MAP_ANON_64K;
+ #endif
+         aligned_size= MY_ALIGN(*size, (size_t) large_page_size);
+@@ -375,6 +394,9 @@
+ # elif defined MAP_ALIGNED
+         MAP_ALIGNED(my_bit_log2_size_t(large_page_size)) |
+ #  if defined MAP_ALIGNED_SUPER
+         MAP_ALIGNED_SUPER |
++#  endif
++# elif defined(_AIX) && defined(MAP_ANON_64K)
++        MAP_ANON_64K |
+ #  endif
+         OS_MAP_ANON;

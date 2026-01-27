@@ -28,6 +28,14 @@ This port adds native AIX `pollset(2)` support to MariaDB's thread pool, bringin
 
 > Benchmarked with `mysqlslap` on AIX 7.3 TL4, IBM Power S924 (POWER9), GCC 13.3.0, `-O3 -mcpu=power9`.
 
+### Release 2: MHNSW Vector Search Optimization
+
+Release 2 adds tuning and large page support for MariaDB's MHNSW vector index on POWER:
+
+- Default config with `mhnsw_max_cache_size = 4GB` (upstream default 16MB is too small for real workloads -- the graph cache has no LRU and evicts entirely when exceeded)
+- Wrapper with `LDR_CNTRL` for 64K pages on all process segments (reduces TLB misses on POWER)
+- Patch 4: `MAP_ANON_64K` support in `my_largepage.c` for `--large-pages` on AIX
+
 ---
 
 ## QA Validation
@@ -60,10 +68,10 @@ dnf install mariadb11
 ### Direct RPM
 
 ```bash
-curl -L -o mariadb11-11.8.5-1.librepower.aix7.3.ppc.rpm \
-  https://aix.librepower.org/packages/mariadb11-11.8.5-1.librepower.aix7.3.ppc.rpm
+curl -L -o mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm \
+  https://aix.librepower.org/packages/mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm
 
-rpm -ivh mariadb11-11.8.5-1.librepower.aix7.3.ppc.rpm
+rpm -ivh mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm
 ```
 
 > Package named `mariadb11` to coexist with AIX Toolbox's `mariadb10.11`.
@@ -119,15 +127,22 @@ thread_stack               = 512K
 innodb_buffer_pool_size    = 1G
 innodb_adaptive_hash_index = ON
 max_connections            = 2000
+
+# Vector index (MHNSW) -- upstream default 16MB is too small.
+# The graph cache has no LRU; it evicts entirely when exceeded.
+# Set generously; memory is only used when vector indexes are accessed.
+mhnsw_max_cache_size       = 4294967296
 ```
 
 > `thread-stack=512K` is required with `-O3` builds -- aggressive inlining increases stack usage.
+>
+> A default config file is installed at `/opt/freeware/mariadb/etc/mariadb11.cnf` with these settings.
 
 ---
 
-## Three Patches, One Goal: AIX Parity
+## Four Patches, One Goal: AIX Parity
 
-Starting from upstream MariaDB, exactly **3 patches** bring full AIX support:
+Starting from upstream MariaDB, exactly **4 patches** bring full AIX support:
 
 ### Patch 1: `pthread_threadid_np` Detection (Bug Fix)
 - **File**: `storage/perfschema/CMakeLists.txt`
@@ -159,7 +174,16 @@ Linux `epoll` + `EPOLLONESHOT` guarantees each fd fires once across concurrent w
 
 The per-pollset `pthread_mutex` with `trylock` for non-blocking callers solves this cleanly: workers skip if the listener is active, and `PS_DELETE` runs under the lock before any fd is returned.
 
-**Status**: All three patches submitted to MariaDB upstream (JIRA).
+### Patch 4: Large Pages -- AIX `MAP_ANON_64K` (Performance)
+- **File**: `mysys/my_largepage.c`
+- **What**: Adds AIX implementation of `--large-pages` using `MAP_ANON_64K` (0x400)
+- **Key changes**:
+  - Define `MAP_ANON_64K` on AIX if not already defined
+  - AIX `my_get_large_page_sizes()` reporting 64K as available
+  - `MAP_ANON_64K` flag in `my_large_malloc()` and `my_large_virtual_alloc()`
+- **Impact**: All mmap regions use 64K pages with `--large-pages`, reducing TLB misses for memory-intensive workloads (MHNSW vector graph traversal)
+
+**Status**: All four patches submitted to MariaDB upstream (JIRA).
 
 ---
 
@@ -195,6 +219,7 @@ The per-pollset `pthread_mutex` with `trylock` for non-blocking callers solves t
 | Component | Details |
 |-----------|---------|
 | **Version** | MariaDB 11.8.5 LTS |
+| **Release** | 2 (MHNSW performance fix + 64K pages) |
 | **Platform** | AIX 7.3 TL4 |
 | **Hardware** | IBM Power S924 (POWER9) |
 | **Compiler** | GCC 13.3.0 |
@@ -203,7 +228,7 @@ The per-pollset `pthread_mutex` with `trylock` for non-blocking callers solves t
 | **Thread Handling** | pool-of-threads (pollset v11) |
 | **Build Time** | ~15 minutes (`gmake -j96`) |
 | **RPM Size** | 40 MB |
-| **Patches** | 3 (2 CMake + 1 thread pool = 191 lines) |
+| **Patches** | 4 (2 CMake + 1 thread pool + 1 large pages) |
 
 ### Building from Source
 
@@ -215,6 +240,7 @@ cd server && git submodule update --init
 # Apply patches
 patch -p1 < mariadb-aix-perfschema.patch
 patch -p1 < threadpool_aix_pollset.patch
+patch -p1 < 0004-AIX-large-pages-MAP_ANON_64K.patch
 
 # Configure
 cmake . \
@@ -256,18 +282,19 @@ Fully working with 1,247 performance instruments. AIX-specific patches fix incor
 
 ```
 mariadb11/
-+-- demo.gif                              # Demo recording
++-- demo.gif                                          # Demo recording
 +-- RPMS/
-|   +-- mariadb11-11.8.5-1.librepower.aix7.3.ppc.rpm
+|   +-- mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm
 +-- SPECS/
 |   +-- mariadb11.spec
 +-- SOURCES/
-|   +-- mariadb-aix-perfschema.patch      # CMake bug fixes (patches 1 & 2)
-|   +-- threadpool_aix_pollset.patch      # Thread pool implementation (patch 3)
+|   +-- mariadb-aix-perfschema.patch                  # CMake bug fixes (patches 1 & 2)
+|   +-- threadpool_aix_pollset.patch                  # Thread pool implementation (patch 3)
+|   +-- 0004-AIX-large-pages-MAP_ANON_64K.patch       # Large pages for AIX (patch 4)
 +-- docs/
-|   +-- PATCHES.md                        # Technical analysis of patches
-|   +-- BUGS_REPORT.md                    # Bug reports for upstream
-|   +-- UPSTREAM_PR_GUIDE.md              # Guide for submitting PRs to MariaDB
+|   +-- PATCHES.md                                    # Technical analysis of patches
+|   +-- BUGS_REPORT.md                                # Bug reports for upstream
+|   +-- UPSTREAM_PR_GUIDE.md                          # Guide for submitting PRs
 +-- README.md
 ```
 
@@ -283,10 +310,11 @@ mariadb11/
 
 ## Upstream Contribution
 
-Three patches ready for MariaDB upstream:
+Four patches ready for MariaDB upstream:
 1. **[BUG]** CMake incorrectly detects `pthread_threadid_np()` on AIX
 2. **[BUG]** CMake incorrectly detects `getthrid()` on AIX
 3. **[FEATURE]** Add AIX pollset support for thread pool
+4. **[FEATURE]** Add AIX large page support (`MAP_ANON_64K`) in `my_largepage.c`
 
 See `docs/UPSTREAM_PR_GUIDE.md` for the full submission process and `SOURCES/` for patch files.
 
