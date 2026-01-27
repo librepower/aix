@@ -1,42 +1,56 @@
-# MariaDB 11.8.0 - Database Server for AIX
+# MariaDB 11.8.5 LTS - Database Server for AIX
 
 **LibrePower - Unlocking Power Systems through open source. Unmatched RAS and TCO. Minimal footprint 🌍**
 
 ![AIX 7.3](https://img.shields.io/badge/AIX-7.2+-blue)
-![MariaDB](https://img.shields.io/badge/MariaDB-11.8.0-orange)
+![MariaDB](https://img.shields.io/badge/MariaDB-11.8.5_LTS-orange)
+![Thread Pool](https://img.shields.io/badge/Thread_Pool-pool--of--threads-green)
 ![License](https://img.shields.io/badge/license-GPLv2-green)
 
-Community-developed fork of MySQL, now available for AIX on IBM Power. Full SQL database server with Performance Schema support and native AIX SRC integration.
+Community-developed fork of MySQL, now available for AIX on IBM Power. Full SQL database server with **native thread pool** (`pool-of-threads`) and Performance Schema support.
 
 ![MariaDB 11.8 on AIX Demo](demo.gif)
 
 ## Join the Community
 
-LibrePower is more than AIX—we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power (ppc64le).
+LibrePower is more than AIX -- we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power (ppc64le).
 
-**[Subscribe to our newsletter](https://librepower.substack.com/subscribe)** for releases, technical articles, and community updates.
-
-**[librepower.org](https://librepower.org)** — Launching February 2026
+- **[Subscribe to our newsletter](https://librepower.substack.com/subscribe)** for releases, technical articles, and community updates.
+- **[librepower.org](https://librepower.org)** -- Launching February 2026
 
 ---
 
-## What is MariaDB?
+## What's New in 11.8.5
 
-MariaDB is a high-performance, open-source relational database server. It's a drop-in replacement for MySQL with additional features and optimizations.
+### Thread Pool (pool-of-threads)
 
-**Why use MariaDB on AIX:**
-- Enterprise-grade SQL database on POWER architecture
-- Native AIX SRC (System Resource Controller) integration
-- High availability and clustering support
-- Compatible with MySQL applications and tools
-- Active development and community support
-- No Oracle licensing concerns
+MariaDB on AIX now supports the **pool-of-threads** thread handling model, previously unavailable on AIX. This is the same high-performance model used on Linux, FreeBSD, Solaris, and Windows.
+
+**Performance improvement** (mysqlslap mixed workload):
+
+| Clients | one-thread-per-connection | pool-of-threads | Improvement |
+|---------|--------------------------|-----------------|-------------|
+| 50      | 5.437s                   | 1.917s          | **65% faster** |
+| 100     | 11.340s                  | 1.964s          | **83% faster** |
+
+The thread pool is enabled by default in this package. No configuration needed.
+
+### Optimized Build
+
+Built with `-O3 -mcpu=power9 -mtune=power9` (Release mode) for maximum performance on POWER9+ systems.
+
+### QA Validated
+
+- 1,000 concurrent clients: PASS
+- 30 min sustained load (100 clients, 11.15M queries): 0 errors
+- Memory stable (zero drift across 29 checkpoints)
+- MTR: 709 pass, 50 fail (federated/platform, none thread-pool specific)
+
+---
 
 ## Installation
 
 ### Option 1: dnf (Recommended)
-
-Add the LibrePower repository and install with one command:
 
 ```bash
 # Add repository (one-time setup)
@@ -48,17 +62,15 @@ dnf install mariadb11
 
 Repository details: https://aix.librepower.org/
 
-> **Note**: Package named `mariadb11` to avoid conflicts with AIX Toolbox's `mariadb10.11`. Both can coexist on the same system.
+> **Note**: Package named `mariadb11` to avoid conflicts with AIX Toolbox's `mariadb10.11`. Both can coexist.
 
 ### Option 2: Direct RPM Download
 
 ```bash
-cd /tmp
+curl -L -o mariadb11-11.8.5-1.librepower.aix7.3.ppc.rpm \
+  https://aix.librepower.org/packages/mariadb11-11.8.5-1.librepower.aix7.3.ppc.rpm
 
-curl -L -o mariadb11-11.8.0-4.librepower.ppc.rpm \
-  https://aix.librepower.org/packages/mariadb11-11.8.0-4.librepower.ppc.rpm
-
-rpm -ivh mariadb11-11.8.0-4.librepower.ppc.rpm
+rpm -ivh mariadb11-11.8.5-1.librepower.aix7.3.ppc.rpm
 ```
 
 ## Quick Start
@@ -68,7 +80,12 @@ rpm -ivh mariadb11-11.8.0-4.librepower.ppc.rpm
 ```bash
 cd /opt/freeware/mariadb
 
-# Initialize system tables (first time only)
+# Create data directory
+mkdir -p /var/mariadb/data
+chown mysql:mysql /var/mariadb/data
+chmod 750 /var/mariadb/data
+
+# Initialize system tables
 ./bin/mysql_install_db \
   --basedir=/opt/freeware/mariadb \
   --datadir=/var/mariadb/data \
@@ -128,23 +145,23 @@ cd /opt/freeware/mariadb
   --user=mysql &
 ```
 
+The SRC service starts MariaDB with pool-of-threads enabled and optimized defaults.
+
 ### Connect and Test
 
 ```bash
 # Connect as root (no password initially)
-mariadb -u root
-
-# Or use mysql client
-mysql -u root
+/opt/freeware/mariadb/bin/mariadb -u root -S /tmp/mysql.sock
 
 # In MariaDB prompt:
 MariaDB> SELECT VERSION();
-+------------------+
-| VERSION()        |
-+------------------+
-| 11.8.0-MariaDB   |
-+------------------+
++-------------------+
+| VERSION()         |
++-------------------+
+| 11.8.5-MariaDB    |
++-------------------+
 
+MariaDB> SHOW VARIABLES LIKE 'thread_handling';
 MariaDB> SHOW DATABASES;
 MariaDB> CREATE DATABASE testdb;
 MariaDB> USE testdb;
@@ -173,25 +190,30 @@ echo "SELECT VERSION();" | mariadb -u root
 ### Secure Installation
 
 ```bash
-# Set root password and secure defaults
 ./bin/mysql_secure_installation
 ```
+
+## Recommended Configuration
+
+For production use, add to your configuration file:
+
+```ini
+[mariadbd]
+thread_handling            = pool-of-threads
+thread_pool_size           = 12
+thread_stack               = 512K
+innodb_buffer_pool_size    = 1G
+innodb_adaptive_hash_index = ON
+max_connections            = 2000
+```
+
+> **Note**: `thread-stack=512K` is required when using `-O3` optimized builds. The aggressive inlining increases stack usage beyond the default.
 
 ## AIX-Specific Notes
 
 ### Threading Library
 
-The RPM package includes a wrapper script that automatically sets the correct `LIBPATH` to use pthread-enabled libstdc++. No manual configuration needed!
-
-**Behind the scenes:**
-```bash
-export LIBPATH=/opt/freeware/lib/pthread:\
-/opt/freeware/lib/gcc/powerpc-ibm-aix7.3.0.0/13/pthread:\
-/opt/freeware/lib:\
-/usr/lib
-```
-
-This ensures C++11 threading features (`std::thread`, `std::condition_variable`, `std::mutex`) work correctly.
+The RPM package includes a wrapper script that sets the correct `LIBPATH` for pthread-enabled libstdc++. No manual configuration needed.
 
 ### Performance Schema
 
@@ -221,30 +243,39 @@ All major storage engines are fully functional:
 | MEMORY | YES | Hash based, stored in memory |
 | MyISAM | YES | Traditional MySQL storage engine |
 
+### AIX SRC Integration
+
+The package registers a System Resource Controller (SRC) subsystem `mariadb11` with optimized defaults for pool-of-threads operation.
+
 ## Package Contents
 
 ```
 mariadb11/
 ├── demo.gif                              # Demo GIF
 ├── RPMS/
-│   └── mariadb11-11.8.0-4.librepower.ppc.rpm
+│   └── mariadb11-11.8.5-1.librepower.aix7.3.ppc.rpm
 ├── SPECS/
-│   └── mariadb.spec
+│   └── mariadb11.spec
 ├── SOURCES/
-│   └── mariadb-aix-perfschema.patch
+│   ├── mariadb-aix-perfschema.patch     # CMake bug fixes
+│   └── threadpool_aix_pollset.patch     # Thread pool implementation
 └── README.md
 ```
 
 ## What's Included
 
-- **mariadbd** - Main database server (via libserver.so)
-- **mysql_install_db** - Database initialization utility
+- **mariadbd** - Main database server with pool-of-threads support
+- **mariadb** - Command-line client
+- **mariadb-admin** - Server administration tool
+- **mariadb-dump** - Logical backup utility
+- **mariadb-import** - Data import tool
+- **mariadb-slap** - Load emulation client
+- **mysql_install_db** - Database initialization
 - **mysqld_safe** - Server startup wrapper with auto-restart
 - **my_print_defaults** - Configuration display utility
 - **resolveip** - IP/hostname resolver
 - **perror** - Error code lookup
-- **Performance Schema** - Performance monitoring tables
-- **System tables and data** - Complete MariaDB installation
+- **Performance Schema** - Performance monitoring (1247 instruments)
 - **SRC integration** - Native AIX service management
 
 ## Technical Details
@@ -253,50 +284,58 @@ mariadb11/
 
 | Component | Details |
 |-----------|---------|
+| **Version** | 11.8.5 LTS |
 | **Platform** | AIX 7.3 TL4 |
 | **Architecture** | POWER (tested on POWER9) |
 | **Compiler** | GCC 13.3.0 |
 | **CMake** | 4.2.0 |
-| **Binary Size** | 703 MB (libserver.so) |
-| **Build Time** | ~15 minutes (-j96) |
-| **Patches** | 2 CMake configuration changes |
+| **Optimization** | `-O3 -mcpu=power9 -mtune=power9` |
+| **Thread Handling** | pool-of-threads (AIX pollset) |
+| **Binary Size** | ~60 MB (libserver.so) |
+| **Patches** | 3 (2 CMake fixes + 1 thread pool) |
 
 ### Patches Applied
 
 1. **pthread_threadid_np Detection**: Skip macOS-specific function detection on AIX
 2. **getthrid Detection**: Skip OpenBSD-specific function detection on AIX
+3. **Thread Pool (pollset)**: Native AIX pollset support with ONESHOT simulation and per-pollset mutex for concurrent safety
 
-**Status**: Patches ready for upstream submission to MariaDB project.
+**Status**: Patches submitted to MariaDB upstream (JIRA).
 
-### Why These Patches Work
+### Thread Pool Implementation
 
-These are **minimal, non-invasive changes**:
-- Only modify CMake platform detection logic
-- No code changes to MariaDB itself
-- Use existing POSIX fallback implementations
-- Ideal candidates for upstream inclusion
+The thread pool uses AIX `pollset(2)` as the I/O multiplexing backend, with two key innovations:
+
+1. **ONESHOT simulation**: Fds are removed from pollset after events fire (`PS_DELETE`) and re-added when ready (`PS_ADD`), preventing duplicate event delivery.
+
+2. **Per-pollset mutex**: Serializes concurrent `pollset_poll_ext` calls between the listener thread (blocking) and worker threads (non-blocking via `trylock`).
+
+This matches the behavior of Linux `epoll` with `EPOLLONESHOT`.
 
 ## Installation Paths
 
 ```
 /opt/freeware/mariadb/bin/         # Server binaries
-/opt/freeware/mariadb/lib/         # libserver.so (703MB)
+/opt/freeware/mariadb/lib/         # libserver.so (~60MB)
 /opt/freeware/mariadb/share/       # Error messages, configs
 /var/mariadb/data/                 # Database files
 ```
 
 ## Requirements
 
-- AIX 7.2+ (tested on 7.3)
+- AIX 7.2+ (tested on 7.3 TL4)
 - GCC runtime libraries (from AIX Toolbox)
-- ~1 GB disk space for installation
+- ~1 GB disk space
 - ~500 MB free RAM minimum
 
 ## Upstream Contribution
 
-These patches are ready for submission to the MariaDB project. They benefit the entire AIX community by enabling MariaDB without source modifications.
+Three patches are ready for MariaDB upstream:
+1. [BUG] CMake incorrectly detects `pthread_threadid_np()` on AIX
+2. [BUG] CMake incorrectly detects `getthrid()` on AIX
+3. [FEATURE] Add AIX pollset support for thread pool
 
-**Want to help?** The patches are documented and ready for submission. Contact us if you'd like to contribute to getting AIX support into upstream MariaDB.
+See `SOURCES/` for patch files.
 
 ## License
 
@@ -311,7 +350,7 @@ These patches are ready for submission to the MariaDB project. They benefit the 
 
 ## Support
 
-- **Documentation**: https://gitlab.com/librepower/aix
 - **Repository**: https://aix.librepower.org
+- **Source**: https://gitlab.com/librepower/aix
 - **Newsletter**: https://librepower.substack.com
 - **Email**: hello@librepower.org

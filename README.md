@@ -176,19 +176,20 @@ Full port of PHP 8.3.16 to AIX 7.3. Modern web development with Fibers, opcache,
 
 ---
 
-### 🗄️ MariaDB - Database Server
+### 🗄️ MariaDB 11.8.5 LTS - Database Server
 *Enterprise SQL database on POWER architecture*
 
-Full port of MariaDB 11.8.0 to AIX 7.3. Community-developed fork of MySQL with Performance Schema support and minimal AIX-specific patches ready for upstream submission.
+Full port of MariaDB 11.8.5 LTS to AIX 7.3 with **native thread pool** (`pool-of-threads`). Up to 83% faster than one-thread-per-connection for concurrent workloads. Built with `-O3 -mcpu=power9`.
 
-- ✅ **Full MariaDB 11.8.0** - Complete SQL database functionality
-- ✅ **Performance Schema** - Working correctly with AIX-specific patches
+- ✅ **MariaDB 11.8.5 LTS** - Latest long-term support release
+- ✅ **Thread Pool** - Native AIX pollset support (pool-of-threads), up to 83% faster
+- ✅ **Optimized** - Built with `-O3 -mcpu=power9` for POWER9+ systems
+- ✅ **QA Validated** - 1,000 clients, 30 min sustained, 0 errors
+- ✅ **Performance Schema** - Working with AIX-specific patches
 - ✅ **AIX SRC integration** - Managed with startsrc/stopsrc commands
-- ✅ **Minimal patches** - Only 2 CMake configuration changes (28 lines)
-- ✅ **Upstream ready** - Patches documented for MariaDB project submission
-- ✅ **C++11 threading** - Uses pthread-enabled libstdc++ automatically
+- ✅ **3 patches** - 2 CMake fixes + thread pool, submitted upstream
 
-📁 **[Documentation & Downloads](https://gitlab.com/librepower/mariadb)**
+📁 **[Documentation & Downloads](mariadb11/)**
 
 ---
 
@@ -203,7 +204,7 @@ Between LibrePower and IBM AIX Toolbox, you now have a complete LAMP/LEMP stack 
 | **Apache httpd** | 2.4.66 | IBM AIX Toolbox | `dnf install httpd` |
 | **nginx** | 1.27.4 | IBM AIX Toolbox | `dnf install nginx` |
 | **PHP** | 8.3.16 | LibrePower | `dnf install php83 php83-fpm` |
-| **MariaDB** | 11.8.0 | LibrePower | `dnf install mariadb11` |
+| **MariaDB** | 11.8.5 | LibrePower | `dnf install mariadb11` |
 | **PostgreSQL** | 18.0 | IBM AIX Toolbox | `dnf install postgresql18-server` |
 | **pgvector** | 0.8.1 | IBM AIX Toolbox | `dnf install postgresql18-pgvector` |
 
