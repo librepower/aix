@@ -1,0 +1,269 @@
+From: LibrePower <hello@librepower.org>
+Date: 2026-01-27
+Subject: [PATCH] Add AIX pollset support for thread pool (v11 - ONESHOT + mutex)
+
+This patch adds native AIX pollset support to MariaDB's thread pool,
+enabling pool-of-threads thread handling on IBM AIX systems.
+
+AIX provides pollset(2) as its scalable I/O multiplexing mechanism.
+However, unlike Linux epoll with EPOLLONESHOT, AIX pollset is purely
+level-triggered with no way to disable events after firing.
+
+Additionally, MariaDB's thread pool has two concurrent code paths that
+call io_poll_wait on the same pollset (a blocking listener and a
+non-blocking worker). On Linux, EPOLLONESHOT prevents duplicate fd
+delivery. On AIX, without protection, the same fd can appear in both
+results, causing two threads to process the same connection.
+
+This implementation (v11) solves both problems:
+
+1. ONESHOT simulation:
+   - Remove fds from pollset after receiving events (PS_DELETE)
+   - Re-add fds when ready for more data (PS_ADD in io_poll_start_read)
+
+2. Per-pollset mutex to serialize concurrent io_poll_wait calls:
+   - Blocking callers (listener): pthread_mutex_lock
+   - Non-blocking callers (worker): pthread_mutex_trylock (skip if busy)
+   - PS_DELETE loop runs under the lock
+
+QA Results:
+- 1,000 concurrent clients: PASS
+- 30 min sustained load (100 clients, 11.15M queries): 0 errors
+- Memory stable (zero drift across 29 checkpoints)
+- MTR: 709 pass, 50 fail (federated/platform, none thread-pool specific)
+- Build: -O3 -mcpu=power9 on AIX 7.3 TL4, POWER9, GCC 13.3.0
+
+---
+ sql/CMakeLists.txt         |   1 +
+ sql/threadpool_generic.h   |   6 ++
+ sql/threadpool_generic.cc  | 184 +++++++++++++++++++++++++++++++++++++
+ 3 files changed, 191 insertions(+)
+
+diff --git a/sql/CMakeLists.txt b/sql/CMakeLists.txt
+index XXXXXXX..XXXXXXX 100644
+--- a/sql/CMakeLists.txt
++++ b/sql/CMakeLists.txt
+@@ -212,6 +212,7 @@ ENDIF()
+ IF ((CMAKE_SYSTEM_NAME MATCHES "Linux" OR
+      CMAKE_SYSTEM_NAME MATCHES "SunOS" OR
++     CMAKE_SYSTEM_NAME MATCHES "AIX" OR
+      WIN32 OR
+      HAVE_KQUEUE)
+     AND (NOT DISABLE_THREADPOOL))
+
+diff --git a/sql/threadpool_generic.h b/sql/threadpool_generic.h
+index XXXXXXX..XXXXXXX 100644
+--- a/sql/threadpool_generic.h
++++ b/sql/threadpool_generic.h
+@@ -44,6 +44,12 @@ typedef struct epoll_event native_event;
+ #elif defined(HAVE_KQUEUE)
+ #include <sys/event.h>
+ typedef struct kevent native_event;
++#elif defined(_AIX)
++/* AIX pollset extended API for userdata support */
++#define _ALL_SOURCE
++#include <sys/pollset.h>
++#include <sys/poll.h>
++typedef struct pollfd_ext native_event;
+ #elif defined (__sun)
+ #include <port.h>
+ typedef port_event_t native_event;
+
+diff --git a/sql/threadpool_generic.cc b/sql/threadpool_generic.cc
+index XXXXXXX..XXXXXXX 100644
+--- a/sql/threadpool_generic.cc
++++ b/sql/threadpool_generic.cc
+@@ -307,6 +307,190 @@
+ #error no suitable implementation of io_poll_* functions
+ #endif
+
++#elif defined(_AIX)
++
++/*
++ * AIX pollset implementation - ONESHOT simulation (v11)
++ *
++ * AIX pollset is level-triggered without EPOLLONESHOT equivalent.
++ * MariaDB's thread pool has TWO code paths that call io_poll_wait on
++ * the same pollset concurrently:
++ *   1. The listener thread: blocking wait (timeout=-1)
++ *   2. A worker thread: non-blocking poll (timeout=0) before sleeping
++ *
++ * With Linux epoll + EPOLLONESHOT, the kernel ensures each fd fires
++ * only once even with concurrent epoll_wait calls. AIX pollset has
++ * no such protection, so the same fd can appear in both calls,
++ * causing two threads to process the same connection (crash/corruption).
++ *
++ * Solution: Per-pollset mutex serializes access to pollset_poll_ext.
++ *   - Blocking callers (timeout != 0): pthread_mutex_lock (wait)
++ *   - Non-blocking callers (timeout == 0): pthread_mutex_trylock (skip if busy)
++ *
++ * After receiving events, we PS_DELETE each fd before releasing the lock,
++ * ensuring no concurrent call can return the same fd.
++ */
++
++#include <pthread.h>
++
++#define AIX_MAX_POLLSETS 256
++static pthread_mutex_t aix_pollset_locks[AIX_MAX_POLLSETS];
++static volatile int aix_pollset_locks_inited[AIX_MAX_POLLSETS];
++
++static void aix_pollset_lock_init(int ps)
++{
++  if (ps >= 0 && ps < AIX_MAX_POLLSETS && !aix_pollset_locks_inited[ps])
++  {
++    pthread_mutex_init(&aix_pollset_locks[ps], NULL);
++    aix_pollset_locks_inited[ps] = 1;
++  }
++}
++
++static TP_file_handle io_poll_create()
++{
++  pollset_t ps = pollset_create(-1);
++  if (ps >= 0)
++    aix_pollset_lock_init(ps);
++  return ps;
++}
++
++/*
++ * Associate a file descriptor with the pollset.
++ * Uses extended API (version 1) for userdata support.
++ */
++int io_poll_associate_fd(TP_file_handle pollfd, TP_file_handle fd,
++                         void *data, void *)
++{
++  struct poll_ctl_ext pce;
++  memset(&pce, 0, sizeof(pce));
++  pce.version = 1;
++  pce.command = PS_ADD;
++  pce.events = POLLIN | POLLERR | POLLHUP;
++  pce.fd = fd;
++  pce.u.addr = data;
++  return pollset_ctl_ext(pollfd, &pce, 1);
++}
++
++/*
++ * Re-arm file descriptor for reading.
++ * Uses PS_ADD because io_poll_wait removed the fd (ONESHOT simulation).
++ * Falls back to PS_MOD if fd is already in pollset (edge case).
++ */
++int io_poll_start_read(TP_file_handle pollfd, TP_file_handle fd,
++                       void *data, void *)
++{
++  struct poll_ctl_ext pce;
++  memset(&pce, 0, sizeof(pce));
++  pce.version = 1;
++  pce.command = PS_ADD;
++  pce.events = POLLIN | POLLERR | POLLHUP;
++  pce.fd = fd;
++  pce.u.addr = data;
++
++  int ret = pollset_ctl_ext(pollfd, &pce, 1);
++  if (ret == -1 && errno == EEXIST)
++  {
++    /* fd already in pollset, use MOD instead */
++    pce.command = PS_MOD;
++    ret = pollset_ctl_ext(pollfd, &pce, 1);
++  }
++  return ret;
++}
++
++/*
++ * Remove file descriptor from pollset.
++ */
++int io_poll_disassociate_fd(TP_file_handle pollfd, TP_file_handle fd)
++{
++  struct poll_ctl pctl;
++  pctl.cmd = PS_DELETE;
++  pctl.fd = fd;
++  pctl.events = 0;
++  return pollset_ctl(pollfd, &pctl, 1);
++}
++
++/*
++ * Wait for events, then REMOVE each fd (ONESHOT simulation).
++ *
++ * Uses per-pollset mutex to prevent concurrent pollset_poll_ext calls:
++ *   - Blocking (timeout != 0): lock and wait
++ *   - Non-blocking (timeout == 0): trylock, return 0 if busy
++ *
++ * This is safe because the non-blocking path is only an optimization
++ * (worker checking for events before sleeping). If the listener is
++ * already polling, the worker simply finds no events and sleeps.
++ */
++int io_poll_wait(TP_file_handle pollfd, native_event *native_events,
++                 int maxevents, int timeout_ms)
++{
++  int ret;
++  int i;
++  struct poll_ctl pctl;
++  pthread_mutex_t *lock = NULL;
++
++  if (pollfd >= 0 && pollfd < AIX_MAX_POLLSETS)
++    lock = &aix_pollset_locks[pollfd];
++
++  /*
++   * Serialize access to pollset_poll_ext.
++   * Non-blocking callers use trylock: if the listener is blocking
++   * on the pollset, the worker skips polling (returns 0 events).
++   */
++  if (lock)
++  {
++    if (timeout_ms == 0)
++    {
++      if (pthread_mutex_trylock(lock) != 0)
++        return 0;  /* Listener is active, skip */
++    }
++    else
++    {
++      pthread_mutex_lock(lock);
++    }
++  }
++
++  do
++  {
++    ret = pollset_poll_ext(pollfd, native_events, maxevents, timeout_ms);
++  }
++  while (ret == -1 && errno == EINTR);
++
++  if (ret <= 0)
++  {
++    if (lock)
++      pthread_mutex_unlock(lock);
++    return ret;
++  }
++
++  /*
++   * ONESHOT simulation: Remove each fd from pollset BEFORE releasing
++   * the lock. This ensures no concurrent call can return the same fd.
++   */
++  for (i = 0; i < ret; i++)
++  {
++    if (native_events[i].u.addr)  /* Skip shutdown pipe (NULL userdata) */
++    {
++      pctl.cmd = PS_DELETE;
++      pctl.fd = native_events[i].fd;
++      pctl.events = 0;
++      pollset_ctl(pollfd, &pctl, 1);
++    }
++  }
++
++  if (lock)
++    pthread_mutex_unlock(lock);
++
++  return ret;
++}
++
++/*
++ * Extract userdata (connection pointer) from event.
++ */
++static void *native_event_get_userdata(native_event *event)
++{
++  return event->u.addr;
++}
++
++#endif /* _AIX */
++
+ /* End of platform-specific I/O multiplexing code */
+
+--
+2.39.0
