@@ -39,17 +39,17 @@
 
 ```bash
 curl -fsSL https://aix.librepower.org/install.sh | sh
+
+# GCC build (no external dependencies)
 dnf install mariadb11
+
+# Open XL build (fastest, requires IBM Open XL runtime)
+dnf install mariadb11-openxl
 ```
+
+> **Note**: `mariadb11` and `mariadb11-openxl` conflict with each other -- only one can be installed at a time. Both install to the same paths (`/opt/freeware/mariadb`).
 
 ### Option 2: Direct RPM
-
-**Open XL Build** (fastest performance)
-```bash
-curl -LO https://aix.librepower.org/packages/mariadb11-11.8.5-3.openxl.librepower.aix7.3.ppc.rpm
-rpm -ivh mariadb11-11.8.5-3.openxl.librepower.aix7.3.ppc.rpm
-```
-> **Note**: Built with IBM Open XL C/C++ 17.1.3. Please consult IBM for licensing requirements.
 
 **GCC Build** (no external dependencies)
 ```bash
@@ -57,7 +57,14 @@ curl -LO https://aix.librepower.org/packages/mariadb11-11.8.5-2.librepower.aix7.
 rpm -ivh mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm
 ```
 
-> Package named `mariadb11` to coexist with AIX Toolbox's `mariadb10.11`.
+**Open XL Build** (fastest performance)
+```bash
+curl -LO https://aix.librepower.org/packages/mariadb11-openxl-11.8.5-3.librepower.aix7.3.ppc.rpm
+rpm -ivh mariadb11-openxl-11.8.5-3.librepower.aix7.3.ppc.rpm
+```
+> **Note**: The Open XL build requires IBM Open XL C/C++ 17.1.3 runtime. Please consult IBM for licensing requirements.
+
+> Package names include `11` to coexist with AIX Toolbox's `mariadb10.11`.
 
 ---
 
@@ -134,7 +141,7 @@ mhnsw_max_cache_size       = 4294967296   # 4GB for vector indexes
 |--|---------------|-----------|
 | **Compiler** | IBM Open XL 17.1.3 | GCC 13.3.0 |
 | **Optimization** | `-O3 -mcpu=power9` | `-O3 -mcpu=power9` |
-| **RPM Size** | 15 MB | 40 MB |
+| **RPM Size** | 37 MB | 39 MB |
 | **Dependencies** | Open XL runtime | None |
 
 ### Compatibility
@@ -155,8 +162,9 @@ This port adds native AIX support through 4 patches:
 1. **Thread Pool**: Native `pollset(2)` backend with ONESHOT simulation
 2. **Large Pages**: `MAP_ANON_64K` support for reduced TLB misses
 3. **Performance Schema**: Platform detection fixes for AIX
+4. **CMake**: Build system fixes for AIX
 
-All patches are available in `SOURCES/` and ready for upstream contribution.
+All patches are available in `SOURCES/` and will be submitted upstream once MariaDB provides feedback.
 
 ### Building from Source
 
@@ -181,8 +189,8 @@ gmake -j$(nproc)
 ```
 mariadb11/
 +-- RPMS/
-|   +-- mariadb11-11.8.5-3.openxl.librepower.aix7.3.ppc.rpm
-|   +-- mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm
+|   +-- mariadb11-openxl-11.8.5-3.librepower.aix7.3.ppc.rpm   (Open XL build)
+|   +-- mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm           (GCC build)
 +-- SPECS/
 |   +-- mariadb11-openxl.spec
 |   +-- mariadb11.spec
