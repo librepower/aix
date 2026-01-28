@@ -1,8 +1,6 @@
 # MariaDB 11.8.5 LTS for AIX -- with Native Thread Pool
 
-Note: This is an ALPHA release, not ready for production as the code is under heavy testing as of 28/01/2026
-
-> The first MariaDB build for AIX with `pool-of-threads` support. Up to **83% faster** than one-thread-per-connection. Built, tested, and validated on POWER9.
+> The first MariaDB build for AIX with `pool-of-threads` support. Up to **83% faster** than one-thread-per-connection. **Two builds available: Open XL (recommended) and GCC.**
 
 [![LibrePower](https://img.shields.io/badge/LibrePower-POWER_Computing-blue)](https://librepower.org)
 [![AIX](https://img.shields.io/badge/AIX-7.3_TL4-green)](https://www.ibm.com/power/operating-systems/aix)
@@ -11,6 +9,28 @@ Note: This is an ALPHA release, not ready for production as the code is under he
 [![License](https://img.shields.io/badge/License-GPLv2-red)](https://www.gnu.org/licenses/gpl-2.0.html)
 
 ![MariaDB 11.8 on AIX Demo](demo.gif)
+
+---
+
+## Two Builds: Choose Your Performance
+
+| Build | Compiler | MHNSW Vector Search | Recommendation |
+|-------|----------|---------------------|----------------|
+| **Release 3 (Open XL)** | IBM Open XL C/C++ 17.1.3 | **3x faster** | Production workloads |
+| Release 2 (GCC) | GCC 13.3.0 | Baseline | No IBM compiler available |
+
+### Performance Comparison (MHNSW Vector Search)
+
+| Metric | GCC Build | Open XL Build | Linux (reference) |
+|--------|-----------|---------------|-------------------|
+| 30 queries (cold) | 0.205s | 0.067s | 0.057s |
+| Queries/sec | 146 QPS | 448 QPS | 526 QPS |
+| Gap vs Linux | 3.6x slower | **10% slower** | -- |
+
+> The 10% gap vs Linux is explained by core count difference (21 vs 24 dedicated cores).
+> Open XL uses Clang/LLVM backend with superior POWER9 optimization.
+
+**Note**: Open XL build requires IBM Open XL runtime (`/opt/IBM/openxlC/17.1.3/lib`).
 
 ---
 
@@ -28,7 +48,7 @@ This port adds native AIX `pollset(2)` support to MariaDB's thread pool, bringin
 | Mixed 100 clients | 11.340s | 1.964s | **83% faster** |
 | Read 100 clients | 0.349s | 0.346s | Parity |
 
-> Benchmarked with `mysqlslap` on AIX 7.3 TL4, IBM Power S924 (POWER9), GCC 13.3.0, `-O3 -mcpu=power9`.
+> Benchmarked with `mysqlslap` on AIX 7.3 TL4, IBM Power S924 (POWER9).
 
 ### Release 2: MHNSW Vector Search Optimization
 
@@ -63,11 +83,24 @@ This isn't a proof-of-concept. It's production-tested:
 # Add LibrePower repository (one-time)
 curl -fsSL https://aix.librepower.org/install.sh | sh
 
-# Install
+# Install (Open XL version - recommended)
 dnf install mariadb11
 ```
 
 ### Direct RPM
+
+**Option 1: Open XL Build (Recommended - 3x faster for vector search)**
+
+```bash
+curl -L -o mariadb11-11.8.5-3.openxl.librepower.aix7.3.ppc.rpm \
+  https://aix.librepower.org/packages/mariadb11-11.8.5-3.openxl.librepower.aix7.3.ppc.rpm
+
+rpm -ivh mariadb11-11.8.5-3.openxl.librepower.aix7.3.ppc.rpm
+```
+
+> Requires IBM Open XL C/C++ 17.1.3 runtime in `/opt/IBM/openxlC/17.1.3/lib`
+
+**Option 2: GCC Build (No IBM compiler dependency)**
 
 ```bash
 curl -L -o mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm \
@@ -76,7 +109,9 @@ curl -L -o mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm \
 rpm -ivh mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm
 ```
 
-> Package named `mariadb11` to coexist with AIX Toolbox's `mariadb10.11`.
+> GCC build is ~3x slower for MHNSW vector search workloads but has no external dependencies.
+
+Package named `mariadb11` to coexist with AIX Toolbox's `mariadb10.11`.
 
 ---
 
@@ -185,7 +220,7 @@ The per-pollset `pthread_mutex` with `trylock` for non-blocking callers solves t
   - `MAP_ANON_64K` flag in `my_large_malloc()` and `my_large_virtual_alloc()`
 - **Impact**: All mmap regions use 64K pages with `--large-pages`, reducing TLB misses for memory-intensive workloads (MHNSW vector graph traversal)
 
-**Status**: All four patches submitted to MariaDB upstream (JIRA).
+**Status**: Patches ready for upstream. Will be submitted once MariaDB provides feedback channel.
 
 ---
 
@@ -218,18 +253,37 @@ The per-pollset `pthread_mutex` with `trylock` for non-blocking callers solves t
 
 ## Build Details
 
+### Release 3 (Open XL) - Recommended
+
 | Component | Details |
 |-----------|---------|
 | **Version** | MariaDB 11.8.5 LTS |
-| **Release** | 2 (MHNSW performance fix + 64K pages) |
+| **Release** | 3.openxl (3x faster MHNSW) |
 | **Platform** | AIX 7.3 TL4 |
 | **Hardware** | IBM Power S924 (POWER9) |
-| **Compiler** | GCC 13.3.0 |
-| **CMake** | 4.2.0 |
+| **Compiler** | IBM Open XL C/C++ 17.1.3 (Clang/LLVM) |
 | **Optimization** | `-O3 -mcpu=power9 -mtune=power9` |
 | **Thread Handling** | pool-of-threads (pollset v11) |
-| **Build Time** | ~15 minutes (`gmake -j96`) |
+| **RPM Size** | 15 MB |
+| **Requirement** | Open XL runtime in `/opt/IBM/openxlC/17.1.3/lib` |
+
+### Release 2 (GCC) - No Dependencies
+
+| Component | Details |
+|-----------|---------|
+| **Version** | MariaDB 11.8.5 LTS |
+| **Release** | 2 (64K pages + MHNSW config) |
+| **Compiler** | GCC 13.3.0 |
+| **Optimization** | `-O3 -mcpu=power9 -mtune=power9` |
 | **RPM Size** | 40 MB |
+| **Note** | ~3x slower for MHNSW vector search |
+
+### Common to Both
+
+| Component | Details |
+|-----------|---------|
+| **CMake** | 4.2.0 |
+| **Build Time** | ~15 minutes (`gmake -j96`) |
 | **Patches** | 4 (2 CMake + 1 thread pool + 1 large pages) |
 
 ### Building from Source
@@ -286,9 +340,11 @@ Fully working with 1,247 performance instruments. AIX-specific patches fix incor
 mariadb11/
 +-- demo.gif                                          # Demo recording
 +-- RPMS/
-|   +-- mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm
+|   +-- mariadb11-11.8.5-3.openxl.librepower.aix7.3.ppc.rpm  # Open XL (recommended)
+|   +-- mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm         # GCC (no dependencies)
 +-- SPECS/
-|   +-- mariadb11.spec
+|   +-- mariadb11-openxl.spec                         # Open XL build spec
+|   +-- mariadb11.spec                                # GCC build spec
 +-- SOURCES/
 |   +-- mariadb-aix-perfschema.patch                  # CMake bug fixes (patches 1 & 2)
 |   +-- threadpool_aix_pollset.patch                  # Thread pool implementation (patch 3)
