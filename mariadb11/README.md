@@ -1,5 +1,7 @@
 # MariaDB 11.8.5 LTS for AIX -- with Native Thread Pool
 
+Note: This is an ALPHA release, not ready for production as the code is under heavy testing as of 28/01/2026
+
 > The first MariaDB build for AIX with `pool-of-threads` support. Up to **83% faster** than one-thread-per-connection. Built, tested, and validated on POWER9.
 
 [![LibrePower](https://img.shields.io/badge/LibrePower-POWER_Computing-blue)](https://librepower.org)
