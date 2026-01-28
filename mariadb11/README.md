@@ -62,7 +62,8 @@ rpm -ivh mariadb11-11.8.5-2.librepower.aix7.3.ppc.rpm
 curl -LO https://aix.librepower.org/packages/mariadb11-openxl-11.8.5-3.librepower.aix7.3.ppc.rpm
 rpm -ivh mariadb11-openxl-11.8.5-3.librepower.aix7.3.ppc.rpm
 ```
-> **Note**: The Open XL build requires IBM Open XL C/C++ 17.1.3 runtime. Please consult IBM for licensing requirements.
+> **Note**: The Open XL build requires `openxlCrte.17.1.3` (IBM Open XL C/C++ Runtime).
+> Install via: `installp -aXYgd <path> openxlCrte.17.1.3`. Please consult IBM for licensing requirements.
 
 > Package names include `11` to coexist with AIX Toolbox's `mariadb10.11`.
 
@@ -154,6 +155,11 @@ mhnsw_max_cache_size       = 4294967296   # 4GB for vector indexes
 | POWER9 | Optimized |
 | POWER10 | Compatible |
 | POWER11 | Compatible |
+
+> **Note**: Both builds use `-mcpu=power9` which runs efficiently on POWER10 and POWER11.
+> Recompiling with `-mcpu=power10` or `-mcpu=power11` shows no measurable improvement.
+> However, POWER11 delivers significant performance gains for vector search workloads.
+> See `RESULTS_SUMMARY.md` for benchmark details.
 
 ---
 
