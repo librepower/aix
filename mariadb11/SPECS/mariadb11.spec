@@ -113,12 +113,8 @@ case "$1" in
   start)
     cd $BASEDIR
     exec $BASEDIR/bin/mariadbd \
-      --basedir=$BASEDIR \
-      --datadir=$DATADIR \
+      --defaults-file=$BASEDIR/etc/mariadb11.cnf \
       --user=$USER \
-      --thread-handling=pool-of-threads \
-      --thread-pool-size=12 \
-      --thread-stack=512K \
       --log-warnings=9
     ;;
   stop)
