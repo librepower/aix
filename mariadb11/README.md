@@ -1,6 +1,8 @@
 # MariaDB 11.8.5 LTS for AIX -- with Native Thread Pool
 
-> The first MariaDB build for AIX with `pool-of-threads` support. Up to **83% faster** than one-thread-per-connection. **Two builds available: Open XL (recommended) and GCC.**
+**ALPHA** - Under heavy testing, not production ready.
+
+> The first MariaDB build for AIX with `pool-of-threads` support. Up to **83% faster** than one-thread-per-connection. Two builds available: **Open XL** (3x faster MHNSW) and **GCC** (no dependencies).
 
 [![LibrePower](https://img.shields.io/badge/LibrePower-POWER_Computing-blue)](https://librepower.org)
 [![AIX](https://img.shields.io/badge/AIX-7.3_TL4-green)](https://www.ibm.com/power/operating-systems/aix)
@@ -9,28 +11,6 @@
 [![License](https://img.shields.io/badge/License-GPLv2-red)](https://www.gnu.org/licenses/gpl-2.0.html)
 
 ![MariaDB 11.8 on AIX Demo](demo.gif)
-
----
-
-## Two Builds: Choose Your Performance
-
-| Build | Compiler | MHNSW Vector Search | Recommendation |
-|-------|----------|---------------------|----------------|
-| **Release 3 (Open XL)** | IBM Open XL C/C++ 17.1.3 | **3x faster** | Production workloads |
-| Release 2 (GCC) | GCC 13.3.0 | Baseline | No IBM compiler available |
-
-### Performance Comparison (MHNSW Vector Search)
-
-| Metric | GCC Build | Open XL Build | Linux (reference) |
-|--------|-----------|---------------|-------------------|
-| 30 queries (cold) | 0.205s | 0.067s | 0.057s |
-| Queries/sec | 146 QPS | 448 QPS | 526 QPS |
-| Gap vs Linux | 3.6x slower | **10% slower** | -- |
-
-> The 10% gap vs Linux is explained by core count difference (21 vs 24 dedicated cores).
-> Open XL uses Clang/LLVM backend with superior POWER9 optimization.
-
-**Note**: Open XL build requires IBM Open XL runtime (`/opt/IBM/openxlC/17.1.3/lib`).
 
 ---
 
