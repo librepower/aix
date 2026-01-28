@@ -1,23 +1,23 @@
 Summary: MariaDB 11.8.5 LTS Server with Thread Pool for AIX (Open XL Build)
-Name: mariadb11
+Name: mariadb11-openxl
 Version: 11.8.5
-Release: 3.openxl.librepower
-License: GPLv2
+Release: 3.librepower
+Conflicts: mariadb11
+License: GPLv3
 Group: Applications/Databases
 URL: https://mariadb.org
 Packager: LibrePower <hello@librepower.org>
 
 %description
 MariaDB 11.8.5 LTS for IBM AIX with native Thread Pool support.
+Open XL build -- compiled with IBM Open XL C/C++ 17.1.3 (Clang/LLVM-based)
+for optimal POWER9/10/11 performance.
 
-Compiled with IBM Open XL C/C++ 17.1.3 (Clang/LLVM-based) for optimal
-POWER9/10 performance. 3x faster than GCC build for compute-intensive
-workloads like MHNSW vector search.
-
-Native AIX pollset thread pool (v11). 64K large pages via LDR_CNTRL.
+Native AIX pollset thread pool. 64K large pages via LDR_CNTRL.
 QA validated: 1000 clients, 30 min sustained load, 0 errors.
 
-Performance vs Linux (24-core Ubuntu): within 10% (explained by core count).
+Requires IBM Open XL C/C++ 17.1.3 runtime. Please consult IBM for licensing.
+For a build with no external dependencies, install mariadb11 (GCC build).
 
 Binaries in /opt/freeware/mariadb, data in /var/mariadb/data.
 
@@ -27,7 +27,10 @@ Binaries in /opt/freeware/mariadb, data in /var/mariadb/data.
 
 %install
 rm -rf %{buildroot}
-BUILD=/tmp/mariadb-11.8.5-openxl-build
+# Server binary from Open XL build, client tools from GCC build
+# (client tools don't benefit from Open XL; server is where it matters)
+BUILD_XL=/tmp/mariadb-11.8.5-openxl-build
+BUILD_GCC=/tmp/mariadb-11.8.5-dev-build
 
 mkdir -p %{buildroot}/opt/freeware/mariadb/bin
 mkdir -p %{buildroot}/opt/freeware/mariadb/lib
@@ -35,65 +38,68 @@ mkdir -p %{buildroot}/opt/freeware/mariadb/share
 mkdir -p %{buildroot}/opt/freeware/mariadb/etc
 mkdir -p %{buildroot}/var/mariadb/data
 
-cp $BUILD/sql/mariadbd %{buildroot}/opt/freeware/mariadb/bin/mariadbd.bin
-cp $BUILD/sql/libserver.so %{buildroot}/opt/freeware/mariadb/lib/
-cp $BUILD/client/mariadb %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/client/mariadb-admin %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/client/mariadb-binlog %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/client/mariadb-check %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/client/mariadb-conv %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/client/mariadb-dump %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/client/mariadb-import %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/client/mariadb-show %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/client/mariadb-slap %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/client/mariadb-upgrade %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/extra/my_print_defaults %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/extra/resolveip %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/extra/perror %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/extra/replace %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/extra/mariadbd-safe-helper %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/extra/mariadb-waitpid %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/extra/innochecksum %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/scripts/mysqld_safe %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/scripts/mariadb-install-db %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/scripts/mariadb-secure-installation %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/scripts/mysql_install_db %{buildroot}/opt/freeware/mariadb/bin/
-cp $BUILD/scripts/fill_help_tables.sql %{buildroot}/opt/freeware/mariadb/share/
-cp $BUILD/scripts/mariadb_system_tables.sql %{buildroot}/opt/freeware/mariadb/share/
-cp $BUILD/scripts/mariadb_system_tables_data.sql %{buildroot}/opt/freeware/mariadb/share/
-cp $BUILD/scripts/mariadb_fix_privilege_tables.sql %{buildroot}/opt/freeware/mariadb/share/
-cp $BUILD/scripts/mariadb_performance_tables.sql %{buildroot}/opt/freeware/mariadb/share/
-cp $BUILD/scripts/mariadb_sys_schema.sql %{buildroot}/opt/freeware/mariadb/share/
-cp $BUILD/scripts/maria_add_gis_sp.sql %{buildroot}/opt/freeware/mariadb/share/
-cp $BUILD/scripts/maria_add_gis_sp_bootstrap.sql %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/english %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/spanish %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/french %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/german %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/japanese %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/chinese %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/portuguese %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/italian %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/korean %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/russian %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/dutch %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/polish %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/czech %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/danish %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/hungarian %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/swedish %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/norwegian %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/romanian %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/estonian %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/greek %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/serbian %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/slovak %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/ukrainian %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/bulgarian %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/georgian %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/hindi %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/norwegian-ny %{buildroot}/opt/freeware/mariadb/share/
-cp -r $BUILD/sql/share/swahili %{buildroot}/opt/freeware/mariadb/share/
+# Server (Open XL compiled)
+cp $BUILD_XL/sql/mariadbd %{buildroot}/opt/freeware/mariadb/bin/mariadbd.bin
+cp $BUILD_XL/sql/libserver.so %{buildroot}/opt/freeware/mariadb/lib/
+
+# Client tools (GCC compiled)
+cp $BUILD_GCC/client/mariadb %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/client/mariadb-admin %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/client/mariadb-binlog %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/client/mariadb-check %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/client/mariadb-conv %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/client/mariadb-dump %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/client/mariadb-import %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/client/mariadb-show %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/client/mariadb-slap %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/client/mariadb-upgrade %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/extra/my_print_defaults %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/extra/resolveip %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/extra/perror %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/extra/replace %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/extra/mariadbd-safe-helper %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/extra/mariadb-waitpid %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/extra/innochecksum %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/scripts/mysqld_safe %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/scripts/mariadb-install-db %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/scripts/mariadb-secure-installation %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/scripts/mysql_install_db %{buildroot}/opt/freeware/mariadb/bin/
+cp $BUILD_GCC/scripts/fill_help_tables.sql %{buildroot}/opt/freeware/mariadb/share/
+cp $BUILD_GCC/scripts/mariadb_system_tables.sql %{buildroot}/opt/freeware/mariadb/share/
+cp $BUILD_GCC/scripts/mariadb_system_tables_data.sql %{buildroot}/opt/freeware/mariadb/share/
+cp $BUILD_GCC/scripts/mariadb_fix_privilege_tables.sql %{buildroot}/opt/freeware/mariadb/share/
+cp $BUILD_GCC/scripts/mariadb_performance_tables.sql %{buildroot}/opt/freeware/mariadb/share/
+cp $BUILD_GCC/scripts/mariadb_sys_schema.sql %{buildroot}/opt/freeware/mariadb/share/
+cp $BUILD_GCC/scripts/maria_add_gis_sp.sql %{buildroot}/opt/freeware/mariadb/share/
+cp $BUILD_GCC/scripts/maria_add_gis_sp_bootstrap.sql %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/english %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/spanish %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/french %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/german %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/japanese %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/chinese %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/portuguese %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/italian %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/korean %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/russian %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/dutch %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/polish %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/czech %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/danish %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/hungarian %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/swedish %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/norwegian %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/romanian %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/estonian %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/greek %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/serbian %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/slovak %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/ukrainian %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/bulgarian %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/georgian %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/hindi %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/norwegian-ny %{buildroot}/opt/freeware/mariadb/share/
+cp -r $BUILD_GCC/sql/share/swahili %{buildroot}/opt/freeware/mariadb/share/
 
 # Wrapper with Open XL runtime and 64K pages
 cat > %{buildroot}/opt/freeware/mariadb/bin/mariadbd << 'WRAPPER_EOF'
@@ -210,10 +216,10 @@ rmssys -s mariadb11 2>/dev/null || true
 %changelog
 * Tue Jan 28 2026 LibrePower <hello@librepower.org> - 11.8.5-3.openxl
 - Compiler: IBM Open XL C/C++ 17.1.3 (Clang/LLVM-based)
-- Performance: 3x faster than GCC for MHNSW vector search
-- AIX vs Linux gap: reduced from 23x to 10% (explained by core count difference)
-- Stability: 24h stress test validated
-- Same features as Release 2: pollset thread pool, 64K pages, 4GB MHNSW cache
+- Optimized for POWER9/10/11
+- Stability validated under sustained load
+- Same features as GCC build: pollset thread pool, 64K pages, 4GB MHNSW cache
+- Separate package name (mariadb11-openxl) to coexist in DNF repo with mariadb11
 
 * Mon Jan 27 2026 LibrePower <hello@librepower.org> - 11.8.5-2
 - Wrapper: enable 64K pages via LDR_CNTRL (DATAPSIZE, TEXTPSIZE, STACKPSIZE, SHMPSIZE)

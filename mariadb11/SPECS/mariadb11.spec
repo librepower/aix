@@ -2,17 +2,21 @@ Summary: MariaDB 11.8.5 LTS Server with Thread Pool for AIX
 Name: mariadb11
 Version: 11.8.5
 Release: 2.librepower
-License: GPLv2
+Conflicts: mariadb11-openxl
+License: GPLv3
 Group: Applications/Databases
 URL: https://mariadb.org
 Packager: LibrePower <hello@librepower.org>
 
 %description
 MariaDB 11.8.5 LTS for IBM AIX with native Thread Pool support.
+GCC build -- no external dependencies, works out of the box.
 
-Optimized with -O3 -mcpu=power9. Native AIX pollset thread pool (v11).
-83 percent performance improvement for mixed workloads at 100 clients.
+Optimized with -O3 -mcpu=power9. Native AIX pollset thread pool.
+Ready for POWER9, POWER10, and POWER11.
 QA validated: 1000 clients, 30 min sustained load, 0 errors.
+
+For maximum performance, install mariadb11-openxl (Open XL build) instead.
 
 Binaries in /opt/freeware/mariadb, data in /var/mariadb/data.
 
