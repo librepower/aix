@@ -81,7 +81,7 @@ chown mysql:staff /var/mariadb/data
 startsrc -s mariadb11
 
 # Verify
-/opt/freeware/mariadb/bin/mariadb -u root -e "SELECT VERSION();"
+/opt/freeware/mariadb/bin/mariadb -u root -S /tmp/mysql.sock -e "SELECT VERSION();"
 # -> 11.8.5-MariaDB
 ```
 
@@ -104,6 +104,8 @@ Default config at `/opt/freeware/mariadb/etc/mariadb11.cnf`:
 
 ```ini
 [mariadbd]
+socket                     = /tmp/mysql.sock
+port                       = 3306
 thread_handling            = pool-of-threads
 thread_pool_size           = 12
 innodb_buffer_pool_size    = 1G
