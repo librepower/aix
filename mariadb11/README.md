@@ -198,7 +198,7 @@ mariadb11/
 ## License
 
 - MariaDB: GPLv2 (MariaDB Foundation)
-- AIX patches and packaging: GPLv2 (LibrePower)
+- AIX patches and packaging: GPLv3 (LibrePower)
 
 ## Links
 
