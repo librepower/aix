@@ -158,8 +158,7 @@ mhnsw_max_cache_size       = 4294967296   # 4GB for vector indexes
 
 > **Note**: Both builds use `-mcpu=power9` which runs efficiently on POWER10 and POWER11.
 > Recompiling with `-mcpu=power10` or `-mcpu=power11` shows no measurable improvement.
-> However, POWER11 delivers significant performance gains for vector search workloads.
-> See `RESULTS_SUMMARY.md` for benchmark details.
+> POWER11 delivers significant performance gains for vector search workloads.
 
 ---
 
