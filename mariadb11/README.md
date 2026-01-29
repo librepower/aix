@@ -175,9 +175,22 @@ All patches are available in `SOURCES/` and will be submitted upstream once Mari
 
 ### Building from Source
 
+See **[docs/BUILD.md](docs/BUILD.md)** for complete build instructions including:
+- Environment setup
+- Patch application
+- GCC and Open XL build configurations
+- RPM generation
+
+Quick start:
 ```bash
+# Get source and patches
 git clone --branch mariadb-11.8.5 https://github.com/MariaDB/server.git
 cd server && git submodule update --init
+
+# Get patches from this repo
+curl -LO https://gitlab.com/librepower/aix/-/raw/main/mariadb11/SOURCES/mariadb-aix-perfschema.patch
+curl -LO https://gitlab.com/librepower/aix/-/raw/main/mariadb11/SOURCES/threadpool_aix_pollset.patch
+curl -LO https://gitlab.com/librepower/aix/-/raw/main/mariadb11/SOURCES/0004-AIX-large-pages-MAP_ANON_64K.patch
 
 # Apply patches
 patch -p1 < mariadb-aix-perfschema.patch
@@ -185,7 +198,9 @@ patch -p1 < threadpool_aix_pollset.patch
 patch -p1 < 0004-AIX-large-pages-MAP_ANON_64K.patch
 
 # Configure and build
-cmake . -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-mcpu=power9" -DCMAKE_CXX_FLAGS="-mcpu=power9"
+mkdir build && cd build
+export OBJECT_MODE=64
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-O3 -mcpu=power9" -DCMAKE_CXX_FLAGS="-O3 -mcpu=power9"
 gmake -j$(nproc)
 ```
 
@@ -205,6 +220,11 @@ mariadb11/
 |   +-- threadpool_aix_pollset.patch
 |   +-- mariadb-aix-perfschema.patch
 |   +-- 0004-AIX-large-pages-MAP_ANON_64K.patch
++-- docs/
+|   +-- BUILD.md                    (Build from source guide)
+|   +-- PATCHES.md                  (Technical patch details)
+|   +-- UPSTREAM_PR_GUIDE.md        (Upstream submission guide)
+|   +-- BUGS_REPORT.md              (Bug analysis)
 +-- README.md
 ```
 
