@@ -28,9 +28,9 @@ Potential Issues:
 
 **Initial assessment**: System appears healthy. 97 long-running processes is normal for a 13-day uptime on a validator node.
 
-## AI-Powered Analysis (Claude)
+## AI-Powered Analysis
 
-When we sent the full fingerprint to Claude for semantic analysis:
+When we sent the full fingerprint for semantic analysis:
 
 ```
 ## Summary
@@ -126,9 +126,9 @@ During this same test, we discovered a bug in the FD counting logic:
 
 ## Comparison: Local vs Cloud LLM
 
-We tested with both a local LLM (TinyLlama 1.1B via Ollama) and Claude Sonnet:
+We tested with both a local LLM (TinyLlama 1.1B via Ollama) and a cloud LLM:
 
-| Aspect | TinyLlama (Local) | Claude (Cloud) |
+| Aspect | TinyLlama (Local) | Cloud LLM |
 |--------|-------------------|----------------|
 | Response time | ~45 seconds | ~3 seconds |
 | Passwd detection | ❌ Missed entirely | ✅ Flagged as HIGH |
