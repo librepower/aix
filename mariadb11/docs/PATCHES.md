@@ -186,6 +186,99 @@ std::thread::_State::~_State() T   270374368          64
 
 ---
 
+## Patch 3: AIX Thread Pool (`pollset`)
+
+### Problem
+
+MariaDB's thread pool (`thread_handling=pool-of-threads`) uses platform-specific I/O multiplexing:
+- Linux: `epoll`
+- FreeBSD/macOS: `kqueue`
+- Windows: IOCP
+- Solaris: event ports
+
+AIX was **not supported**, forcing users to use `one-thread-per-connection` which doesn't scale well under high concurrency.
+
+### Technical Challenge
+
+AIX provides `pollset(2)` as its scalable I/O mechanism, but it differs from Linux epoll:
+
+1. **No ONESHOT mode**: Linux `EPOLLONESHOT` automatically disables an fd after one event. AIX pollset is purely level-triggered - events keep firing until explicitly removed.
+
+2. **Concurrent access**: MariaDB's thread pool has two code paths calling `io_poll_wait` on the same pollset simultaneously (a blocking listener and non-blocking workers). Without protection, the same fd can be delivered to multiple threads.
+
+### Solution
+
+The patch implements:
+
+1. **ONESHOT simulation**:
+   ```c
+   // After receiving event, remove fd from pollset
+   pollset_ctl(ps, &ctl, 1);  // PS_DELETE
+
+   // When ready for more data, re-add fd
+   pollset_ctl(ps, &ctl, 1);  // PS_ADD in io_poll_start_read
+   ```
+
+2. **Per-pollset mutex**:
+   ```c
+   struct aix_pollset {
+     pollset_t ps;
+     pthread_mutex_t mutex;  // Serializes concurrent io_poll_wait
+   };
+
+   // Blocking caller (listener): pthread_mutex_lock
+   // Non-blocking caller (worker): pthread_mutex_trylock (skip if busy)
+   ```
+
+### Files Changed
+
+```
+sql/CMakeLists.txt         - Add HAVE_POLLSET detection for AIX
+sql/threadpool_generic.h   - Add AIX pollset structures
+sql/threadpool_generic.cc  - Implement io_poll_* functions for AIX
+```
+
+**Lines added**: ~191
+
+### Build Detection
+
+```cmake
+# In sql/CMakeLists.txt
+IF(CMAKE_SYSTEM_NAME MATCHES "AIX")
+  CHECK_INCLUDE_FILE(sys/pollset.h HAVE_POLLSET)
+  IF(HAVE_POLLSET)
+    SET(CMAKE_REQUIRED_LIBRARIES pthread)
+  ENDIF()
+ENDIF()
+```
+
+### Impact
+
+**Enables**: `thread_handling=pool-of-threads` on AIX
+**Default config**: `thread_pool_size=12` (adjustable)
+**Tested**: 1,000 concurrent clients, 30 min sustained, 0 errors
+
+### Performance Results
+
+Benchmarked on IBM Power S924 (POWER9), AIX 7.3 TL4:
+
+| Workload | one-thread-per-connection | pool-of-threads | Improvement |
+|----------|---------------------------|-----------------|-------------|
+| Mixed 50 clients | 5.4s | 1.9s | **65% faster** |
+| Mixed 100 clients | 11.3s | 2.0s | **83% faster** |
+
+### Patch File
+
+**File**: `SOURCES/threadpool_aix_pollset.patch`
+**Format**: Git-style unified diff
+**Apply with**:
+```bash
+cd mariadb-11.8.5
+patch -p1 < threadpool_aix_pollset.patch
+```
+
+---
+
 ## Patch 4: AIX Large Page Support (`MAP_ANON_64K`)
 
 ### Problem
@@ -389,7 +482,7 @@ See [UPSTREAM_PR_GUIDE.md](./UPSTREAM_PR_GUIDE.md) for the submission process.
 
 **Author**: LibrePower <hello@librepower.org>
 
-**Last Updated**: 2026-01-27
+**Last Updated**: 2026-01-29
 
 **MariaDB Version**: 11.8.5
 
