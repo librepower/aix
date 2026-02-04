@@ -1,7 +1,7 @@
 Summary: MariaDB 11.8.5 LTS Server with Thread Pool for AIX
 Name: mariadb11
 Version: 11.8.5
-Release: 2.librepower
+Release: 4.librepower
 Conflicts: mariadb11-openxl
 License: GPLv3
 Group: Applications/Databases
@@ -180,6 +180,14 @@ rm -rf %{buildroot}
 %dir /var/mariadb/data
 
 %pre
+# Check AIX version - mariadb11 requires AIX 7.2 or later
+_aix_ver=$(oslevel 2>/dev/null | cut -d. -f1,2)
+if [ "$_aix_ver" = "7.1" ]; then
+    echo "ERROR: mariadb11 requires AIX 7.2 or later."
+    echo "AIX 7.1 has runtime incompatibilities with this build."
+    exit 1
+fi
+
 if ! lsuser mysql >/dev/null 2>&1; then
     mkuser pgrp=staff home=/var/mariadb/data shell=/usr/bin/ksh mysql 2>/dev/null || true
 fi

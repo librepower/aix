@@ -4,7 +4,7 @@
 
 Name:           php83
 Version:        %{php_version}
-Release:        3.librepower
+Release:        4.librepower
 Summary:        PHP 8.3 scripting language for AIX
 
 License:        PHP-3.01
@@ -118,6 +118,14 @@ cp -rp %{_prefix}/lib/php/extensions/no-debug-non-zts-20230831/* %{buildroot}%{_
 # Copy headers and build files
 cp -rp %{_prefix}/include/php/* %{buildroot}%{_prefix}/include/php/
 cp -rp %{_prefix}/lib/php/build/* %{buildroot}%{_prefix}/lib/php/build/
+
+%pre
+_aix_ver=$(oslevel 2>/dev/null | cut -d. -f1,2)
+if [ "$_aix_ver" = "7.1" ]; then
+    echo "ERROR: php83 requires AIX 7.2 or later."
+    echo "AIX 7.1 has libcurl incompatibilities with this build."
+    exit 1
+fi
 
 %files
 %{_prefix}/bin/php
