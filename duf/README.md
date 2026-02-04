@@ -76,3 +76,17 @@ duf --only local
 ## License
 
 MIT
+
+---
+
+## Join the Community
+
+LibrePower is more than AIX—we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power (ppc64le).
+
+📬 **[Subscribe to our newsletter](https://librepower.substack.com/subscribe)** for releases, technical articles, and community updates.
+
+🌐 **[librepower.org](https://librepower.org)** — Beta live now!
+
+---
+
+*Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source. Unmatched RAS and TCO. Minimal footprint 🌍*

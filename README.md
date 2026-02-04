@@ -13,7 +13,7 @@ LibrePower is more than AIX—we're building open source support across the enti
 
 📬 **[Subscribe to our newsletter](https://librepower.substack.com/subscribe)** for releases, technical articles, and community updates.
 
-🌐 **[librepower.org](https://librepower.org)** — Launching February 2026
+🌐 **[librepower.org](https://librepower.org)** — Beta live now!
 
 ---
 
@@ -51,6 +51,32 @@ Or install `linux-compat` which configures this automatically.
 | AIX 7.3 TL2+ | Supported | 7300-04-00-2546 |
 
 All packages are built with `OS:aix7.1` for maximum compatibility across AIX versions.
+
+
+### AIX 7.1/7.2 Compatibility (NEW)
+
+We've improved compatibility across all AIX versions:
+
+| Feature | AIX 7.1 | AIX 7.2 | AIX 7.3 |
+|---------|---------|---------|---------|
+| **Go packages** (fzf, duf, rclone, yq, age, gron, stgtui) | ✅ | ✅ | ✅ |
+| **Rust packages** (ripgrep, fd, delta, eza, gping, starship) | ✅ | ✅ | ✅ |
+| **nano** | ✅* | ✅* | ✅ |
+| **mariadb11** | ❌ | ✅* | ✅ |
+| **php83** | ❌ | ✅ | ✅ |
+
+**Legend:** ✅ = Works | ✅* = Requires `librepower-compat` shim | ❌ = Not compatible
+
+**New packages for compatibility:**
+- **libunwind** — Enables all Rust packages on AIX 7.1/7.2 (auto-installed as dependency)
+- **librepower-compat** — Provides missing `single_locale` symbol for nano/mariadb on older AIX
+
+```bash
+# For nano on AIX 7.1/7.2:
+dnf install librepower-compat nano
+export LDR_PRELOAD64="/opt/freeware/lib/librepower/libcompat.a(shr_64.o)"
+nano file.txt
+```
 
 ### DNF Installation on AIX 7.1/7.2
 

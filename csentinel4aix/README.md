@@ -30,7 +30,7 @@ LibrePower is more than AIX—we're building open source support across the enti
 
 📬 **[Subscribe to our newsletter](https://librepower.substack.com/subscribe)** for releases, technical articles, and community updates.
 
-🌐 **[librepower.org](https://librepower.org)** — Launching February 2026
+🌐 **[librepower.org](https://librepower.org)** — Beta live now!
 
 ---
 
@@ -190,3 +190,17 @@ If you use C-Sentinel in your research or production environment, please cite:
 **Last Updated:** 2026-01-22
 **Supported Platforms:** Linux (all), AIX 7.1, AIX 7.2, AIX 7.3
 **License:** MIT
+
+---
+
+## Join the Community
+
+LibrePower is more than AIX—we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power (ppc64le).
+
+📬 **[Subscribe to our newsletter](https://librepower.substack.com/subscribe)** for releases, technical articles, and community updates.
+
+🌐 **[librepower.org](https://librepower.org)** — Beta live now!
+
+---
+
+*Part of [LibrePower](https://librepower.org) - Unlocking Power Systems through open source. Unmatched RAS and TCO. Minimal footprint 🌍*
