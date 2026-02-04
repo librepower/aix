@@ -87,6 +87,13 @@
         .package-version { font-size: 12px; background: rgba(34, 197, 94, 0.1); color: var(--accent-green); padding: 2px 8px; border-radius: 4px; }
         .package-desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; min-height: 60px; }
         .package-install { font-family: 'SF Mono', monospace; font-size: 13px; background: var(--bg-primary); padding: 8px 12px; border-radius: 6px; color: var(--accent-green); }
+        .compat-badge { display: inline-flex; gap: 4px; margin-top: 12px; }
+        .compat-badge span { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+        .compat-badge .v71 { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+        .compat-badge .v72 { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+        .compat-badge .v73 { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+        .compat-badge .v71-no { background: rgba(239, 68, 68, 0.15); color: #ef4444; text-decoration: line-through; }
+        .compat-badge .v71-shim { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
         .cta-btn {
             display: inline-flex; align-items: center; gap: 8px;
             padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s;
@@ -206,106 +213,127 @@
                         <div class="package-name">linux-compat <span class="package-version">2.2</span></div>
                         <p class="package-desc">Feel at home on AIX. GNU coreutils in your PATH, systemctl wrappers, and familiar commands like watch and pgrep.</p>
                         <div class="package-install">dnf install linux-compat</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/fzf-fuzzy-finder" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">fzf <span class="package-version">0.46.1</span></div>
                         <p class="package-desc">The beloved fuzzy finder. Search files, history, processes—anything. Ctrl+R will never be the same.</p>
                         <div class="package-install">dnf install fzf</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/rclone" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">rclone <span class="package-version">1.73.0</span></div>
                         <p class="package-desc">Rsync for cloud storage. Sync to S3, Google Drive, Dropbox, Azure and 70+ more. Serve files via HTTP/WebDAV/FTP/NFS.</p>
                         <div class="package-install">dnf install rclone</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/nano-editor" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">nano <span class="package-version">8.3</span></div>
                         <p class="package-desc">The friendly text editor. Syntax highlighting, intuitive shortcuts. No steep learning curve.</p>
                         <div class="package-install">dnf install nano</div>
+                        <div class="compat-badge"><span class="v71-shim">7.1*</span><span class="v71-shim">7.2*</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/2fa-made-simple" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">2FA Made Simple <span class="package-version">1.2</span></div>
                         <p class="package-desc">Google Authenticator for AIX, done right. QR codes that actually work. Bilingual wizards. Peace of mind.</p>
                         <div class="package-install">dnf install google-authenticator-setup</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/csentinel4aix" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">C-Sentinel <span class="package-version">1.0.0</span></div>
                         <p class="package-desc">AI-ready observability. Capture system fingerprints, detect anomalies, track 70+ services. Built for AIX.</p>
                         <div class="package-install">dnf install csentinel4aix</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/lpsof" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">lpsof <span class="package-version">0.3.0</span></div>
                         <p class="package-desc">Native lsof for AIX. Full socket details, delta tracking, watch mode. Powered by libperfstat.</p>
                         <div class="package-install">dnf install lpsof</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/mariadb11" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">MariaDB <span class="package-version">11.8.5 LTS</span></div>
                         <p class="package-desc">Enterprise SQL database on POWER. Native AIX thread pool (pool-of-threads), up to 83% faster. Vector search ready. POWER9/10/11.</p>
                         <div class="package-install">dnf install mariadb11</div>
+                        <div class="compat-badge"><span class="v71-no">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/doom-ascii" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">DOOM ASCII <span class="package-version">0.3.1</span></div>
                         <p class="package-desc">Yes. DOOM. On AIX. In your terminal. Because proving a point has never been this fun.</p>
                         <div class="package-install">dnf install doom-ascii</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/delta" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">delta <span class="package-version">0.18.2</span></div>
                         <p class="package-desc">Syntax-highlighting pager for git, diff, and grep. Makes code reviews beautiful.</p>
                         <div class="package-install">dnf install delta</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/ripgrep" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">ripgrep <span class="package-version">15.1.0</span></div>
+                        <div class="package-name">ripgrep <span class="package-version">14.1.1</span></div>
                         <p class="package-desc">Blazingly fast search. 4x faster than grep. Respects .gitignore, skips binaries, beautiful output.</p>
                         <div class="package-install">dnf install ripgrep</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/duf" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">duf <span class="package-version">0.9.1</span></div>
                         <p class="package-desc">Modern disk usage utility. Colorful tables, easy filtering. A better df for AIX.</p>
                         <div class="package-install">dnf install duf</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/gron" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">gron <span class="package-version">0.7.1</span></div>
                         <p class="package-desc">Make JSON greppable. Transform complex JSON to discrete paths you can grep and pipe.</p>
                         <div class="package-install">dnf install gron</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/yq" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">yq <span class="package-version">4.40.5</span></div>
                         <p class="package-desc">YAML/JSON/XML processor. Like jq but for YAML. Edit configs, convert formats, merge files.</p>
                         <div class="package-install">dnf install yq</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/age" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">age <span class="package-version">1.2.0</span></div>
                         <p class="package-desc">Modern file encryption. Simple keys, no config, UNIX-style composability. By FiloSottile.</p>
                         <div class="package-install">dnf install age</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/php83" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">PHP <span class="package-version">8.3.16</span></div>
                         <p class="package-desc">Modern PHP for AIX. 53 extensions, Fibers, opcache, PHP-FPM. Perfect for WordPress, Drupal, Zabbix frontend.</p>
                         <div class="package-install">dnf install php83</div>
+                        <div class="compat-badge"><span class="v71-no">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/fd" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">fd <span class="package-version">10.3.0</span></div>
+                        <div class="package-name">fd <span class="package-version">10.2.0</span></div>
                         <p class="package-desc">Fast find alternative. Intuitive syntax, regex support, parallel search. 10x faster than find.</p>
                         <div class="package-install">dnf install fd</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/eza" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">eza <span class="package-version">0.23.4</span></div>
+                        <div class="package-name">eza <span class="package-version">0.20.14</span></div>
                         <p class="package-desc">Modern ls replacement. Colors, icons, Git integration, tree view. Because ls deserves an upgrade.</p>
                         <div class="package-install">dnf install eza</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/gping" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">gping <span class="package-version">1.20.1</span></div>
+                        <div class="package-name">gping <span class="package-version">1.17.3</span></div>
                         <p class="package-desc">Ping with a graph. Real-time latency visualization in your terminal. Beautiful network diagnostics.</p>
                         <div class="package-install">dnf install gping</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/starship" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">starship <span class="package-version">1.24.2</span></div>
+                        <div class="package-name">starship <span class="package-version">1.21.1</span></div>
                         <p class="package-desc">Cross-shell prompt. Blazing fast, customizable, shows git status. Make your terminal beautiful.</p>
                         <div class="package-install">dnf install starship</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix/-/tree/main/stgtui" class="package-card" style="text-decoration: none; color: inherit;">
                         <div class="package-name">stgtui <span class="package-version">1.1.0</span></div>
                         <p class="package-desc">Storage TUI dashboard. Monitor disks, LVs, PVs, and filesystems in a beautiful terminal interface.</p>
                         <div class="package-install">dnf install stgtui</div>
+                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
                     </a>
                     <a href="https://gitlab.com/librepower/aix" class="package-card" style="text-decoration: none; color: inherit; border-style: dashed; opacity: 0.7;">
                         <div class="package-name">Want something else?</div>
