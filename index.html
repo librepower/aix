@@ -131,7 +131,7 @@
     <main>
         <section class="hero">
             <div class="container">
-                <div class="badge">25+ Packages Available</div>
+                <div class="badge">30+ Packages Available</div>
                 <h1>Modern Tools for <span>AIX</span></h1>
                 <p class="subtitle">Expanding the AIX ecosystem, one package at a time. Your favorite CLI tools, compiled for Power.</p>
                 <div class="install-section">
@@ -144,8 +144,54 @@
 <span class="comment"># Install any package</span>
 <span class="command">dnf install nano</span></code>
                     </div>
-                    <p style="color: var(--text-secondary); font-size: 13px;">Works on AIX 7.2+ with DNF from IBM AIX Toolbox.</p>
+                    <p style="color: var(--text-secondary); font-size: 13px;">Works on AIX 7.1, 7.2 & 7.3 — DNF from IBM AIX Toolbox.</p>
                 </div>
+            </div>
+        </section>
+
+        <!-- Compatibility Section -->
+        <section style="padding: 40px 0; background: var(--bg-secondary);">
+            <div class="container">
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <h2 style="font-size: 24px; margin-bottom: 8px;">✨ Improved AIX 7.1/7.2 Compatibility</h2>
+                    <p style="color: var(--text-secondary);">New packages enable modern tools on older AIX versions</p>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; max-width: 900px; margin: 0 auto;">
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; text-align: center;">
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">Go packages</div>
+                        <div style="font-size: 18px; font-weight: 600;">✅ 7.1 / 7.2 / 7.3</div>
+                    </div>
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; text-align: center;">
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">Rust packages</div>
+                        <div style="font-size: 18px; font-weight: 600;">✅ 7.1 / 7.2 / 7.3</div>
+                        <div style="font-size: 11px; color: var(--accent-green);">via libunwind</div>
+                    </div>
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; text-align: center;">
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">nano</div>
+                        <div style="font-size: 18px; font-weight: 600;">✅ 7.1 / 7.2 / 7.3</div>
+                        <div style="font-size: 11px; color: var(--accent-green);">shim on 7.1/7.2</div>
+                    </div>
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; text-align: center;">
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">mariadb11 / php83</div>
+                        <div style="font-size: 18px; font-weight: 600;">✅ 7.2 / 7.3</div>
+                        <div style="font-size: 11px; color: var(--text-secondary);">7.1 not supported</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter CTA -->
+        <section style="padding: 48px 0; text-align: center;">
+            <div class="container">
+                <p style="font-size: 15px; color: var(--text-secondary); max-width: 600px; margin: 0 auto 20px;">
+                    LibrePower is more than AIX — we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power.
+                </p>
+                <a href="https://librepower.substack.com/subscribe" class="cta-btn cta-btn-primary" style="margin-right: 12px;">
+                    📬 Subscribe to Newsletter
+                </a>
+                <a href="https://librepower.org" class="cta-btn cta-btn-secondary">
+                    🌐 librepower.org — Beta live now!
+                </a>
             </div>
         </section>
 
