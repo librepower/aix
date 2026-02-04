@@ -7,7 +7,7 @@
 
 Name:           nano
 Version:        8.3
-Release:        3.librepower
+Release:        6.librepower
 Summary:        GNU nano - A simple, friendly text editor
 License:        GPL-3.0
 Group:          Applications/Editors
