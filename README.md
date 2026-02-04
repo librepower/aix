@@ -52,6 +52,29 @@ Or install `linux-compat` which configures this automatically.
 
 All packages are built with `OS:aix7.1` for maximum compatibility across AIX versions.
 
+### DNF Installation on AIX 7.1/7.2
+
+AIX 7.3 ships with DNF ready to use. For AIX 7.1 and 7.2, you need to install DNF manually:
+
+1. **Prerequisites** (from [IBM AIX Toolbox](https://www.ibm.com/support/pages/aix-toolbox-open-source-software)):
+   - **OpenSSL 3.0+** - Required for secure connections
+   - **ncurses** - Required by rpmlibs32
+
+2. **Install DNF Bundle**:
+   ```bash
+   # Download DNF bundle from IBM
+   curl -O https://public.dhe.ibm.com/aix/freeSoftware/aixtoolbox/ezinstall/ppc/dnf_aixtoolbox.sh
+   chmod +x dnf_aixtoolbox.sh
+   ./dnf_aixtoolbox.sh
+   ```
+
+3. **Add LibrePower Repository**:
+   ```bash
+   curl -fsSL https://aix.librepower.org/install.sh | sh
+   ```
+
+For detailed instructions, see [AIX Toolbox DNF documentation](https://www.ibm.com/support/pages/aix-toolbox-open-source-software-downloads-alpha#D).
+
 ---
 
 ## Available Packages
@@ -422,6 +445,20 @@ Port of [starship](https://github.com/starship/starship) to AIX. A beautiful, fa
 - ✅ **Compiled with Rust 1.90** - IBM Open SDK for Rust on AIX
 
 📁 **[Documentation & Downloads](starship/)**
+
+---
+
+### 📚 libunwind - Stack Unwinding Library
+*Required dependency for Rust packages on AIX 7.1/7.2*
+
+Repackaged from IBM Open XL C++ 17.1.3 Runtime. Provides the stack unwinding library that Rust-compiled binaries require on AIX.
+
+- ✅ **Automatic installation** - DNF installs as dependency of Rust packages
+- ✅ **Works on all AIX versions** - 7.1, 7.2, and 7.3
+- ✅ **Original source** - IBM Open XL C++ Utilities (freely available)
+- ✅ **Enables** - ripgrep, fd, delta, eza, gping, starship
+
+📁 **[Documentation & Downloads](libunwind/)**
 
 ---
 
