@@ -4,8 +4,8 @@
 
 Open-source tools and packages for AIX/VIOS on IBM Power systems.
 
-> ⚠️ **Early Release**: These packages are provided as-is for testing and evaluation.
-> While we use them in production, bugs may exist.
+> **Tested on AIX 7.1, 7.2, and 7.3** — All packages install without `--ignoreos` on any supported version.
+> While we use them in production, please report issues via GitLab.
 
 ## Join the Community
 
@@ -41,6 +41,16 @@ export MANPATH=/opt/freeware/share/man:${MANPATH:-/usr/share/man}
 ```
 
 Or install `linux-compat` which configures this automatically.
+
+### System Requirements
+
+| AIX Version | Status | Tested |
+|-------------|--------|--------|
+| AIX 7.1 TL5+ | Supported | 7100-05-09-2148 |
+| AIX 7.2 TL4+ | Supported | 7200-05-10-2520 |
+| AIX 7.3 TL2+ | Supported | 7300-04-00-2546 |
+
+All packages are built with `OS:aix7.1` for maximum compatibility across AIX versions.
 
 ---
 
