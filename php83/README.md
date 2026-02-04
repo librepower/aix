@@ -250,6 +250,39 @@ php83/
 
 All dependencies available via `dnf` from AIX Toolbox.
 
+## Known Issues
+
+### AIX 7.1: Not Supported
+
+PHP 8.3 requires AIX 7.2 or later due to libcurl incompatibilities. Installation on AIX 7.1 will be blocked with a clear error message.
+
+### AIX 7.2: libzstd Dependency Issue
+
+On some AIX 7.2 systems, PHP may fail to load with:
+
+```
+Could not load module /opt/freeware/lib/libzip.a(libzip.so.5).
+    Dependent module /opt/freeware/lib/libzstd.a(libzstd.so.1) could not be loaded.
+    The module has an invalid magic number.
+```
+
+**Cause**: The `libzstd` package from IBM AIX Toolbox (version 1.5.7-32_1) may have a corrupted or incompatible shared object on AIX 7.2.
+
+**Workaround**: Try reinstalling libzstd from AIX Toolbox:
+
+```bash
+# Check current version
+rpm -q libzstd
+
+# Try updating from AIX Toolbox
+dnf reinstall libzstd
+
+# Or download directly from IBM
+# https://www.ibm.com/support/pages/aix-toolbox-open-source-software-downloads-alpha
+```
+
+**Note**: This is an AIX Toolbox dependency issue, not a LibrePower packaging issue. AIX 7.3 is not affected.
+
 ## License
 
 - PHP: [PHP License](https://www.php.net/license/)
