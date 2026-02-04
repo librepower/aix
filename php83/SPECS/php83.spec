@@ -4,7 +4,7 @@
 
 Name:           php83
 Version:        %{php_version}
-Release:        1%{?dist}
+Release:        3.librepower
 Summary:        PHP 8.3 scripting language for AIX
 
 License:        PHP-3.01

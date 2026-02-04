@@ -1,6 +1,6 @@
 Name:           google-authenticator-setup
 Version:        1.2
-Release:        1.librepower.aix7.3
+Release:        2.librepower
 Summary:        Easy 2FA setup wizards for AIX/VIOS
 License:        Apache-2.0
 URL:            https://librepower.org

@@ -1,6 +1,6 @@
 Name:           csentinel-dashboard
 Version:        1.0.0
-Release:        1.librepower
+Release:        2.librepower
 Summary:        C-Sentinel Web Dashboard for AIX
 License:        MIT
 Group:          Applications/System
