@@ -1,382 +1,427 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LibrePower AIX Repository - Modern Open Source Tools for IBM Power</title>
-    <meta name="description" content="DNF repository with modern CLI tools for AIX. Install fzf, nano, delta and more with a single command. Part of LibrePower.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIX Open Source Packages — LibrePower</title>
+    <meta
+      http-equiv="refresh"
+      content="3; url=https://librepower.org/stack/databases-operating-systems/aix/"
+    />
+    <link
+      rel="canonical"
+      href="https://librepower.org/stack/databases-operating-systems/aix/"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800;900&family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <style>
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #141414;
-            --bg-card: #1a1a1a;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-            --accent-green: #22c55e;
-            --accent-green-dark: #16a34a;
-            --accent-blue: #3b82f6;
-            --border-color: #2a2a2a;
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      .lp,
+      .lp * {
+        margin: 0;
+        padding: 0;
+      }
+      .lp {
+        font-family: "Work Sans", sans-serif;
+        color: #e8e8e8;
+        background: #0a0a0b;
+        overflow-x: clip;
+        --gold: #e9cb8e;
+        --gold-d: rgba(233, 203, 142, 0.1);
+        --tq: #68aec9;
+        --tq-d: rgba(104, 174, 201, 0.08);
+        --green: #81c784;
+        --muted: #999;
+        --dim: #777;
+        --border: rgba(255, 255, 255, 0.07);
+        font-size: 17px;
+        line-height: 1.7;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .lp a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .lp h1,
+      .lp h2 {
+        font-family: "Alexandria", sans-serif;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+      }
+      .lp-label {
+        font-family: "Alexandria", sans-serif;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+      }
+      @keyframes lp-grain {
+        0%,
+        100% {
+          transform: translate(0);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
+        20% {
+          transform: translate(-3%, -8%);
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-        header { padding: 24px 0; border-bottom: 1px solid var(--border-color); }
-        .header-content { display: flex; justify-content: space-between; align-items: center; }
-        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-primary); }
-        .logo-icon { width: 40px; height: 40px; border-radius: 10px; }
-        .logo-icon img { width: 100%; height: 100%; object-fit: contain; }
-        .logo-text { font-size: 20px; font-weight: 600; }
-        .logo-text span { color: var(--accent-green); }
-        nav a { color: var(--text-secondary); text-decoration: none; margin-left: 32px; font-size: 14px; transition: color 0.2s; }
-        nav a:hover { color: var(--text-primary); }
-        .hero { padding: 80px 0; text-align: center; }
-        .badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);
-            color: var(--accent-green); padding: 8px 16px; border-radius: 50px;
-            font-size: 13px; font-weight: 500; margin-bottom: 24px;
+        60% {
+          transform: translate(8%, 5%);
         }
-        .badge::before { content: "●"; font-size: 8px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        h1 { font-size: 48px; font-weight: 700; margin-bottom: 16px; line-height: 1.2; }
-        h1 span {
-            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        80% {
+          transform: translate(-2%, 6%);
         }
-        .subtitle { font-size: 18px; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px; }
-        .install-section {
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 16px; padding: 32px; max-width: 800px; margin: 0 auto; text-align: left;
+      }
+      .lp-grain::after {
+        content: "";
+        position: absolute;
+        inset: -50%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        opacity: 0.025;
+        pointer-events: none;
+        z-index: 1;
+        animation: lp-grain 6s steps(8) infinite;
+      }
+      @keyframes lp-fadeIn {
+        from {
+          opacity: 0;
         }
-        .install-title { font-size: 14px; font-weight: 600; color: var(--accent-green); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
-        .code-block {
-            background: var(--bg-primary); border: 1px solid var(--border-color);
-            border-radius: 8px; padding: 20px; font-family: 'SF Mono', 'Consolas', monospace;
-            font-size: 14px; overflow-x: auto; position: relative; margin-bottom: 16px;
+        to {
+          opacity: 1;
         }
-        .code-block code { color: var(--text-primary); white-space: pre; }
-        .code-block .comment { color: var(--text-secondary); }
-        .code-block .command { color: var(--accent-green); }
-        .copy-btn {
-            position: absolute; top: 12px; right: 12px;
-            background: var(--bg-secondary); border: 1px solid var(--border-color);
-            color: var(--text-secondary); padding: 6px 12px; border-radius: 6px;
-            font-size: 12px; cursor: pointer; transition: all 0.2s;
+      }
+      @keyframes lp-fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
         }
-        .copy-btn:hover { background: var(--bg-card); color: var(--text-primary); }
-        .packages-section { padding: 80px 0; }
-        .section-header { text-align: center; margin-bottom: 48px; }
-        .section-header h2 { font-size: 32px; margin-bottom: 12px; }
-        .section-header p { color: var(--text-secondary); }
-        .packages-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
-        .package-card {
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 24px; transition: border-color 0.2s, transform 0.2s;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        .package-card:hover { border-color: var(--accent-green); transform: translateY(-2px); }
-        .package-name { font-size: 18px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-        .package-version { font-size: 12px; background: rgba(34, 197, 94, 0.1); color: var(--accent-green); padding: 2px 8px; border-radius: 4px; }
-        .package-desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; min-height: 60px; }
-        .package-install { font-family: 'SF Mono', monospace; font-size: 13px; background: var(--bg-primary); padding: 8px 12px; border-radius: 6px; color: var(--accent-green); }
-        .compat-badge { display: inline-flex; gap: 4px; margin-top: 12px; }
-        .compat-badge span { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
-        .compat-badge .v71 { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
-        .compat-badge .v72 { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
-        .compat-badge .v73 { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
-        .compat-badge .v71-no { background: rgba(239, 68, 68, 0.15); color: #ef4444; text-decoration: line-through; }
-        .compat-badge .v71-shim { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
-        .cta-btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s;
+      }
+      @keyframes lp-sh {
+        0% {
+          background-position: -200% center;
         }
-        .cta-btn-primary { background: var(--accent-green); color: #000; }
-        .cta-btn-primary:hover { background: var(--accent-green-dark); }
-        .cta-btn-secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); }
-        .cta-btn-secondary:hover { border-color: var(--accent-green); }
-        footer { padding: 48px 0; border-top: 1px solid var(--border-color); text-align: center; }
-        .footer-logo { margin-bottom: 20px; }
-        .footer-logo img { height: 48px; }
-        .footer-text { color: var(--text-secondary); font-size: 14px; margin-bottom: 8px; }
-        .footer-text a { color: var(--accent-green); text-decoration: none; }
-        .footer-text a:hover { text-decoration: underline; }
-        .footer-slogan { margin-top: 20px; font-size: 14px; color: var(--text-secondary); }
-        .footer-slogan span { color: var(--accent-green); font-weight: 500; }
-        @media (max-width: 768px) {
-            h1 { font-size: 32px; }
-            .header-content { flex-direction: column; gap: 16px; }
-            nav a { margin: 0 16px; }
-            .hero { padding: 48px 0; }
+        100% {
+          background-position: 200% center;
         }
+      }
+      @keyframes lp-drift {
+        0% {
+          transform: translate(0, 0) scale(1);
+        }
+        25% {
+          transform: translate(80px, -60px) scale(1.1);
+        }
+        50% {
+          transform: translate(-40px, -100px) scale(0.95);
+        }
+        75% {
+          transform: translate(60px, 40px) scale(1.05);
+        }
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+      }
+      @keyframes lp-drift2 {
+        0% {
+          transform: translate(0, 0) scale(1);
+        }
+        33% {
+          transform: translate(-70px, 80px) scale(1.08);
+        }
+        66% {
+          transform: translate(50px, -50px) scale(0.92);
+        }
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+      }
+      @keyframes lp-progress {
+        from {
+          width: 0%;
+        }
+        to {
+          width: 100%;
+        }
+      }
+      @keyframes lp-sc {
+        0% {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+      }
+      .lp-shim {
+        background: linear-gradient(
+          110deg,
+          #e9cb8e 0%,
+          #f5e6c3 20%,
+          #e9cb8e 40%,
+          #c9a44e 60%,
+          #e9cb8e 80%,
+          #f5e6c3 100%
+        );
+        background-size: 250% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: lp-sh 5s linear infinite;
+      }
+      .lp-orb {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+        filter: blur(100px);
+      }
+      .lp-orb-drift {
+        animation: lp-drift 20s ease-in-out infinite;
+      }
+      .lp-orb-drift2 {
+        animation: lp-drift2 25s ease-in-out infinite;
+      }
+      .lp-vig {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            ellipse 100% 80% at 50% 50%,
+            transparent 30%,
+            rgba(10, 10, 11, 0.9) 100%
+          ),
+          linear-gradient(
+            to bottom,
+            rgba(10, 10, 11, 0.35) 0%,
+            transparent 15%,
+            transparent 90%,
+            rgba(10, 10, 11, 1) 100%
+          );
+      }
+      .lp-content {
+        position: relative;
+        z-index: 10;
+        text-align: center;
+        padding: clamp(40px, 8vw, 80px) clamp(24px, 5vw, 80px);
+        max-width: 700px;
+        width: 100%;
+        margin: 0 auto;
+        opacity: 0;
+        animation: lp-fadeUp 1s ease 0.3s forwards;
+      }
+      .lp-badge-wrap {
+        margin-bottom: 40px;
+        opacity: 0;
+        animation: lp-fadeIn 0.8s ease 0.2s forwards;
+      }
+      .lp-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 24px;
+        border-radius: 9999px;
+        background: rgba(10, 10, 11, 0.5);
+        border: 1px solid rgba(233, 203, 142, 0.12);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: border-color 0.3s;
+      }
+      .lp-badge-pill:hover {
+        border-color: rgba(233, 203, 142, 0.3);
+      }
+      .lp-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--green);
+        display: inline-block;
+        box-shadow: 0 0 12px rgba(129, 199, 132, 0.5);
+      }
+      .lp-title {
+        font-size: clamp(2.8rem, 9vw, 6rem);
+        line-height: 0.9;
+        letter-spacing: -0.06em;
+        font-weight: 900;
+        margin-bottom: 28px;
+        opacity: 0;
+        animation: lp-fadeUp 1.2s ease 0.5s forwards;
+      }
+      .lp-sub {
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        font-weight: 300;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 48px;
+        line-height: 1.6;
+        opacity: 0;
+        animation: lp-fadeUp 1s ease 0.8s forwards;
+      }
+      .lp-progress-wrap {
+        margin: 0 auto 16px;
+        max-width: 320px;
+        width: 100%;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 9999px;
+        overflow: hidden;
+        opacity: 0;
+        animation: lp-fadeIn 0.6s ease 1s forwards;
+      }
+      .lp-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--gold), #f5e6c3);
+        border-radius: 9999px;
+        width: 0%;
+        animation: lp-progress 3s linear 1s forwards;
+      }
+      .lp-counter {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        color: var(--dim);
+        margin-bottom: 40px;
+        opacity: 0;
+        animation: lp-fadeIn 0.6s ease 1s forwards;
+      }
+      .lp-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 32px;
+        border-radius: 9999px;
+        font-family: "Alexandria", sans-serif;
+        font-weight: 600;
+        font-size: 0.9rem;
+        background: var(--gold);
+        color: #0a0a0b;
+        border: 1px solid var(--gold);
+        color: black !important;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        opacity: 0;
+        animation: lp-fadeIn 0.8s ease 1.2s forwards;
+      }
+      .lp-cta:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(233, 203, 142, 0.2);
+      }
+      .lp-footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        margin-top: 48px;
+        align-items: center;
+        opacity: 0;
+        animation: lp-fadeIn 0.8s ease 1.4s forwards;
+      }
+      .lp-footer-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: var(--dim);
+        transition: color 0.3s;
+      }
+      .lp-footer-link:hover {
+        color: #1c1c1c;
+      }
     </style>
-</head>
-<body>
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <a href="https://librepower.org" class="logo">
-                    <div class="logo-icon"><img src="https://librepower.org/wp-content/uploads/2025/12/logo-librepower-1.svg" alt="LibrePower"></div>
-                    <div class="logo-text">Libre<span>Power</span> AIX</div>
-                </a>
-                <nav>
-                    <a href="https://librepower.org">LibrePower</a>
-                    <a href="https://gitlab.com/librepower/aix">Source Code</a>
-                    <a href="https://librepower.substack.com">Newsletter</a>
-                </nav>
-            </div>
+  </head>
+  <body>
+    <div class="lp lp-grain">
+      <div
+        class="lp-orb lp-orb-drift"
+        style="
+          width: 600px;
+          height: 600px;
+          top: -10%;
+          right: -5%;
+          background: rgba(233, 203, 142, 0.08);
+        "
+      ></div>
+      <div
+        class="lp-orb lp-orb-drift2"
+        style="
+          width: 500px;
+          height: 500px;
+          bottom: 5%;
+          left: -10%;
+          background: rgba(104, 174, 201, 0.06);
+        "
+      ></div>
+      <div class="lp-vig"></div>
+      <div class="lp-content">
+        <div class="lp-badge-wrap">
+          <a href="https://librepower.org" class="lp-badge-pill">
+            <span class="lp-dot"></span>
+            <span class="lp-label" style="color: var(--gold)"
+              >LibrePower AIX Repository</span
+            >
+            <span style="color: var(--dim)">—</span>
+            <span style="font-size: 0.8rem; color: var(--muted)"
+              >aix.librepower.org</span
+            >
+          </a>
         </div>
-    </header>
-
-    <main>
-        <section class="hero">
-            <div class="container">
-                <div class="badge">30+ Packages Available</div>
-                <h1>Modern Tools for <span>AIX</span></h1>
-                <p class="subtitle">Expanding the AIX ecosystem, one package at a time. Your favorite CLI tools, compiled for Power.</p>
-                <div class="install-section">
-                    <div class="install-title">Quick Start</div>
-                    <div class="code-block">
-                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-                        <code><span class="comment"># Add the repository (one-time)</span>
-<span class="command">curl -fsSL https://aix.librepower.org/install.sh | sh</span>
-
-<span class="comment"># Install any package</span>
-<span class="command">dnf install nano</span></code>
-                    </div>
-                    <p style="color: var(--text-secondary); font-size: 13px;">Works on AIX 7.1, 7.2 & 7.3 — DNF from IBM AIX Toolbox.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Compatibility Section -->
-        <section style="padding: 40px 0; background: var(--bg-secondary);">
-            <div class="container">
-                <div style="text-align: center; margin-bottom: 32px;">
-                    <h2 style="font-size: 24px; margin-bottom: 8px;">✨ Improved AIX 7.1/7.2 Compatibility</h2>
-                    <p style="color: var(--text-secondary);">New packages enable modern tools on older AIX versions</p>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; max-width: 900px; margin: 0 auto;">
-                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; text-align: center;">
-                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">Go packages</div>
-                        <div style="font-size: 18px; font-weight: 600;">✅ 7.1 / 7.2 / 7.3</div>
-                    </div>
-                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; text-align: center;">
-                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">Rust packages</div>
-                        <div style="font-size: 18px; font-weight: 600;">✅ 7.1 / 7.2 / 7.3</div>
-                        <div style="font-size: 11px; color: var(--accent-green);">via libunwind</div>
-                    </div>
-                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; text-align: center;">
-                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">nano</div>
-                        <div style="font-size: 18px; font-weight: 600;">✅ 7.1 / 7.2 / 7.3</div>
-                        <div style="font-size: 11px; color: var(--accent-green);">shim on 7.1/7.2</div>
-                    </div>
-                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; text-align: center;">
-                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">mariadb11 / php83</div>
-                        <div style="font-size: 18px; font-weight: 600;">✅ 7.2 / 7.3</div>
-                        <div style="font-size: 11px; color: var(--text-secondary);">7.1 not supported</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Newsletter CTA -->
-        <section style="padding: 48px 0; text-align: center;">
-            <div class="container">
-                <p style="font-size: 15px; color: var(--text-secondary); max-width: 600px; margin: 0 auto 20px;">
-                    LibrePower is more than AIX — we're building open source support across the entire IBM Power ecosystem: AIX, IBM i, and Linux on Power.
-                </p>
-                <a href="https://librepower.substack.com/subscribe" class="cta-btn cta-btn-primary" style="margin-right: 12px;">
-                    📬 Subscribe to Newsletter
-                </a>
-                <a href="https://librepower.org" class="cta-btn cta-btn-secondary">
-                    🌐 librepower.org — Beta live now!
-                </a>
-            </div>
-        </section>
-
-        <section class="packages-section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>Available Packages</h2>
-                    <p>Open source. Actively maintained. Free to use, modify, and redistribute.</p>
-                </div>
-                <div class="packages-grid">
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/linux-compat" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">linux-compat <span class="package-version">2.2</span></div>
-                        <p class="package-desc">Feel at home on AIX. GNU coreutils in your PATH, systemctl wrappers, and familiar commands like watch and pgrep.</p>
-                        <div class="package-install">dnf install linux-compat</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/fzf-fuzzy-finder" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">fzf <span class="package-version">0.46.1</span></div>
-                        <p class="package-desc">The beloved fuzzy finder. Search files, history, processes—anything. Ctrl+R will never be the same.</p>
-                        <div class="package-install">dnf install fzf</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/rclone" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">rclone <span class="package-version">1.73.0</span></div>
-                        <p class="package-desc">Rsync for cloud storage. Sync to S3, Google Drive, Dropbox, Azure and 70+ more. Serve files via HTTP/WebDAV/FTP/NFS.</p>
-                        <div class="package-install">dnf install rclone</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/nano-editor" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">nano <span class="package-version">8.3</span></div>
-                        <p class="package-desc">The friendly text editor. Syntax highlighting, intuitive shortcuts. No steep learning curve.</p>
-                        <div class="package-install">dnf install nano</div>
-                        <div class="compat-badge"><span class="v71-shim">7.1*</span><span class="v71-shim">7.2*</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/2fa-made-simple" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">2FA Made Simple <span class="package-version">1.2</span></div>
-                        <p class="package-desc">Google Authenticator for AIX, done right. QR codes that actually work. Bilingual wizards. Peace of mind.</p>
-                        <div class="package-install">dnf install google-authenticator-setup</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/csentinel4aix" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">C-Sentinel <span class="package-version">1.0.0</span></div>
-                        <p class="package-desc">AI-ready observability. Capture system fingerprints, detect anomalies, track 70+ services. Built for AIX.</p>
-                        <div class="package-install">dnf install csentinel4aix</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/lpsof" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">lpsof <span class="package-version">0.3.0</span></div>
-                        <p class="package-desc">Native lsof for AIX. Full socket details, delta tracking, watch mode. Powered by libperfstat.</p>
-                        <div class="package-install">dnf install lpsof</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/mariadb11" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">MariaDB <span class="package-version">11.8.5 LTS</span></div>
-                        <p class="package-desc">Enterprise SQL database on POWER. Native AIX thread pool (pool-of-threads), up to 83% faster. Vector search ready. POWER9/10/11.</p>
-                        <div class="package-install">dnf install mariadb11</div>
-                        <div class="compat-badge"><span class="v71-no">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/doom-ascii" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">DOOM ASCII <span class="package-version">0.3.1</span></div>
-                        <p class="package-desc">Yes. DOOM. On AIX. In your terminal. Because proving a point has never been this fun.</p>
-                        <div class="package-install">dnf install doom-ascii</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/delta" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">delta <span class="package-version">0.18.2</span></div>
-                        <p class="package-desc">Syntax-highlighting pager for git, diff, and grep. Makes code reviews beautiful.</p>
-                        <div class="package-install">dnf install delta</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/ripgrep" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">ripgrep <span class="package-version">15.1.0</span></div>
-                        <p class="package-desc">Blazingly fast search. 4x faster than grep. Respects .gitignore, skips binaries, beautiful output.</p>
-                        <div class="package-install">dnf install ripgrep</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/duf" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">duf <span class="package-version">0.9.1</span></div>
-                        <p class="package-desc">Modern disk usage utility. Colorful tables, easy filtering. A better df for AIX.</p>
-                        <div class="package-install">dnf install duf</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/gron" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">gron <span class="package-version">0.7.1</span></div>
-                        <p class="package-desc">Make JSON greppable. Transform complex JSON to discrete paths you can grep and pipe.</p>
-                        <div class="package-install">dnf install gron</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/yq" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">yq <span class="package-version">4.40.5</span></div>
-                        <p class="package-desc">YAML/JSON/XML processor. Like jq but for YAML. Edit configs, convert formats, merge files.</p>
-                        <div class="package-install">dnf install yq</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/age" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">age <span class="package-version">1.2.0</span></div>
-                        <p class="package-desc">Modern file encryption. Simple keys, no config, UNIX-style composability. By FiloSottile.</p>
-                        <div class="package-install">dnf install age</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/php83" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">PHP <span class="package-version">8.3.16</span></div>
-                        <p class="package-desc">Modern PHP for AIX. 53 extensions, Fibers, opcache, PHP-FPM. Perfect for WordPress, Drupal, Zabbix frontend.</p>
-                        <div class="package-install">dnf install php83</div>
-                        <div class="compat-badge"><span class="v71-no">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/fd" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">fd <span class="package-version">10.3.0</span></div>
-                        <p class="package-desc">Fast find alternative. Intuitive syntax, regex support, parallel search. 10x faster than find.</p>
-                        <div class="package-install">dnf install fd</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/eza" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">eza <span class="package-version">0.23.4</span></div>
-                        <p class="package-desc">Modern ls replacement. Colors, icons, Git integration, tree view. Because ls deserves an upgrade.</p>
-                        <div class="package-install">dnf install eza</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/gping" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">gping <span class="package-version">1.20.1</span></div>
-                        <p class="package-desc">Ping with a graph. Real-time latency visualization in your terminal. Beautiful network diagnostics.</p>
-                        <div class="package-install">dnf install gping</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/starship" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">starship <span class="package-version">1.24.2</span></div>
-                        <p class="package-desc">Cross-shell prompt. Blazing fast, customizable, shows git status. Make your terminal beautiful.</p>
-                        <div class="package-install">dnf install starship</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix/-/tree/main/stgtui" class="package-card" style="text-decoration: none; color: inherit;">
-                        <div class="package-name">stgtui <span class="package-version">1.1.0</span></div>
-                        <p class="package-desc">Storage TUI dashboard. Monitor disks, LVs, PVs, and filesystems in a beautiful terminal interface.</p>
-                        <div class="package-install">dnf install stgtui</div>
-                        <div class="compat-badge"><span class="v71">7.1</span><span class="v72">7.2</span><span class="v73">7.3</span></div>
-                    </a>
-                    <a href="https://gitlab.com/librepower/aix" class="package-card" style="text-decoration: none; color: inherit; border-style: dashed; opacity: 0.7;">
-                        <div class="package-name">Want something else?</div>
-                        <p class="package-desc">Request a package or contribute your own. C, Go, Rust—modern languages compile beautifully on AIX.</p>
-                        <div class="package-install" style="color: var(--text-secondary);">Open an issue on GitLab →</div>
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <section style="padding: 80px 0; background: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
-            <div class="container" style="text-align: center;">
-                <h2 style="font-size: 28px; margin-bottom: 16px;">Stay in the Loop</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto;">New packages, deep dives, and the occasional Power Systems hot take. No spam. Unsubscribe anytime.</p>
-                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                    <a href="https://librepower.substack.com/subscribe" class="cta-btn cta-btn-primary">
-                        Subscribe to Newsletter
-                    </a>
-                    <a href="https://librepower.org" class="cta-btn cta-btn-secondary">
-                        Explore LibrePower
-                    </a>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <div class="footer-logo">
-                <a href="https://librepower.org"><img src="https://librepower.org/wp-content/uploads/2025/12/logo-librepower-1.svg" alt="LibrePower" style="height: 48px;"></a>
-            </div>
-            <p class="footer-text">Part of the <a href="https://librepower.org">LibrePower</a> initiative by <a href="https://sixe.eu">SIXE</a></p>
-            <p class="footer-slogan"><span>Unlocking Power Systems through open source.</span> Unmatched RAS. Superior TCO. Minimal footprint. 🌍</p>
+        <h1 class="lp-title">
+          We've<br />
+          <span class="lp-shim">moved.</span>
+        </h1>
+        <p class="lp-sub">
+          This page has a new home at
+          <strong style="color: #e0e0e0">librepower.org</strong>.<br />
+          You'll be redirected automatically in a moment.
+        </p>
+        <div class="lp-progress-wrap">
+          <div class="lp-progress-bar"></div>
         </div>
-    </footer>
-
+        <div class="lp-counter" id="lp-counter">Redirecting in 3…</div>
+        <a
+          href="https://librepower.org/stack/databases-operating-systems/aix/"
+          class="lp-cta"
+        >
+          Take me there now
+          <iconify-icon
+            icon="lucide:arrow-right"
+            style="font-size: 1rem"
+          ></iconify-icon>
+        </a>
+      </div>
+    </div>
     <script>
-        function copyCode(btn) {
-            const code = btn.parentElement.querySelector('code').innerText;
-            navigator.clipboard.writeText(code.trim());
-            btn.textContent = 'Copied!';
-            setTimeout(() => btn.textContent = 'Copy', 2000);
-        }
+      (function () {
+        var dest =
+          "https://librepower.org/stack/databases-operating-systems/aix/";
+        var secs = 3;
+        var el = document.getElementById("lp-counter");
+        var interval = setInterval(function () {
+          secs--;
+          if (secs <= 0) {
+            clearInterval(interval);
+            el.textContent = "Redirecting…";
+            window.location.href = dest;
+          } else {
+            el.textContent = "Redirecting in " + secs + "…";
+          }
+        }, 1000);
+      })();
     </script>
-</body>
+  </body>
 </html>
