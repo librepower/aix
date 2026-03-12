@@ -64,6 +64,8 @@ We've improved compatibility across all AIX versions:
 | **nano** | ✅* | ✅* | ✅ |
 | **mariadb11** | ❌ | ✅* | ✅ |
 | **php83** | ❌ | ✅ | ✅ |
+| **caddy** | ✅ | ✅ | ✅ |
+| **gridgain** + **semeru-jdk25** | ❓ | ❓ | ✅ |
 
 **Legend:** ✅ = Works | ✅* = Requires `librepower-compat` shim | ❌ = Not compatible
 
@@ -471,6 +473,56 @@ Port of [starship](https://github.com/starship/starship) to AIX. A beautiful, fa
 - ✅ **Compiled with Rust 1.90** - IBM Open SDK for Rust on AIX
 
 📁 **[Documentation & Downloads](starship/)**
+
+---
+
+### 🌐 Caddy - Modern Web Server
+*Automatic HTTPS, reverse proxy, and file server*
+
+Port of [Caddy](https://github.com/caddyserver/caddy) to AIX. The most popular modern web server with zero-config HTTPS, reverse proxy, load balancing, and static file serving.
+
+- ✅ **Automatic HTTPS** — Let's Encrypt and ZeroSSL, zero configuration
+- ✅ **Reverse proxy** — Load balancing, health checks, circuit breakers
+- ✅ **5,300+ req/s** — On par with Linux ppc64le performance
+- ✅ **Zero dependencies** — Single static binary (Go, CGO_ENABLED=0)
+- ✅ **All AIX versions** — Works on AIX 7.1, 7.2, and 7.3
+- ✅ **Patched badger** — `syscall.FcntlFlock` replaces `unix.Flock` for AIX
+
+📁 **[Documentation & Downloads](caddy/)**
+
+---
+
+### ⚡ GridGain - In-Memory Computing Platform
+*Distributed caching, SQL, and compute grid on POWER*
+
+Port of [GridGain Community Edition](https://www.gridgain.com) (based on Apache Ignite) to AIX. In-memory data grid with distributed caching, SQL engine, and compute capabilities. **Does NOT touch your system Java.**
+
+- ✅ **5,000+ ops/s** — In-memory cache on POWER9
+- ✅ **SQL engine** — ANSI SQL queries over in-memory data via SQLLine
+- ✅ **REST API** — HTTP interface for cache operations
+- ✅ **Java safe** — Private JDK (Semeru 25), does NOT modify system Java
+- ✅ **One command** — `dnf install gridgain` installs everything including JDK
+- ✅ **Patched for OpenJ9** — Graceful fallback for HotSpot-specific APIs
+
+> Tested on AIX 7.3 only. Requires JDK 25 (installed automatically).
+
+📁 **[Documentation & Downloads](gridgain/)**
+
+---
+
+### ☕ IBM Semeru JDK 25
+*Modern JDK for AIX — isolated, safe, no conflicts*
+
+IBM Semeru Certified Edition JDK 25 (Eclipse OpenJ9) for AIX ppc64. Installed as an **additional** JDK that does NOT modify your system Java, PATH, or JAVA_HOME.
+
+- ✅ **JDK 25.0.2** — Latest LTS with OpenJ9 0.57.0
+- ✅ **Safe install** — Does NOT touch `/usr/bin/java` or `/usr/java8_64`
+- ✅ **Auto-installed** — Pulled automatically as `gridgain` dependency
+- ✅ **IBM Certified** — Official IBM Semeru Runtime Certified Edition
+
+> Tested on AIX 7.3 only. Does NOT interfere with existing Java installations.
+
+📁 **[Documentation & Downloads](semeru-jdk25/)**
 
 ---
 
