@@ -65,6 +65,7 @@ We've improved compatibility across all AIX versions:
 | **mariadb11** | ❌ | ✅* | ✅ |
 | **php83** | ❌ | ✅ | ✅ |
 | **caddy** | ✅ | ✅ | ✅ |
+| **podman-aix** | ❌ | ✅ | ✅ |
 | **gridgain** + **semeru-jdk25** | ❓ | ❓ | ✅ |
 
 **Legend:** ✅ = Works | ✅* = Requires `librepower-compat` shim | ❌ = Not compatible
@@ -283,6 +284,22 @@ startsrc -s mariadb11
 ```
 
 📁 **[Full Documentation: LAMP/LEMP, PHP-FPM, pgvector for AI/RAG](webstack/)**
+
+---
+
+### 📦 podman-aix - Container Engine
+*Podman CLI. Native WPARs. POWER9/10/11 ready.*
+
+Container engine for AIX that leverages System WPARs — AIX native container technology since 2007 — with a podman-compatible CLI. Full container lifecycle, image management, built-in registry, and automatic networking.
+
+- ✅ **podman-compatible CLI** — `run`, `stop`, `rm`, `exec`, `ps`, `logs`, `inspect`
+- ✅ **Image management** — `build`, `commit`, `push`, `pull` with built-in registry
+- ✅ **Automatic networking** — IP alias on host interface (.200-.253 range)
+- ✅ **Fast cloning** — Layer-based images via `savewpar`/`restwpar` (~48s create)
+- ✅ **Multi-container demo** — Caddy + Go app + MariaDB with blue/green deployment
+- ✅ **Zero dependencies** — Single static binary (Go, CGO_ENABLED=0)
+
+📁 **[Documentation & Downloads](podman-aix/)**
 
 ---
 
