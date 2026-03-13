@@ -14,14 +14,37 @@
 
 ---
 
+## What It Is
+
+podman-aix brings the familiar `podman` command-line interface to IBM AIX, using **System WPARs** (Workload Partitions) as the container runtime.
+
+WPARs are AIX's native isolation technology — lightweight system partitions that share the host kernel, available since AIX 6.1 (2007). podman-aix wraps WPARs with a CLI that Linux administrators already know: `run`, `stop`, `exec`, `ps`, `logs`, `inspect`.
+
+This is not a port of Podman or a Docker-compatible runtime. It is a purpose-built tool that maps container concepts to WPAR operations, giving AIX teams a modern workflow without leaving the platform.
+
+---
+
+## What It Is Not
+
+Transparency matters. podman-aix is **not**:
+
+- **OCI-compatible** — Images are `savewpar` snapshots, not OCI/Docker images. You cannot pull from Docker Hub or use Dockerfiles.
+- **A drop-in Podman replacement** — The CLI is familiar, but the runtime is fundamentally different. Not all podman flags are implemented.
+- **Portable across OS versions** — Images are WPAR snapshots tied to a specific AIX oslevel. An image built on AIX 7.3 TL04 works on AIX 7.3 TL04 systems. This is inherent to how WPARs work, not a limitation of podman-aix.
+
+What it **is**: a way to manage isolated workloads on AIX with the ergonomics of modern container tooling, backed by technology IBM has shipped and supported for almost 20 years.
+
+---
+
 ## Highlights
 
 - **podman-compatible CLI**: `run`, `stop`, `rm`, `exec`, `ps`, `logs`, `inspect`
 - **Image management**: `build`, `commit`, `push`, `pull`, `images`
 - **Built-in registry**: HTTP registry with Bearer token auth
 - **Automatic networking**: IP alias on host interface (.200-.253 range)
-- **Fast cloning**: Layer-based images via `savewpar`/`restwpar` (~48s create)
-- **Multi-container demo**: Full stack — Caddy + Go app + MariaDB with blue/green deployment
+- **Fast cloning**: Images via `savewpar`/`restwpar` (~48s container create)
+- **Multi-container demo**: Caddy + Go + MariaDB with blue/green deployment and live dashboard
+- **Interactive mode**: `podman demo --interactive` — control the blue/green switch yourself
 
 ---
 
@@ -76,21 +99,75 @@ podman rm myapp
 ### Multi-container demo
 
 ```bash
-# Deploy a full-stack application (Caddy + Go app + MariaDB)
+# Deploy a full-stack application (~6 minutes)
+# Creates 4 containers: Caddy reverse proxy + Go app (blue/green) + MariaDB
 podman demo
 
-# Verify
-podman ps
-curl http://<web-ip>/health
-curl http://<web-ip>/api/pets
+# Interactive mode — you control the blue/green switch
+podman demo --interactive
 
-# Blue/green zero-downtime switch
-podman exec demo-web /tmp/switch-to-green.sh
-podman exec demo-web /tmp/switch-to-blue.sh
+# Open the live dashboard in your browser (URL shown during demo)
+# Watch the deployment switch in real time
 
 # Cleanup
 podman demo --cleanup
 ```
+
+The demo deploys a real microservices stack:
+
+```
+Client
+  |
+  v
+[ demo-web ]         Caddy 2.9 reverse proxy (:80)
+  |
+  +----> [ demo-app-blue ]    Go app v1 (:8090)
+  |
+  +----> [ demo-app-green ]   Go app v2 (:8090)
+            |
+            v
+      [ demo-db ]         MariaDB 11.8.5 (:3306)
+```
+
+Each box is an isolated System WPAR with its own IP address, filesystem, and process space.
+
+---
+
+## Architecture
+
+### How It Works
+
+```
+podman run -d --name myapp aix73-minimal
+       |
+       v
+  1. Find image: /var/lib/podman-aix/images/aix73-minimal.img
+  2. Restore WPAR: restwpar -f image.img (fast clone, ~48s)
+  3. Assign IP: ifconfig en0 alias 192.168.128.20x (auto-detected)
+  4. Start WPAR: startwpar myapp
+  5. Track state: /var/lib/podman-aix/state.json
+       |
+       v
+  podman exec myapp hostname  -->  clogin wpar_name hostname
+```
+
+### Key Concepts
+
+| Concept | podman-aix | Traditional Podman |
+|---------|-----------|-------------------|
+| **Container** | AIX System WPAR | OCI container (cgroups/namespaces) |
+| **Image** | `savewpar` snapshot | OCI image (layers, registry) |
+| **Image format** | AIX backup format | OCI image spec |
+| **Registry** | Built-in HTTP + token auth | OCI Distribution spec |
+| **Networking** | IP alias on host interface | CNI/netavark |
+| **Isolation** | WPAR (shared kernel) | namespaces + cgroups |
+| **Portability** | Same AIX oslevel | Any OCI runtime |
+
+### Image Portability
+
+WPAR images are snapshots of a running AIX system. They work across machines with the **same AIX version and TL/SP level**. This is not a bug — it's how WPARs are designed. If your fleet runs AIX 7.3 TL04, one image serves all machines.
+
+For heterogeneous environments, build one image per oslevel and use the registry to distribute them.
 
 ---
 
@@ -113,35 +190,8 @@ podman demo --cleanup
 | `podman images` | List available images |
 | `podman image build IMAGE` | Build savewpar image |
 | `podman registry serve [OPTIONS]` | Start local image registry |
-| `podman demo [--cleanup]` | Run/clean multi-container demo |
+| `podman demo [--cleanup] [--interactive]` | Run/clean multi-container demo |
 | `podman version` | Show version info |
-
----
-
-## Features on AIX
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| **Container lifecycle** | Working | create, start, stop, rm, run, exec |
-| **Image management** | Working | build, commit, push, pull, images |
-| **Image registry** | Working | HTTP with Bearer token auth |
-| **Networking** | Working | Automatic IP alias on host interface |
-| **Logs** | Working | Per-container log files |
-| **Inspect** | Working | JSON container details |
-| **Multi-container** | Working | `podman demo` — full stack |
-| **Blue/green deploy** | Working | Zero-downtime traffic switch |
-
----
-
-## How It Works
-
-podman-aix uses AIX **System WPARs** (Workload Partitions) as the container runtime:
-
-1. **Images** are stored as `savewpar` snapshots in `/var/lib/podman-aix/images/`
-2. **Container creation** restores a WPAR from the saved image (`restwpar`)
-3. **Networking** assigns IP aliases on the host interface (auto-detected)
-4. **Exec** uses `clogin` to run commands inside WPARs
-5. **State** is tracked in `/var/lib/podman-aix/state.json`
 
 ---
 
@@ -171,9 +221,9 @@ podman-aix uses AIX **System WPARs** (Workload Partitions) as the container runt
 
 | AIX 7.1 | AIX 7.2 | AIX 7.3 |
 |---------|---------|---------|
-| ❌      | ✅      | ✅      |
+| ---      | Supported      | Supported      |
 
-> Requires AIX 7.2+ — System WPARs with the features used by podman-aix are available from AIX 7.2 onwards.
+> Requires AIX 7.2+ with System WPAR support. The binary runs on all versions; WPAR operations require 7.2+.
 
 ---
 
