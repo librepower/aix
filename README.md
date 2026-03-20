@@ -557,6 +557,22 @@ Repackaged from IBM Open XL C++ 17.1.3 Runtime. Provides the stack unwinding lib
 
 ---
 
+### 🖥️ Hercules - IBM Mainframe Emulator
+*Run S/370, ESA/390, and z/Architecture mainframes on AIX*
+
+Port of [SDL Hercules Hyperion](https://github.com/SDL-Hercules-390/hyperion) to AIX. Emulate IBM mainframe hardware and run MVS, VM/370, z/OS, z/VSE, and z/VM on POWER systems.
+
+- ✅ **S/370, ESA/390, z/Architecture** - Three architecture modes in one binary
+- ✅ **Up to 128 CPUs** - Multi-processor emulation
+- ✅ **DASD & Tape** - Full CKD/FBA DASD and 3420/3480 tape support
+- ✅ **3270 Console** - Connect via tn3270 terminal emulator
+- ✅ **DASD Utilities** - dasdinit, dasdload, dasdcopy, dasdls, and more
+- ✅ **Big-endian native** - POWER and z/Architecture share byte order
+
+📁 **[Documentation & Downloads](hercules/)**
+
+---
+
 ## Contribute
 
 **We welcome contributions from the community!**
